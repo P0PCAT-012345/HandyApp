@@ -91,10 +91,8 @@ def classify(embeddings, threshold, database, chunk=10):
     return sentence, costs
 
 
-lastWord = None
-refreshCount = 0
-def toSentence(sentence, curr_sentence):
-    global lastWord, refreshCount
+
+def toSentence(sentence, curr_sentence, lastWord, refreshCount):
     if len(sentence) == 0:
         lastWord = None
         refreshCount += 1
