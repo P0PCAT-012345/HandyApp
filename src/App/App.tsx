@@ -21,10 +21,8 @@ interface HomeProps {
 const Home: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
   const [subtitleText, setSubtitleText] = useState<string>('');
   const [isVideoVisible, setIsVideoVisible] = useState(false);
-  const [isCameraInitialized, setIsCameraInitialized] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [webcamDimensions, setWebcamDimensions] = useState({ width: 0, height: 0, top: 0, left: 0 }); // Store webcam size and position
   const webcamRef = useRef<Webcam>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   // Toggle video visibility
   const handleClick = () => {
@@ -37,64 +35,29 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
     setSubtitleText('');
   };
 
-  // Initialize canvas on mount
+  // Update the webcam size and position when it's visible
   useEffect(() => {
-    const canvas = document.createElement('canvas');
-    canvasRef.current = canvas;
-  }, []);
+    if (isVideoVisible && webcamRef.current) {
+      const updateWebcamDimensions = () => {
+        const webcamElement = webcamRef.current?.video;
 
-  // Capture frames and send them to the server
-  useEffect(() => {
-    if (isVideoVisible && webcamRef.current && canvasRef.current) {
-      const captureImage = () => {
-        const video = webcamRef.current?.video;
-
-        if (!video) return;
-
-        // Dynamically set the canvas size to match the video dimensions
-        const canvas = canvasRef.current;
-        if (canvas) {
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            // Draw the video frame on the canvas
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            // Convert the canvas to a base64 encoded image (JPEG format)
-            const base64Image = canvas.toDataURL('image/jpeg');
-            if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-              const message = JSON.stringify({
-                function: 'recieve',
-                args: [base64Image], // Send the base64 encoded image
-                kwargs: { mode: 'translate' }, // Mode for the server
-              });
-
-              socketRef.current.send(message);
-            }
-          }
+        if (webcamElement) {
+          const { width, height, top, left } = webcamElement.getBoundingClientRect();
+          setWebcamDimensions({ width, height, top, left });
         }
       };
 
-      // Capture the video frame every 50ms
-      const intervalId = setInterval(captureImage, 50);
+      // Initial call to set the dimensions
+      updateWebcamDimensions();
 
-      setIsCameraInitialized(true);
-      setIsLoading(false);
+      // Add a resize listener to update dimensions when window resizes
+      window.addEventListener('resize', updateWebcamDimensions);
 
-      return () => clearInterval(intervalId); // Cleanup when the component unmounts or the video is turned off
+      return () => {
+        window.removeEventListener('resize', updateWebcamDimensions);
+      };
     }
   }, [isVideoVisible]);
-
-  useEffect(() => {
-    if (socketMessage && socketMessage.function === 'recieve' && socketMessage.result) {
-      if (socketMessage.result === 'No match found') {
-        setSubtitleText('');
-      } else {
-        setSubtitleText(socketMessage.result);
-      }
-    }
-  }, [socketMessage]);
 
   return (
     <div onClick={handleClick} className="home-container">
@@ -105,26 +68,30 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
         className={`video-element ${isVideoVisible ? 'visible' : 'blurred'}`}
         style={{
           transform: 'scaleX(-1)',
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          filter: isVideoVisible ? 'none' : 'blur(10px)', // Apply blur when not visible
-        }}
-      />
-      {/* Overlay with an image and play button */}
-      <img
-        src="/abc350image.png"
-        style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '80%',
-          height: 'auto',
           maxWidth: '100%',
           maxHeight: '100%',
+          objectFit: 'contain',
+          margin: 'auto',
+          display: 'block',
+          filter: isVideoVisible ? 'none' : 'blur(10px)',
         }}
       />
+
+      {/* Resized and positioned image based on webcam size */}
+      {isVideoVisible && (
+        <img
+          src="/abc350image.png"
+          style={{
+            position: 'absolute',
+            top: `${webcamDimensions.top}px`, // Align with the webcam's top
+            left: `${webcamDimensions.left}px`, // Align with the webcam's left
+            width: `${webcamDimensions.width}px`, // Match the webcam's width
+            height: `${webcamDimensions.height}px`, // Match the webcam's height
+            objectFit: 'contain', // Maintain aspect ratio
+          }}
+        />
+      )}
+
       {!isVideoVisible && (
         <div className="overlay">
           <button
@@ -138,7 +105,6 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
           </button>
         </div>
       )}
-      {/* Subtitle text */}
       {subtitleText && (
         <div className="subtitle-container">
           <p className="subtitle-text">{subtitleText}</p>
@@ -171,7 +137,6 @@ const App: React.FC = () => {
     };
 
     return () => {
-      // Close the WebSocket when the component unmounts
       if (socketRef.current) {
         socketRef.current.close();
       }

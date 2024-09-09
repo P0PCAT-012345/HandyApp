@@ -18,22 +18,26 @@ html, body {
   height: 100%;
   overflow: hidden;
   background-color: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .home-container {
-  position: absolute;
-  top: 0;
-  left: 0;
+  position: relative;
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background-color: black; 
+  background-color: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .video-element {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: cover; /* Ensures the video fills the container without black bars */
   transition: filter 0.5s;
 }
 
@@ -62,7 +66,8 @@ html, body {
   background-color: red;
   border: none;
   border-radius: 50%;
-  padding: 20px;
+  width: 60px; /* Fixed button size */
+  height: 60px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -75,23 +80,28 @@ html, body {
   font-size: 24px;
 }
 
-div {
-  background-color: transparent;
+.img-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain; /* Ensure the image maintains its aspect ratio */
 }
 
 .App {
   text-align: center;
-}
-
-.App-header {
-  background-color: transparent;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
 }
 
 input {
@@ -125,11 +135,7 @@ div > div {
 
 .video-element,
 .canvas-element {
-  object-fit: cover;
-}
-
-.overlay {
-  z-index: 15;
+  object-fit: cover; /* Ensures video and canvas take up full space */
 }
 
 .landmarks-display {
@@ -148,7 +154,7 @@ div > div {
   white-space: pre-wrap;
 }
 
-/* New Subtitle Styling */
+/* Subtitle Styling */
 .subtitle-container {
   position: absolute;
   bottom: 50px;
