@@ -1,53 +1,39 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { FaPlay } from 'react-icons/fa';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { FaPlay } from 'react-icons/fa';
 import Webcam from 'react-webcam';
 import MenuButton2 from '../components/MenuButton2';
 import Record from '../Record/Record';
 import Saved from '../Saved/Saved';
 import Settings from '../Settings/Settings';
+import LoadingScreen from '../LoadingScreen/LoadingScreen';
 import './App.css';
 
-
-
-interface HomeProps {
-  socketRef: React.MutableRefObject<WebSocket | null>;
-}
-
-const Home: React.FC<HomeProps> = ({ socketRef }) => {
+const Home: React.FC<{ socketRef: React.MutableRefObject<WebSocket | null>; isConnected: boolean }> = ({ socketRef, isConnected }) => {
   const [subtitleText, setSubtitleText] = useState<string>('');
   const [isVideoVisible, setIsVideoVisible] = useState(false);
-  const [isCameraInitialized, setIsCameraInitialized] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const webcamRef = useRef<Webcam>(null);
 
-  // Toggle video visibility
   const handleClick = () => {
     setIsVideoVisible((prev) => !prev);
   };
 
-  // Capture frames and send them to the server
   useEffect(() => {
     if (isVideoVisible && webcamRef.current) {
       const captureImage = () => {
         const video = webcamRef.current?.video;
-
         if (!video) return;
-
-        // Create a canvas to capture the video frame
         const canvas = document.createElement('canvas');
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         const ctx = canvas.getContext('2d');
         ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        // Convert canvas to Base64 encoded image (JPEG format)
         const base64Image = canvas.toDataURL('image/jpeg');
         if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
           const message = JSON.stringify({
             function: 'recieve',
-            args: [base64Image], // Send the base64 encoded image
-            kwargs: { mode: 'translate' }, // Mode for the server
+            args: [base64Image],
+            kwargs: { mode: 'translate' },
           });
 
           socketRef.current.send(message);
@@ -56,26 +42,24 @@ const Home: React.FC<HomeProps> = ({ socketRef }) => {
 
       const intervalId = setInterval(captureImage, 80);
 
-      setIsCameraInitialized(true);
-      setIsLoading(false);
-
-      return () => clearInterval(intervalId); // Cleanup when the component unmounts or the video is turned off
+      return () => clearInterval(intervalId);
     }
-  }, [isVideoVisible]);
+  }, [isVideoVisible, socketRef]);
 
-  useEffect(()=>{
-    if (socketRef && socketRef.current){
+  useEffect(() => {
+    if (socketRef.current) {
       socketRef.current.onmessage = (event) => {
         const data = JSON.parse(event.data);
         if (data && data.result) {
           setSubtitleText(data.result);
         }
       };
-    }  
-  }, [socketRef])
+    }
+  }, [socketRef]);
 
   return (
     <div onClick={handleClick} className="home-container">
+      {!isConnected && <LoadingScreen />} {/* Show loading screen if WebSocket is not connected */}
       {/* Webcam video element */}
       <Webcam
         audio={false}
@@ -86,12 +70,12 @@ const Home: React.FC<HomeProps> = ({ socketRef }) => {
           width: '100%',
           height: '100%',
           objectFit: 'cover',
-          filter: isVideoVisible ? 'none' : 'blur(10px)', // Apply blur when not visible
+          filter: isVideoVisible ? 'none' : 'blur(10px)',
         }}
       />
       {/* Overlay with an image and play button */}
       <img
-        src='/abc350image.png'
+        src="/abc350image.png"
         style={{
           position: 'absolute',
           top: '50%',
@@ -105,7 +89,13 @@ const Home: React.FC<HomeProps> = ({ socketRef }) => {
       />
       {!isVideoVisible && (
         <div className="overlay">
-          <button onClick={(event) => { event.stopPropagation(); handleClick(); }} className="play-button">
+          <button
+            onClick={(event) => {
+              event.stopPropagation();
+              handleClick();
+            }}
+            className="play-button"
+          >
             <FaPlay className="play-icon" />
           </button>
         </div>
@@ -120,28 +110,53 @@ const Home: React.FC<HomeProps> = ({ socketRef }) => {
   );
 };
 
-
-
 const App: React.FC = () => {
   const socketRef = useRef<WebSocket | null>(null);
+  const [isConnected, setIsConnected] = useState(false); // State to track WebSocket connection status
+
   useEffect(() => {
-    socketRef.current = new WebSocket('ws://localhost:8765');
+    const connectWebSocket = () => {
+      socketRef.current = new WebSocket('ws://localhost:8765');
 
-    socketRef.current.onopen = () => {
-      console.log('WebSocket connection opened');
+      socketRef.current.onopen = () => {
+        console.log('WebSocket connection opened');
+        setIsConnected(true); // WebSocket is connected
+      };
+
+      socketRef.current.onclose = () => {
+        console.log('WebSocket connection closed');
+        setIsConnected(false); // WebSocket is disconnected
+      };
+
+      socketRef.current.onerror = (error) => {
+        console.log('WebSocket error', error);
+        setIsConnected(false); // Treat WebSocket error as disconnected
+      };
     };
 
-    
+    // Call connectWebSocket initially
+    connectWebSocket();
 
-    socketRef.current.onclose = () => {
-      console.log('WebSocket connection closed');
-    };
+    // Periodically check the connection status every 5 seconds
+    const intervalId = setInterval(() => {
+      if (socketRef.current) {
+        if (socketRef.current.readyState !== WebSocket.OPEN) {
+          console.log('WebSocket is not connected, attempting to reconnect...');
+          setIsConnected(false); // Set state to show loading screen
+          connectWebSocket(); // Attempt to reconnect
+        }
+      } else {
+        // If WebSocket is null, try reconnecting
+        console.log('WebSocket is null, attempting to reconnect...');
+        connectWebSocket();
+      }
+    }, 5000); // 5000ms = 5 seconds
 
     return () => {
-      // Close the WebSocket when the component unmounts
       if (socketRef.current) {
         socketRef.current.close();
       }
+      clearInterval(intervalId); // Clean up interval on component unmount
     };
   }, []);
 
@@ -150,8 +165,8 @@ const App: React.FC = () => {
       <div className="app-container">
         <MenuButton2 />
         <Routes>
-          <Route path="/" element={<Home socketRef={socketRef} />} />
-          <Route path="/record" element={<Record socketRef={socketRef}/>} />
+          <Route path="/" element={<Home socketRef={socketRef} isConnected={isConnected} />} />
+          <Route path="/record" element={<Record socketRef={socketRef} />} />
           <Route path="/saved" element={<Saved />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>

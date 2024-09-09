@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { FaRecordVinyl } from 'react-icons/fa';
 import './Record.css';
 import Webcam from 'react-webcam';
+import LoadingScreen from '../LoadingScreen/LoadingScreen';
 
 interface HomeProps {
   socketRef: React.MutableRefObject<WebSocket | null>;
@@ -16,6 +17,7 @@ const Record: React.FC<HomeProps> = ({ socketRef }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [recordName, setRecordName] = useState('');
   const webcamRef = useRef<Webcam>(null);
+  const [isConnected, setIsConnected] = useState(false);
 
   const handleClick = () => {
     if (!isRecording && !isSaving) {
@@ -25,6 +27,21 @@ const Record: React.FC<HomeProps> = ({ socketRef }) => {
       stopRecording();
     }
   };
+
+  useEffect(() => {
+    const checkWebSocketConnection = () => {
+      if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+        setIsConnected(true);
+      } else {
+        setIsConnected(false);
+      }
+    };
+
+    checkWebSocketConnection();
+    const intervalId = setInterval(checkWebSocketConnection, 5000);
+
+    return () => clearInterval(intervalId);
+  }, [socketRef]);
 
   useEffect(() => {
     if (countdown > 0) {
@@ -62,33 +79,16 @@ const Record: React.FC<HomeProps> = ({ socketRef }) => {
   };
 
   const handleSaveRecording = () => {
-    console.log("Saving")
     if (recordName && recordedChunks.length > 0) {
       const blob = new Blob(recordedChunks, { type: 'video/webm' });
-      const reader = new FileReader();
-      console.log("blob ready")
-      reader.onloadend = () => {
-        console.log("Reading")
-        const base64data = reader.result;
-        console.log("Data ready")
-        if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-          console.log("Socket ready")
-          const message = JSON.stringify({
-            function: 'record',
-            kwargs: {
-              data: base64data,
-              name: recordName,
-            },
-          });
 
-          socketRef.current.send(message);
-          console.log("Sent!")
-        }
+      // Save to localStorage for later use in Saved component
+      const url = URL.createObjectURL(blob);
+      const savedRecordings = JSON.parse(localStorage.getItem('recordings') || '[]');
+      savedRecordings.push({ name: recordName, url });
+      localStorage.setItem('recordings', JSON.stringify(savedRecordings));
 
-        resetState();
-      };
-
-      reader.readAsDataURL(blob);
+      resetState();
     }
   };
 
@@ -101,6 +101,7 @@ const Record: React.FC<HomeProps> = ({ socketRef }) => {
 
   return (
     <div onClick={handleClick} className="record-container">
+      {!isConnected && <LoadingScreen />} {/* Show loading screen if WebSocket is not connected */}
       <Webcam
         audio={false}
         ref={webcamRef}
@@ -129,7 +130,10 @@ const Record: React.FC<HomeProps> = ({ socketRef }) => {
       {!isVideoVisible && !isRecording && !isSaving && (
         <div className="overlay">
           <button
-            onClick={(event) => { event.stopPropagation(); handleClick(); }}
+            onClick={(event) => {
+              event.stopPropagation();
+              handleClick();
+            }}
             className="record-button"
           >
             <FaRecordVinyl className="record-icon" />

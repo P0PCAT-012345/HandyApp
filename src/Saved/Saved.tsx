@@ -18,6 +18,15 @@ const Saved: React.FC = () => {
     localStorage.setItem('recordings', JSON.stringify(updatedRecordings));
   };
 
+  const handleDownloadRecording = (url: string, name: string) => {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${name}.webm`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
   const handleCloseVideo = () => {
     setSelectedRecording(null);
   };
@@ -32,7 +41,15 @@ const Saved: React.FC = () => {
               <span onClick={() => handleRecordingClick(recording.url)}>
                 {recording.name}
               </span>
-              <button className="delete-button" onClick={() => handleDeleteRecording(index)}>Delete</button>
+              <button className="delete-button" onClick={() => handleDeleteRecording(index)}>
+                Delete
+              </button>
+              <button
+                className="download-button"
+                onClick={() => handleDownloadRecording(recording.url, recording.name)}
+              >
+                Download
+              </button>
             </li>
           ))}
         </ul>
@@ -42,8 +59,13 @@ const Saved: React.FC = () => {
       {selectedRecording && (
         <div className="video-overlay" onClick={handleCloseVideo}>
           <div className="video-container" onClick={(e) => e.stopPropagation()}>
-            <button className="close-button" onClick={handleCloseVideo}>X</button>
-            <video src={selectedRecording} controls autoPlay className="full-screen-video" />
+            <button className="close-button" onClick={handleCloseVideo}>
+              X
+            </button>
+            {/* Flip the video content, but not the controls */}
+            <div className="video-wrapper">
+              <video src={selectedRecording} controls autoPlay className="video-content" />
+            </div>
           </div>
         </div>
       )}
