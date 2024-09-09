@@ -56,7 +56,6 @@ def decode_image(base64_data):
     
     # Decode the image using OpenCV
     image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-    image = cv2.flip(image, 1)
 
     return image
 

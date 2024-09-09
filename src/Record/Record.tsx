@@ -29,7 +29,7 @@ const Record: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
       setIsVideoVisible(true);
       setCountdown(3);
       const message = JSON.stringify({
-        function: 'reset_recording',
+        function: 'reset_data',
       });
   
       socketRef.current.send(message);  
