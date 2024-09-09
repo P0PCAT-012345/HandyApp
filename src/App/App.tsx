@@ -27,8 +27,11 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
   // Toggle video visibility
   const handleClick = () => {
     setIsVideoVisible((prev) => !prev);
+    const currentTime = new Date();
+    const requestTime = currentTime.toISOString();
     const message = JSON.stringify({
       function: 'reset_data',
+      requestTime: requestTime,
     });
 
     socketRef.current?.send(message);

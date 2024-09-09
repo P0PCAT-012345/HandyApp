@@ -28,8 +28,11 @@ const Record: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
     if (!isRecording && !isSaving && socketRef.current) {
       setIsVideoVisible(true);
       setCountdown(3);
+      const currentTime = new Date();
+      const requestTime = currentTime.toISOString();
       const message = JSON.stringify({
         function: 'reset_data',
+        requestTime: requestTime
       });
   
       socketRef.current.send(message);  
@@ -77,9 +80,12 @@ const Record: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
   const handleSaveRecording = () => {
     console.log(recordName);
     if (recordName && socketRef.current){
+      const currentTime = new Date();
+      const requestTime = currentTime.toISOString();
       const message = JSON.stringify({
         function: 'stop_recording',
-        kwargs: {name: recordName}
+        kwargs: {name: recordName},
+        requestTime: requestTime
       });
   
       socketRef.current.send(message);  
@@ -143,9 +149,12 @@ const Record: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
         // Convert canvas to Base64 encoded image (JPEG format)
         const base64Image = canvas.toDataURL('image/jpeg');
         if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+          const currentTime = new Date();
+          const requestTime = currentTime.toISOString();
           const message = JSON.stringify({
             function: 'record',
-            args: [base64Image]
+            args: [base64Image],
+            requestTime: requestTime
           });
           socketRef.current.send(message);
         }
