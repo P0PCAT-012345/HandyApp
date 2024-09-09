@@ -2,7 +2,7 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  overflow: hidden; /* Prevent scrolling */
+  overflow: hidden; 
 }
 
 .record-container {
@@ -22,7 +22,7 @@ html, body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scaleX(-1); /* Flip video horizontally */
+  transform: scaleX(-1); 
   transition: filter 0.5s;
 }
 
@@ -48,7 +48,7 @@ html, body {
 }
 
 .record-button {
-  background-color: red;
+  background-color: rgb(85, 85, 224);
   border: none;
   border-radius: 50%;
   padding: 20px;
@@ -60,7 +60,7 @@ html, body {
 }
 
 .record-icon {
-  color: white;
+  color: rgb(214, 214, 255);
   font-size: 48px;
 }
 
@@ -78,7 +78,6 @@ html, body {
   font-size: 48px;
   color: white;
 }
-
 .save-overlay {
   display: flex;
   flex-direction: column;
@@ -92,26 +91,29 @@ html, body {
   background-color: rgba(0, 0, 0, 0.7);
   z-index: 12;
   color: white;
+  margin: 10px; 
+  padding: 20px; 
 }
 
 .save-overlay input {
-  padding: 10px;
-  font-size: 18px;
+  padding: 15px; 
+  font-size: 22px;
   margin-bottom: 20px;
   border: none;
   border-radius: 5px;
+  width: 20%; 
 }
 
 .save-overlay button {
-  background-color: red;
+  background-color: rgb(85, 85, 224);
   border: none;
   border-radius: 5px;
-  padding: 10px 20px;
-  margin: 5px;
+  padding: 15px 30px;
+  margin: 10px;
   color: white;
   cursor: pointer;
 }
 
 .save-overlay button:hover {
-  background-color: darkred;
+  background-color: rgb(49, 49, 150);
 }

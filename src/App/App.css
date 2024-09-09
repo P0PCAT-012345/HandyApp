@@ -37,7 +37,7 @@ html, body {
 .video-element {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* Ensures the video fills the container without black bars */
+  object-fit: cover; 
   transition: filter 0.5s;
 }
 
@@ -63,11 +63,11 @@ html, body {
 }
 
 .play-button {
-  background-color: red;
+  background-color: rgb(85, 85, 224);
   border: none;
   border-radius: 50%;
-  width: 60px; /* Fixed button size */
-  height: 60px;
+  width: 75px;
+  height: 75px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -77,7 +77,8 @@ html, body {
 
 .play-icon {
   color: white;
-  font-size: 24px;
+  font-size: 26px;
+  margin: auto; 
 }
 
 .img-container {
@@ -97,7 +98,7 @@ html, body {
 img {
   max-width: 100%;
   height: auto;
-  object-fit: contain; /* Ensure the image maintains its aspect ratio */
+  object-fit: contain; 
 }
 
 .App {
@@ -135,7 +136,7 @@ div > div {
 
 .video-element,
 .canvas-element {
-  object-fit: cover; /* Ensures video and canvas take up full space */
+  object-fit: cover; 
 }
 
 .landmarks-display {
@@ -154,7 +155,6 @@ div > div {
   white-space: pre-wrap;
 }
 
-/* Subtitle Styling */
 .subtitle-container {
   position: absolute;
   bottom: 50px;

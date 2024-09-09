@@ -86,16 +86,11 @@ class TCNSignEmbedding(nn.Module):
 
         x = self.dim_reduction(x)
 
-        # Temporal modeling
         x = self.tcn(x)
 
-
-        # Reshape back to (batch_size, frames, features)
         x = x.permute(0, 2, 1).contiguous()
 
         return x
-
-
 
 def get_model(path = 'server/weights.h5', device='cpu'):
     model = TCNSignEmbedding().to(device)

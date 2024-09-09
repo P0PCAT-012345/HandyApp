@@ -22,7 +22,7 @@ interface HomeProps {
 const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) => {
   const [subtitleText, setSubtitleText] = useState<string>('');
   const [isVideoVisible, setIsVideoVisible] = useState(false);
-  const [webcamDimensions, setWebcamDimensions] = useState({ width: 0, height: 0, top: 0, left: 0 }); // Store webcam size and position
+  const [webcamDimensions, setWebcamDimensions] = useState({ width: 0, height: 0, top: 0, left: 0 });
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -36,13 +36,11 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
     setSubtitleText('');
   };
 
-  // Initialize canvas on mount
   useEffect(() => {
     const canvas = document.createElement('canvas');
     canvasRef.current = canvas;
   }, []);
 
-  // Update the webcam size and position when it's visible
   useEffect(() => {
     if (isVideoVisible && webcamRef.current) {
       const updateWebcamDimensions = () => {
@@ -54,10 +52,8 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
         }
       };
 
-      // Initial call to set the dimensions
       updateWebcamDimensions();
 
-      // Add a resize listener to update dimensions when window resizes
       window.addEventListener('resize', updateWebcamDimensions);
 
       return () => {
@@ -66,7 +62,6 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
     }
   }, [isVideoVisible]);
 
-  // Capture frames and send them to the server
   useEffect(() => {
     if (isVideoVisible && webcamRef.current && canvasRef.current) {
       const captureImage = () => {
@@ -80,21 +75,18 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
           const videoWidth = video.videoWidth;
           const videoHeight = video.videoHeight;
 
-          // Set canvas size based on the video size
           canvas.width = videoWidth;
           canvas.height = videoHeight;
 
-          // Draw the video frame on the resized canvas
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-          // Convert the canvas to a base64 encoded image (JPEG format)
           const base64Image = canvas.toDataURL('image/jpeg');
           if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
             const message = JSON.stringify({
               function: 'recieve',
-              args: [base64Image], // Send the base64 encoded image
-              kwargs: { mode: 'translate' }, // Mode for the server
+              args: [base64Image],
+              kwargs: { mode: 'translate' },
             });
 
             socketRef.current.send(message);
@@ -102,10 +94,9 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
         }
       };
 
-      // Capture the video frame every 50ms
       const intervalId = setInterval(captureImage, 50);
 
-      return () => clearInterval(intervalId); // Cleanup when the component unmounts or the video is turned off
+      return () => clearInterval(intervalId);
     }
   }, [isVideoVisible, socketRef]);
 
@@ -121,8 +112,7 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
 
   return (
     <div onClick={handleClick} className="home-container">
-      {!isConnected && <LoadingScreen />} {/* Show loading screen if WebSocket is not connected */}
-      {/* Webcam video element */}
+      {!isConnected && <LoadingScreen />}
       <Webcam
         audio={false}
         ref={webcamRef}
@@ -138,17 +128,16 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
         }}
       />
 
-      {/* Resized and positioned image based on webcam size */}
       {isVideoVisible && (
         <img
           src="/abc350image.png"
           style={{
             position: 'absolute',
-            top: `${webcamDimensions.top}px`, // Align with the webcam's top
-            left: `${webcamDimensions.left}px`, // Align with the webcam's left
-            width: `${webcamDimensions.width}px`, // Match the webcam's width
-            height: `${webcamDimensions.height}px`, // Match the webcam's height
-            objectFit: 'contain', // Maintain aspect ratio
+            top: `${webcamDimensions.top}px`,
+            left: `${webcamDimensions.left}px`,
+            width: `${webcamDimensions.width}px`,
+            height: `${webcamDimensions.height}px`,
+            objectFit: 'contain',
           }}
         />
       )}
@@ -179,19 +168,17 @@ const App: React.FC = () => {
   const socketRef = useRef<WebSocket | null>(null);
   const [socketMessage, setSocketMessage] = useState<SocketMessageProps | null>(null);
 
-  const [isConnected, setIsConnected] = useState(false); // State to track WebSocket connection status
+  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
     const connectWebSocket = () => {
       socketRef.current = new WebSocket('ws://localhost:8765');
 
       socketRef.current.onopen = () => {
-        console.log('WebSocket connection opened');
         setIsConnected(true);
       };
 
       socketRef.current.onclose = () => {
-        console.log('WebSocket connection closed');
       };
 
       socketRef.current.onmessage = (event) => {
@@ -201,40 +188,34 @@ const App: React.FC = () => {
         }
       };
         socketRef.current.onclose = () => {
-          console.log('WebSocket connection closed');
-          setIsConnected(false); // WebSocket is disconnected
+          setIsConnected(false);
         };
 
         socketRef.current.onerror = (error) => {
-          console.log('WebSocket error', error);
-          setIsConnected(false); // Treat WebSocket error as disconnected
+          setIsConnected(false);
         };
 
     };
 
-    // Call connectWebSocket initially
     connectWebSocket();
 
-    // Periodically check the connection status every 5 seconds
     const intervalId = setInterval(() => {
       if (socketRef.current) {
         if (socketRef.current.readyState !== WebSocket.OPEN) {
-          console.log('WebSocket is not connected, attempting to reconnect...');
-          setIsConnected(false); // Set state to show loading screen
-          connectWebSocket(); // Attempt to reconnect
+          setIsConnected(false);
+          connectWebSocket();
         }
       } else {
-        // If WebSocket is null, try reconnecting
         console.log('WebSocket is null, attempting to reconnect...');
         connectWebSocket();
       }
-    }, 5000); // 5000ms = 5 seconds
+    }, 5000);
 
     return () => {
       if (socketRef.current) {
         socketRef.current.close();
       }
-      clearInterval(intervalId); // Clean up interval on component unmount
+      clearInterval(intervalId);
     };
   }, []);
 
@@ -253,4 +234,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-

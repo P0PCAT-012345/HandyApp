@@ -62,7 +62,6 @@ const Saved: React.FC = () => {
             <button className="close-button" onClick={handleCloseVideo}>
               X
             </button>
-            {/* Flip the video content, but not the controls */}
             <div className="video-wrapper">
               <video src={selectedRecording} controls autoPlay className="video-content" />
             </div>

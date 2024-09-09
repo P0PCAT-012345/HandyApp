@@ -25,7 +25,6 @@ def partial_DTW(x: np.ndarray, y: np.ndarray) -> np.ndarray:
         for j in range(1, M):
             dist = np.linalg.norm(x[i] - y[j])
 
-            # Manually determine the minimum cost path
             cost_diag = dtw[i-1, j-1]
             cost_left = dtw[i, j-1]
             cost_up = dtw[i-1, j]
@@ -105,15 +104,6 @@ def toSentence(sentence, curr_sentence, lastWord, refreshCount):
         curr_sentence.append(sentence[0])
         lastWord = sentence[-1]
         refreshCount = 0
-    elif lastWord == sentence[-1]:
-        refreshCount += 1
-        if refreshCount >= 2:
-            lastWord = None
-    else:
-        lastWord = sentence[-1]
-        refreshCount = 0
-
-        
 
     for word in sentence[1:]:
         curr_sentence.append(word)

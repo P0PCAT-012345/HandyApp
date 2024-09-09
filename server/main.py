@@ -102,12 +102,30 @@ class Session:
                 np.save('server/database/mostrecent.npy', np.array(self.hand_landmarks))
                 output = self.getEmbedding(self.hand_landmarks)
                 sequence, costs = classify(output, 0.35, self.database)
-                sentence = toSentence(sequence, self.curr_sentence, self.lastWord, self.refreshCount)
                 self.hand_landmarks = []
-                if len(sentence) == 0:
+                if len(sequence) == 0:
+                    self.lastWord = None
+                    self.refreshCount += 1
+                    if self.refreshCount == 4:
+                        self.curr_sentence.clear()
+                        self.refreshCount = 0
+                    
+                    self.hand_landmarks = []
                     return 'No match found'
+                        
                 
-                return ' '.join(sentence)
+                if self.lastWord != sequence[0]:
+                    self.curr_sentence.append(sequence[0])
+                    self.lastWord = sequence[-1]
+                    self.refreshCount = 0
+
+                for word in sequence[1:]:
+                    self.curr_sentence.append(word)
+                
+                if len(self.curr_sentence) > 15:
+                    self.curr_sentence.pop(0)
+                return ' '.join(self.curr_sentence)
+        
 
         if mode=='record':
             if self.mouth_open(frame):
@@ -129,20 +147,16 @@ class Session:
         embeddings = self.getEmbedding(self.hand_landmarks)
         directory_path = f'server/database/{name}'
         
-        # Create the directory if it doesn't exist
         os.makedirs(directory_path, exist_ok=True)
         
-        # Generate the filename with the current timestamp
         timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
         filename = f'{timestamp}.npy'
         
         file_path = os.path.join(directory_path, filename)
         np.save(file_path, embeddings)
         
-        # Log the action
         print(f"Embeddings saved for {name} at {file_path}")
         
-        # Append the new entry to the database
         self.database.append((name, embeddings))
 
     def mouth_open(self, frame):

@@ -74,7 +74,7 @@
   width: 80%;
   height: 80%;
   border-radius: 10px;
-  transform: scaleX(-1); /* Only flip the video content */
+  transform: scaleX(-1);
 }
 
 .full-screen-video {

@@ -10,13 +10,10 @@ async def handler(websocket, path):
     global sessionsList
     client_address = websocket.remote_address
     try:
-        # Start a new session for the client if it doesn't exist
         if client_address not in sessionsList:
             sessionsList[client_address] = Session()
             print(client_address)
             print("New session started")
-
-        # Process incoming messages
         async for message in websocket:
             response = process_message(sessionsList[client_address], message)
             if response:
@@ -24,7 +21,6 @@ async def handler(websocket, path):
     except websockets.exceptions.ConnectionClosed:
         print(f"Connection closed with {client_address}")
     finally:
-        # Remove session when connection is closed
         if client_address in sessionsList:
             del sessionsList[client_address]
             print(f"Session for {client_address} removed")
@@ -33,13 +29,11 @@ def process_message(session, message):
     try:
         data = json.loads(message)
         
-        # Check if requestTime is present and valid
         if "requestTime" in data:
-            request_time = datetime.fromisoformat(data["requestTime"])  # Assuming requestTime is in ISO format
+            request_time = datetime.fromisoformat(data["requestTime"])  
             current_time = datetime.now(timezone.utc)
             time_difference = (current_time - request_time).total_seconds()
 
-            # Ignore message if it's older than 2 seconds
             if time_difference > 2:
                 print("Ignoring message due to outdated requestTime")
                 return None

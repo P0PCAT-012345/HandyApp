@@ -8,9 +8,8 @@ const MenuButton2: React.FC = () => {
       <span className="cls"></span>
       <span>
         <ul className="sub-menu">
-          <li><Link to="/" title="translate">Translate</Link></li>
-          <li><Link to="/record" title="record">Record new sign</Link></li>
-          <li><Link to="/saved" title="view">View recordings</Link></li>
+          <li><Link to="/" title="translate">翻訳する</Link></li>
+          <li><Link to="/record" title="record">録画する</Link></li>
         </ul>
       </span>
       <span className="cls"></span>
