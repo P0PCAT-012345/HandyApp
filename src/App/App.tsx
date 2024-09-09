@@ -8,53 +8,65 @@ import Saved from '../Saved/Saved';
 import Settings from '../Settings/Settings';
 import './App.css';
 
-
+interface SocketMessageProps {
+  result: string;
+  function: string;
+}
 
 interface HomeProps {
   socketRef: React.MutableRefObject<WebSocket | null>;
+  socketMessage: SocketMessageProps | null;
 }
 
-const Home: React.FC<HomeProps> = ({ socketRef }) => {
+const Home: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
   const [subtitleText, setSubtitleText] = useState<string>('');
   const [isVideoVisible, setIsVideoVisible] = useState(false);
   const [isCameraInitialized, setIsCameraInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const webcamRef = useRef<Webcam>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   // Toggle video visibility
   const handleClick = () => {
     setIsVideoVisible((prev) => !prev);
   };
 
+  // Initialize canvas on mount
+  useEffect(() => {
+    const canvas = document.createElement('canvas');
+    canvasRef.current = canvas;
+  }, []);
+
   // Capture frames and send them to the server
   useEffect(() => {
-    if (isVideoVisible && webcamRef.current) {
+    if (isVideoVisible && webcamRef.current && canvasRef.current) {
       const captureImage = () => {
         const video = webcamRef.current?.video;
 
         if (!video) return;
 
-        // Create a canvas to capture the video frame
-        const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        const ctx = canvas.getContext('2d');
-        ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
+        // Use the existing canvas to capture the video frame
+        const canvas = canvasRef.current;
+        if (canvas){
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        // Convert canvas to Base64 encoded image (JPEG format)
-        const base64Image = canvas.toDataURL('image/jpeg');
-        if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-          const message = JSON.stringify({
-            function: 'recieve',
-            args: [base64Image], // Send the base64 encoded image
-            kwargs: { mode: 'translate' }, // Mode for the server
-          });
+          // Convert canvas to Base64 encoded image (JPEG format)
+          const base64Image = canvas.toDataURL('image/jpeg');
+          if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+            const message = JSON.stringify({
+              function: 'recieve',
+              args: [base64Image], // Send the base64 encoded image
+              kwargs: { mode: 'translate' }, // Mode for the server
+            });
 
-          socketRef.current.send(message);
-        }
+            socketRef.current.send(message);
+        }}
       };
 
-      const intervalId = setInterval(captureImage, 80);
+      const intervalId = setInterval(captureImage, 100);
 
       setIsCameraInitialized(true);
       setIsLoading(false);
@@ -63,16 +75,11 @@ const Home: React.FC<HomeProps> = ({ socketRef }) => {
     }
   }, [isVideoVisible]);
 
-  useEffect(()=>{
-    if (socketRef && socketRef.current){
-      socketRef.current.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data && data.result) {
-          setSubtitleText(data.result);
-        }
-      };
-    }  
-  }, [socketRef])
+  useEffect(() => {
+    if (socketMessage && socketMessage.function === 'recieve' && socketMessage.result) {
+      setSubtitleText(socketMessage.result);
+    }
+  }, [socketMessage]);
 
   return (
     <div onClick={handleClick} className="home-container">
@@ -91,7 +98,7 @@ const Home: React.FC<HomeProps> = ({ socketRef }) => {
       />
       {/* Overlay with an image and play button */}
       <img
-        src='/abc350image.png'
+        src="/abc350image.png"
         style={{
           position: 'absolute',
           top: '50%',
@@ -120,10 +127,10 @@ const Home: React.FC<HomeProps> = ({ socketRef }) => {
   );
 };
 
-
-
 const App: React.FC = () => {
   const socketRef = useRef<WebSocket | null>(null);
+  const [socketMessage, setSocketMessage] = useState<SocketMessageProps | null>(null);
+
   useEffect(() => {
     socketRef.current = new WebSocket('ws://localhost:8765');
 
@@ -131,10 +138,15 @@ const App: React.FC = () => {
       console.log('WebSocket connection opened');
     };
 
-    
-
     socketRef.current.onclose = () => {
       console.log('WebSocket connection closed');
+    };
+
+    socketRef.current.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data && data.result && data.function) {
+        setSocketMessage({ result: data.result, function: data.function });
+      }
     };
 
     return () => {
@@ -150,8 +162,8 @@ const App: React.FC = () => {
       <div className="app-container">
         <MenuButton2 />
         <Routes>
-          <Route path="/" element={<Home socketRef={socketRef} />} />
-          <Route path="/record" element={<Record socketRef={socketRef}/>} />
+          <Route path="/" element={<Home socketRef={socketRef} socketMessage={socketMessage} />} />
+          <Route path="/record" element={<Record socketRef={socketRef} socketMessage={socketMessage} />} />
           <Route path="/saved" element={<Saved />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>

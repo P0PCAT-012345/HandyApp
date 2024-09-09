@@ -3,11 +3,17 @@ import { FaRecordVinyl } from 'react-icons/fa';
 import './Record.css';
 import Webcam from 'react-webcam';
 
-interface HomeProps {
-  socketRef: React.MutableRefObject<WebSocket | null>;
+interface SocketMessageProps {
+  result: string;
+  function: string;
 }
 
-const Record: React.FC<HomeProps> = ({ socketRef }) => {
+interface HomeProps {
+  socketRef: React.MutableRefObject<WebSocket | null>;
+  socketMessage: SocketMessageProps | null;
+}
+
+const Record: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const [isVideoVisible, setIsVideoVisible] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
@@ -16,11 +22,18 @@ const Record: React.FC<HomeProps> = ({ socketRef }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [recordName, setRecordName] = useState('');
   const webcamRef = useRef<Webcam>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const handleClick = () => {
-    if (!isRecording && !isSaving) {
+    if (!isRecording && !isSaving && socketRef.current) {
       setIsVideoVisible(true);
       setCountdown(3);
+      const message = JSON.stringify({
+        function: 'reset_recording',
+      });
+  
+      socketRef.current.send(message);  
+
     } else if (isRecording) {
       stopRecording();
     }
@@ -62,27 +75,36 @@ const Record: React.FC<HomeProps> = ({ socketRef }) => {
   };
 
   const handleSaveRecording = () => {
-    console.log("Saving")
+    console.log(recordName);
+    if (recordName && socketRef.current){
+      const message = JSON.stringify({
+        function: 'stop_recording',
+        kwargs: {name: recordName}
+      });
+  
+      socketRef.current.send(message);  
+    }
+
     if (recordName && recordedChunks.length > 0) {
       const blob = new Blob(recordedChunks, { type: 'video/webm' });
       const reader = new FileReader();
-      console.log("blob ready")
+      console.log("blob ready");
       reader.onloadend = () => {
-        console.log("Reading")
+        console.log("Reading");
         const base64data = reader.result;
-        console.log("Data ready")
+        console.log("Data ready");
         if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-          console.log("Socket ready")
-          const message = JSON.stringify({
-            function: 'record',
-            kwargs: {
-              data: base64data,
-              name: recordName,
-            },
-          });
+          console.log("Socket ready");
+          // const message = JSON.stringify({
+          //   function: 'record',
+          //   kwargs: {
+          //     data: base64data,
+          //     name: recordName,
+          //   },
+          // });
 
-          socketRef.current.send(message);
-          console.log("Sent!")
+          // socketRef.current.send(message);
+          console.log("Sent!");
         }
 
         resetState();
@@ -99,6 +121,48 @@ const Record: React.FC<HomeProps> = ({ socketRef }) => {
     setRecordedChunks([]);
   };
 
+  useEffect(() => {
+    // Initialize the canvas once when the component mounts
+    const canvas = document.createElement('canvas');
+    canvasRef.current = canvas;
+  }, []);
+
+  useEffect(() => {
+    if (isVideoVisible && webcamRef.current && countdown === 0 && isRecording) {
+      const captureImage = () => {
+        const video = webcamRef.current?.video;
+        if (!video || !canvasRef.current) return;
+
+        // Use the existing canvas to capture the video frame
+        const canvas = canvasRef.current;
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Convert canvas to Base64 encoded image (JPEG format)
+        const base64Image = canvas.toDataURL('image/jpeg');
+        if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+          const message = JSON.stringify({
+            function: 'record',
+            args: [base64Image]
+          });
+          socketRef.current.send(message);
+        }
+      };
+
+      const intervalId = setInterval(captureImage, 80);
+
+      return () => clearInterval(intervalId); // Cleanup when the component unmounts or the video is turned off
+    }
+  }, [countdown, isVideoVisible, isRecording]);
+
+  useEffect(() => {
+    if (socketMessage && socketMessage.function === 'record' && socketMessage.result === 'MOUTH_OPEN_TRUE') {
+      stopRecording();
+    }
+  }, [socketMessage]);
+
   return (
     <div onClick={handleClick} className="record-container">
       <Webcam
@@ -114,7 +178,7 @@ const Record: React.FC<HomeProps> = ({ socketRef }) => {
         }}
       />
       <img
-        src='/abc350image.png'
+        src="/abc350image.png"
         style={{
           position: 'absolute',
           top: '50%',
@@ -129,18 +193,17 @@ const Record: React.FC<HomeProps> = ({ socketRef }) => {
       {!isVideoVisible && !isRecording && !isSaving && (
         <div className="overlay">
           <button
-            onClick={(event) => { event.stopPropagation(); handleClick(); }}
+            onClick={(event) => {
+              event.stopPropagation();
+              handleClick();
+            }}
             className="record-button"
           >
             <FaRecordVinyl className="record-icon" />
           </button>
         </div>
       )}
-      {countdown > 0 && (
-        <div className="countdown-overlay">
-          {countdown}
-        </div>
-      )}
+      {countdown > 0 && <div className="countdown-overlay">{countdown}</div>}
       {isSaving && (
         <div className="save-overlay">
           <input
