@@ -98,7 +98,6 @@ const Record: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) 
         if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
           console.log('Socket ready');
         }
-
         resetState();
       };
 

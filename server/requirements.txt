@@ -1,0 +1,6 @@
+mediapipe==0.10.9
+numba==0.59.0
+numpy==1.26.3
+opencv_contrib_python==4.9.0.80
+opencv_python==4.9.0.80
+torch==2.2.0
