@@ -78,29 +78,28 @@ def classify(embeddings, threshold, database, chunk=10):
         candidates_names.append(class_name)
     costs.append(np.full((len(embeddings),), threshold))
     costs = chunk_min_arr(np.array(costs), chunk)
-
+    candidates_names.append(None)
     prevPredict = None
     sentence=[]
-    previousWord = None
+
     for i, result in enumerate(np.argmin(costs, axis=0)):
-        if prevPredict!=result and result!=len(database):
-            prevPredict = result
+        if prevPredict!=candidates_names[result] and result!=len(database):
+            prevPredict = candidates_names[result]
             sentence.append(candidates_names[result])
             print(costs[result][i], candidates_names[result], i)
     print(sentence)
     return sentence, costs
 
 
-curr_sentence = []
 lastWord = None
 refreshCount = 0
-def toSentence(sentence):
-    global curr_sentence, lastWord, refreshCount
+def toSentence(sentence, curr_sentence):
+    global lastWord, refreshCount
     if len(sentence) == 0:
         lastWord = None
         refreshCount += 1
         if refreshCount == 4:
-            curr_sentence = []
+            curr_sentence.clear()
             refreshCount = 0
         return curr_sentence
     

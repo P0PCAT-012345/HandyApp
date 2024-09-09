@@ -151,7 +151,7 @@ const Record: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
         }
       };
 
-      const intervalId = setInterval(captureImage, 80);
+      const intervalId = setInterval(captureImage, 50);
 
       return () => clearInterval(intervalId); // Cleanup when the component unmounts or the video is turned off
     }

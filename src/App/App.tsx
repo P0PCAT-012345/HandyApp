@@ -29,6 +29,12 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
   // Toggle video visibility
   const handleClick = () => {
     setIsVideoVisible((prev) => !prev);
+    const message = JSON.stringify({
+      function: 'reset_data',
+    });
+
+    socketRef.current?.send(message);
+    setSubtitleText('');
   };
 
   // Initialize canvas on mount
@@ -45,28 +51,33 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
 
         if (!video) return;
 
-        // Use the existing canvas to capture the video frame
+        // Dynamically set the canvas size to match the video dimensions
         const canvas = canvasRef.current;
-        if (canvas){
+        if (canvas) {
           canvas.width = video.videoWidth;
           canvas.height = video.videoHeight;
           const ctx = canvas.getContext('2d');
-          ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
+          if (ctx) {
+            // Draw the video frame on the canvas
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-          // Convert canvas to Base64 encoded image (JPEG format)
-          const base64Image = canvas.toDataURL('image/jpeg');
-          if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-            const message = JSON.stringify({
-              function: 'recieve',
-              args: [base64Image], // Send the base64 encoded image
-              kwargs: { mode: 'translate' }, // Mode for the server
-            });
+            // Convert the canvas to a base64 encoded image (JPEG format)
+            const base64Image = canvas.toDataURL('image/jpeg');
+            if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+              const message = JSON.stringify({
+                function: 'recieve',
+                args: [base64Image], // Send the base64 encoded image
+                kwargs: { mode: 'translate' }, // Mode for the server
+              });
 
-            socketRef.current.send(message);
-        }}
+              socketRef.current.send(message);
+            }
+          }
+        }
       };
 
-      const intervalId = setInterval(captureImage, 100);
+      // Capture the video frame every 50ms
+      const intervalId = setInterval(captureImage, 50);
 
       setIsCameraInitialized(true);
       setIsLoading(false);
@@ -77,7 +88,11 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
 
   useEffect(() => {
     if (socketMessage && socketMessage.function === 'recieve' && socketMessage.result) {
-      setSubtitleText(socketMessage.result);
+      if (socketMessage.result === 'No match found') {
+        setSubtitleText('');
+      } else {
+        setSubtitleText(socketMessage.result);
+      }
     }
   }, [socketMessage]);
 
@@ -112,7 +127,13 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
       />
       {!isVideoVisible && (
         <div className="overlay">
-          <button onClick={(event) => { event.stopPropagation(); handleClick(); }} className="play-button">
+          <button
+            onClick={(event) => {
+              event.stopPropagation();
+              handleClick();
+            }}
+            className="play-button"
+          >
             <FaPlay className="play-icon" />
           </button>
         </div>
