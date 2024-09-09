@@ -23,20 +23,24 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
   const [isVideoVisible, setIsVideoVisible] = useState(false);
   const [webcamDimensions, setWebcamDimensions] = useState({ width: 0, height: 0, top: 0, left: 0 }); // Store webcam size and position
   const webcamRef = useRef<Webcam>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   // Toggle video visibility
   const handleClick = () => {
     setIsVideoVisible((prev) => !prev);
-    const currentTime = new Date();
-    const requestTime = currentTime.toISOString();
     const message = JSON.stringify({
       function: 'reset_data',
-      requestTime: requestTime,
     });
 
     socketRef.current?.send(message);
     setSubtitleText('');
   };
+
+  // Initialize canvas on mount
+  useEffect(() => {
+    const canvas = document.createElement('canvas');
+    canvasRef.current = canvas;
+  }, []);
 
   // Update the webcam size and position when it's visible
   useEffect(() => {
@@ -61,6 +65,60 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
       };
     }
   }, [isVideoVisible]);
+
+  // Capture frames and send them to the server
+  useEffect(() => {
+    if (isVideoVisible && webcamRef.current && canvasRef.current) {
+      const captureImage = () => {
+        const video = webcamRef.current?.video;
+
+        if (!video) return;
+
+        const canvas = canvasRef.current;
+        const ctx = canvas?.getContext('2d');
+
+        if (canvas && ctx) {
+          const videoWidth = video.videoWidth;
+          const videoHeight = video.videoHeight;
+
+          // Set canvas size based on the video size
+          canvas.width = videoWidth;
+          canvas.height = videoHeight;
+
+          // Draw the video frame on the resized canvas
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+          // Convert the canvas to a base64 encoded image (JPEG format)
+          const base64Image = canvas.toDataURL('image/jpeg');
+          if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+            const message = JSON.stringify({
+              function: 'recieve',
+              args: [base64Image], // Send the base64 encoded image
+              kwargs: { mode: 'translate' }, // Mode for the server
+            });
+
+            socketRef.current.send(message);
+          }
+        }
+      };
+
+      // Capture the video frame every 50ms
+      const intervalId = setInterval(captureImage, 50);
+
+      return () => clearInterval(intervalId); // Cleanup when the component unmounts or the video is turned off
+    }
+  }, [isVideoVisible]);
+
+  useEffect(() => {
+    if (socketMessage && socketMessage.function === 'recieve' && socketMessage.result) {
+      if (socketMessage.result === 'No match found') {
+        setSubtitleText('');
+      } else {
+        setSubtitleText(socketMessage.result);
+      }
+    }
+  }, [socketMessage]);
 
   return (
     <div onClick={handleClick} className="home-container">

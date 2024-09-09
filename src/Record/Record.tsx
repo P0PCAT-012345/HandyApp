@@ -21,6 +21,7 @@ const Record: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
   const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [recordName, setRecordName] = useState('');
+  const [webcamDimensions, setWebcamDimensions] = useState({ width: 0, height: 0, top: 0, left: 0 }); // Store webcam size and position
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -28,15 +29,11 @@ const Record: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
     if (!isRecording && !isSaving && socketRef.current) {
       setIsVideoVisible(true);
       setCountdown(3);
-      const currentTime = new Date();
-      const requestTime = currentTime.toISOString();
       const message = JSON.stringify({
         function: 'reset_data',
-        requestTime: requestTime
       });
-  
-      socketRef.current.send(message);  
 
+      socketRef.current.send(message);
     } else if (isRecording) {
       stopRecording();
     }
@@ -79,38 +76,25 @@ const Record: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
 
   const handleSaveRecording = () => {
     console.log(recordName);
-    if (recordName && socketRef.current){
-      const currentTime = new Date();
-      const requestTime = currentTime.toISOString();
+    if (recordName && socketRef.current) {
       const message = JSON.stringify({
         function: 'stop_recording',
-        kwargs: {name: recordName},
-        requestTime: requestTime
+        kwargs: { name: recordName },
       });
-  
-      socketRef.current.send(message);  
+
+      socketRef.current.send(message);
     }
 
     if (recordName && recordedChunks.length > 0) {
       const blob = new Blob(recordedChunks, { type: 'video/webm' });
       const reader = new FileReader();
-      console.log("blob ready");
+      console.log('blob ready');
       reader.onloadend = () => {
-        console.log("Reading");
+        console.log('Reading');
         const base64data = reader.result;
-        console.log("Data ready");
+        console.log('Data ready');
         if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-          console.log("Socket ready");
-          // const message = JSON.stringify({
-          //   function: 'record',
-          //   kwargs: {
-          //     data: base64data,
-          //     name: recordName,
-          //   },
-          // });
-
-          // socketRef.current.send(message);
-          console.log("Sent!");
+          console.log('Socket ready');
         }
 
         resetState();
@@ -133,6 +117,30 @@ const Record: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
     canvasRef.current = canvas;
   }, []);
 
+  // Update the webcam size and position when it's visible
+  useEffect(() => {
+    if (isVideoVisible && webcamRef.current) {
+      const updateWebcamDimensions = () => {
+        const webcamElement = webcamRef.current?.video;
+
+        if (webcamElement) {
+          const { width, height, top, left } = webcamElement.getBoundingClientRect();
+          setWebcamDimensions({ width, height, top, left });
+        }
+      };
+
+      // Initial call to set the dimensions
+      updateWebcamDimensions();
+
+      // Add a resize listener to update dimensions when window resizes
+      window.addEventListener('resize', updateWebcamDimensions);
+
+      return () => {
+        window.removeEventListener('resize', updateWebcamDimensions);
+      };
+    }
+  }, [isVideoVisible]);
+
   useEffect(() => {
     if (isVideoVisible && webcamRef.current && countdown === 0 && isRecording) {
       const captureImage = () => {
@@ -149,12 +157,9 @@ const Record: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
         // Convert canvas to Base64 encoded image (JPEG format)
         const base64Image = canvas.toDataURL('image/jpeg');
         if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-          const currentTime = new Date();
-          const requestTime = currentTime.toISOString();
           const message = JSON.stringify({
             function: 'record',
             args: [base64Image],
-            requestTime: requestTime
           });
           socketRef.current.send(message);
         }
@@ -174,31 +179,37 @@ const Record: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
 
   return (
     <div onClick={handleClick} className="record-container">
+    {/* Webcam video element */}
       <Webcam
         audio={false}
         ref={webcamRef}
         className={`video-element ${isVideoVisible ? 'visible' : 'blurred'}`}
         style={{
           transform: 'scaleX(-1)',
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
+          maxWidth: '100%',
+          maxHeight: '100%',
+          objectFit: 'contain',
+          margin: 'auto',
+          display: 'block',
           filter: isVideoVisible ? 'none' : 'blur(10px)',
         }}
       />
-      <img
-        src="/abc350image.png"
-        style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '80%',
-          height: 'auto',
-          maxWidth: '100%',
-          maxHeight: '100%',
-        }}
-      />
+
+      {/* Resized and positioned image based on webcam size */}
+      {isVideoVisible && (
+        <img
+          src="/abc350image.png"
+          style={{
+            position: 'absolute',
+            top: `${webcamDimensions.top}px`, // Align with the webcam's top
+            left: `${webcamDimensions.left}px`, // Align with the webcam's left
+            width: `${webcamDimensions.width}px`, // Match the webcam's width
+            height: `${webcamDimensions.height}px`, // Match the webcam's height
+            objectFit: 'contain', // Maintain aspect ratio
+          }}
+        />
+      )}
+
       {!isVideoVisible && !isRecording && !isSaving && (
         <div className="overlay">
           <button
