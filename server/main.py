@@ -101,7 +101,7 @@ class Session:
             if len(self.hand_landmarks) == 30 and len(self.database) > 0:
                 np.save('server/database/mostrecent.npy', np.array(self.hand_landmarks))
                 output = self.getEmbedding(self.hand_landmarks)
-                sequence, costs = classify(output, 0.35, self.database)
+                sequence, costs = classify(output, 0.25, self.database)
                 sentence = toSentence(sequence, self.curr_sentence, self.lastWord, self.refreshCount)
                 self.hand_landmarks = []
                 if len(sentence) == 0:

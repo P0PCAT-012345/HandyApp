@@ -21,7 +21,7 @@ const Record: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
   const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [recordName, setRecordName] = useState('');
-  const [webcamDimensions, setWebcamDimensions] = useState({ width: 0, height: 0, top: 0, left: 0 }); // Store webcam size and position
+  const [webcamDimensions, setWebcamDimensions] = useState({ width: 0, height: 0, top: 0, left: 0 }); 
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -112,12 +112,10 @@ const Record: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
   };
 
   useEffect(() => {
-    // Initialize the canvas once when the component mounts
     const canvas = document.createElement('canvas');
     canvasRef.current = canvas;
   }, []);
 
-  // Update the webcam size and position when it's visible
   useEffect(() => {
     if (isVideoVisible && webcamRef.current) {
       const updateWebcamDimensions = () => {
@@ -129,10 +127,8 @@ const Record: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
         }
       };
 
-      // Initial call to set the dimensions
       updateWebcamDimensions();
 
-      // Add a resize listener to update dimensions when window resizes
       window.addEventListener('resize', updateWebcamDimensions);
 
       return () => {
@@ -147,14 +143,12 @@ const Record: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
         const video = webcamRef.current?.video;
         if (!video || !canvasRef.current) return;
 
-        // Use the existing canvas to capture the video frame
         const canvas = canvasRef.current;
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         const ctx = canvas.getContext('2d');
         ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        // Convert canvas to Base64 encoded image (JPEG format)
         const base64Image = canvas.toDataURL('image/jpeg');
         if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
           const message = JSON.stringify({
@@ -167,7 +161,7 @@ const Record: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
 
       const intervalId = setInterval(captureImage, 50);
 
-      return () => clearInterval(intervalId); // Cleanup when the component unmounts or the video is turned off
+      return () => clearInterval(intervalId); 
     }
   }, [countdown, isVideoVisible, isRecording]);
 
@@ -179,7 +173,6 @@ const Record: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
 
   return (
     <div onClick={handleClick} className="record-container">
-    {/* Webcam video element */}
       <Webcam
         audio={false}
         ref={webcamRef}
@@ -195,17 +188,16 @@ const Record: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
         }}
       />
 
-      {/* Resized and positioned image based on webcam size */}
       {isVideoVisible && (
         <img
           src="/abc350image.png"
           style={{
             position: 'absolute',
-            top: `${webcamDimensions.top}px`, // Align with the webcam's top
-            left: `${webcamDimensions.left}px`, // Align with the webcam's left
-            width: `${webcamDimensions.width}px`, // Match the webcam's width
-            height: `${webcamDimensions.height}px`, // Match the webcam's height
-            objectFit: 'contain', // Maintain aspect ratio
+            top: `${webcamDimensions.top}px`, 
+            left: `${webcamDimensions.left}px`, 
+            width: `${webcamDimensions.width}px`, 
+            height: `${webcamDimensions.height}px`, 
+            objectFit: 'contain', 
           }}
         />
       )}
