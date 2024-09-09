@@ -186,29 +186,31 @@ const App: React.FC = () => {
     const connectWebSocket = () => {
       socketRef.current = new WebSocket('ws://localhost:8765');
 
-    socketRef.current.onopen = () => {
-      console.log('WebSocket connection opened');
-    };
+      socketRef.current.onopen = () => {
+        console.log('WebSocket connection opened');
+        setIsConnected(true);
+      };
 
-    socketRef.current.onclose = () => {
-      console.log('WebSocket connection closed');
-    };
-
-    socketRef.current.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data && data.result && data.function) {
-        setSocketMessage({ result: data.result, function: data.function });
-      }
-    };
       socketRef.current.onclose = () => {
         console.log('WebSocket connection closed');
-        setIsConnected(false); // WebSocket is disconnected
       };
 
-      socketRef.current.onerror = (error) => {
-        console.log('WebSocket error', error);
-        setIsConnected(false); // Treat WebSocket error as disconnected
+      socketRef.current.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data && data.result && data.function) {
+          setSocketMessage({ result: data.result, function: data.function });
+        }
       };
+        socketRef.current.onclose = () => {
+          console.log('WebSocket connection closed');
+          setIsConnected(false); // WebSocket is disconnected
+        };
+
+        socketRef.current.onerror = (error) => {
+          console.log('WebSocket error', error);
+          setIsConnected(false); // Treat WebSocket error as disconnected
+        };
+
     };
 
     // Call connectWebSocket initially
@@ -242,8 +244,8 @@ const App: React.FC = () => {
       <div className="app-container">
         <MenuButton2 />
         <Routes>
-          <Route path="/" element={<Home socketRef={socketRef} socketMessage={socketMessage} />} />
-          <Route path="/record" element={<Record socketRef={socketRef} socketMessage={socketMessage} />} />
+          <Route path="/" element={<Home socketRef={socketRef} socketMessage={socketMessage} isConnected={isConnected}/>} />
+          <Route path="/record" element={<Record socketRef={socketRef} socketMessage={socketMessage} isConnected={isConnected}/>} />
           <Route path="/saved" element={<Saved />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>
