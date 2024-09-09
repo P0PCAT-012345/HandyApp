@@ -5,7 +5,6 @@ import Webcam from 'react-webcam';
 import MenuButton2 from '../components/MenuButton2';
 import Record from '../Record/Record';
 import Saved from '../Saved/Saved';
-import Settings from '../Settings/Settings';
 import LoadingScreen from '../LoadingScreen/LoadingScreen';
 import './App.css';
 
@@ -247,7 +246,6 @@ const App: React.FC = () => {
           <Route path="/" element={<Home socketRef={socketRef} socketMessage={socketMessage} isConnected={isConnected}/>} />
           <Route path="/record" element={<Record socketRef={socketRef} socketMessage={socketMessage} isConnected={isConnected}/>} />
           <Route path="/saved" element={<Saved />} />
-          <Route path="/settings" element={<Settings />} />
         </Routes>
       </div>
     </Router>

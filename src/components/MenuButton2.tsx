@@ -11,7 +11,6 @@ const MenuButton2: React.FC = () => {
           <li><Link to="/" title="translate">Translate</Link></li>
           <li><Link to="/record" title="record">Record new sign</Link></li>
           <li><Link to="/saved" title="view">View recordings</Link></li>
-          <li><Link to="/settings" title="settings">Settings</Link></li>
         </ul>
       </span>
       <span className="cls"></span>
