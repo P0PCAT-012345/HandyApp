@@ -3,14 +3,14 @@
 
 .open {
     position: fixed;
-    top: 40px;
-    right: 40px;
-    width: 50px;
-    height: 50px;
+    top: 80px;
+    right: 80px;
+    width: 100px;
+    height: 100px;
     display: block;
     cursor: pointer;
     transition: opacity 0.2s linear;
-    z-index: 100; /* Set high z-index */
+    z-index: 100; 
 }
 
 .open:hover {
@@ -21,28 +21,28 @@
     display: block;
     float: left;
     clear: both;
-    height: 4px;
-    width: 40px;
-    border-radius: 40px;
+    height: 8px;
+    width: 80px;
+    border-radius: 80px;
     background-color: #fff;
     position: absolute;
-    right: 3px;
-    top: 3px;
+    right: 6px;
+    top: 6px;
     overflow: hidden;
     transition: all 0.4s ease;
 }
 
 .open span:nth-child(1) {
-    margin-top: 10px;
+    margin-top: 20px;
     z-index: 9;
 }
 
 .open span:nth-child(2) {
-    margin-top: 25px;
+    margin-top: 50px;
 }
 
 .open span:nth-child(3) {
-    margin-top: 40px;
+    margin-top: 80px;
 }
 
 .sub-menu {
@@ -63,12 +63,12 @@
     float: right;
     clear: both;
     height: auto;
-    margin-right: -160px;
+    margin-right: -320px;
     transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 .sub-menu li:first-child {
-    margin-top: 180px;
+    margin-top: 360px;
 }
 
 .sub-menu li:nth-child(1) {
@@ -94,18 +94,18 @@
 .sub-menu a {
     color: #fff;
     font-family: 'Product Sans', Arial, Helvetica, sans-serif;
-    font-size: 16px;
+    font-size: 32px;
     width: 100%;
     display: block;
     float: left;
-    line-height: 40px;
+    line-height: 80px;
     text-decoration: none; /* Remove underline */
 }
 
 .open:hover .sub-menu {
     opacity: 1;
-    height: 400px;
-    width: 400px;
+    height: 800px;
+    width: 800px;
 }
 
 .open:hover span:nth-child(2) {
@@ -119,22 +119,22 @@
 }
 
 .open:hover span:nth-child(1) {
-    transform: rotate(45deg) translateY(12px) translateX(12px);
+    transform: rotate(45deg) translateY(24px) translateX(24px);
 }
 
 .open:hover span:nth-child(2) {
-    height: 400px;
-    width: 400px;
-    right: -160px;
-    top: -160px;
+    height: 800px;
+    width: 800px;
+    right: -320px;
+    top: -320px;
     border-radius: 50%;
     background-color: rgba(38, 84, 133, 0.54);
 }
 
 .open:hover span:nth-child(3) {
-    transform: rotate(-45deg) translateY(-10px) translateX(10px);
+    transform: rotate(-45deg) translateY(-20px) translateX(20px);
 }
 
 .open:hover li {
-    margin-right: 168px;
+    margin-right: 336px;
 }

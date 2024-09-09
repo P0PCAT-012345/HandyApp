@@ -11,14 +11,14 @@ const LoadingScreen: React.FC = () => {
       left: 0,
       width: '100%',
       height: '100%',
-      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+      backgroundColor: 'black', 
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
       zIndex: 9999
     }}>
       <l-pinwheel
-        size="50"
+        size="100" 
         stroke="4"
         speed="0.9"
         color="white"

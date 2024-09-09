@@ -66,11 +66,20 @@
   position: relative;
 }
 
-.full-screen-video {
+.video-wrapper {
+  position: relative;
+}
+
+.video-content {
   width: 80%;
   height: 80%;
   border-radius: 10px;
-  transform: scaleX(-1); 
+  transform: scaleX(-1); /* Only flip the video content */
+}
+
+.full-screen-video {
+  width: 100%;
+  height: auto;
 }
 
 .close-button {

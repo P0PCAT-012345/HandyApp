@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { FaPlay } from 'react-icons/fa';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { FaPlay } from 'react-icons/fa';
 import Webcam from 'react-webcam';
 import MenuButton2 from '../components/MenuButton2';
 import Record from '../Record/Record';
 import Saved from '../Saved/Saved';
 import Settings from '../Settings/Settings';
+import LoadingScreen from '../LoadingScreen/LoadingScreen';
 import './App.css';
 
 interface SocketMessageProps {
@@ -16,16 +17,16 @@ interface SocketMessageProps {
 interface HomeProps {
   socketRef: React.MutableRefObject<WebSocket | null>;
   socketMessage: SocketMessageProps | null;
+  isConnected: boolean;
 }
 
-const Home: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
+const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) => {
   const [subtitleText, setSubtitleText] = useState<string>('');
   const [isVideoVisible, setIsVideoVisible] = useState(false);
   const [webcamDimensions, setWebcamDimensions] = useState({ width: 0, height: 0, top: 0, left: 0 }); // Store webcam size and position
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Toggle video visibility
   const handleClick = () => {
     setIsVideoVisible((prev) => !prev);
     const message = JSON.stringify({
@@ -71,7 +72,6 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
     if (isVideoVisible && webcamRef.current && canvasRef.current) {
       const captureImage = () => {
         const video = webcamRef.current?.video;
-
         if (!video) return;
 
         const canvas = canvasRef.current;
@@ -108,7 +108,7 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
 
       return () => clearInterval(intervalId); // Cleanup when the component unmounts or the video is turned off
     }
-  }, [isVideoVisible]);
+  }, [isVideoVisible, socketRef]);
 
   useEffect(() => {
     if (socketMessage && socketMessage.function === 'recieve' && socketMessage.result) {
@@ -122,6 +122,7 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage }) => {
 
   return (
     <div onClick={handleClick} className="home-container">
+      {!isConnected && <LoadingScreen />} {/* Show loading screen if WebSocket is not connected */}
       {/* Webcam video element */}
       <Webcam
         audio={false}
@@ -179,8 +180,11 @@ const App: React.FC = () => {
   const socketRef = useRef<WebSocket | null>(null);
   const [socketMessage, setSocketMessage] = useState<SocketMessageProps | null>(null);
 
+  const [isConnected, setIsConnected] = useState(false); // State to track WebSocket connection status
+
   useEffect(() => {
-    socketRef.current = new WebSocket('ws://localhost:8765');
+    const connectWebSocket = () => {
+      socketRef.current = new WebSocket('ws://localhost:8765');
 
     socketRef.current.onopen = () => {
       console.log('WebSocket connection opened');
@@ -196,11 +200,40 @@ const App: React.FC = () => {
         setSocketMessage({ result: data.result, function: data.function });
       }
     };
+      socketRef.current.onclose = () => {
+        console.log('WebSocket connection closed');
+        setIsConnected(false); // WebSocket is disconnected
+      };
+
+      socketRef.current.onerror = (error) => {
+        console.log('WebSocket error', error);
+        setIsConnected(false); // Treat WebSocket error as disconnected
+      };
+    };
+
+    // Call connectWebSocket initially
+    connectWebSocket();
+
+    // Periodically check the connection status every 5 seconds
+    const intervalId = setInterval(() => {
+      if (socketRef.current) {
+        if (socketRef.current.readyState !== WebSocket.OPEN) {
+          console.log('WebSocket is not connected, attempting to reconnect...');
+          setIsConnected(false); // Set state to show loading screen
+          connectWebSocket(); // Attempt to reconnect
+        }
+      } else {
+        // If WebSocket is null, try reconnecting
+        console.log('WebSocket is null, attempting to reconnect...');
+        connectWebSocket();
+      }
+    }, 5000); // 5000ms = 5 seconds
 
     return () => {
       if (socketRef.current) {
         socketRef.current.close();
       }
+      clearInterval(intervalId); // Clean up interval on component unmount
     };
   }, []);
 
@@ -220,3 +253,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+
