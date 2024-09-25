@@ -1,71 +1,97 @@
-import React, { useState } from 'react';
+// src/Saved/Saved.tsx
+
+import React, { useEffect, useState } from 'react';
 import './Saved.css';
 
-const Saved: React.FC = () => {
-  const [recordings, setRecordings] = useState<{ name: string; url: string }[]>(() => {
-    const savedRecordings = localStorage.getItem('recordings');
-    return savedRecordings ? JSON.parse(savedRecordings) : [];
-  });
-  const [selectedRecording, setSelectedRecording] = useState<string | null>(null);
+interface SavedItem {
+  name: string;
+  timestamp: string;
+  video: string; // URL to the video file
+}
 
-  const handleRecordingClick = (url: string) => {
-    setSelectedRecording(url);
+interface SavedProps {
+  socketRef: React.MutableRefObject<WebSocket | null>;
+  isConnected: boolean;
+}
+
+const Saved: React.FC<SavedProps> = ({ socketRef, isConnected }) => {
+  const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (socketRef.current && isConnected) {
+      // Request the list of saved items
+      const requestList = JSON.stringify({ function: 'list_saved' });
+      socketRef.current.send(requestList);
+
+      const handleMessage = (event: MessageEvent) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.function === 'list_saved' && data.result) {
+            setSavedItems(data.result);
+            setIsLoading(false);
+          } else if (data.error) {
+            setError(data.error);
+            setIsLoading(false);
+          }
+        } catch (err) {
+          console.error("Failed to parse message in Saved component:", err);
+          setError("Failed to parse server response.");
+          setIsLoading(false);
+        }
+      };
+
+      socketRef.current.addEventListener('message', handleMessage);
+
+      return () => {
+        if (socketRef.current) {
+          socketRef.current.removeEventListener('message', handleMessage);
+        }
+      };
+    }
+  }, [socketRef, isConnected]);
+
+  const handleDelete = (item: SavedItem) => {
+    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+      const deleteMessage = JSON.stringify({
+        function: 'delete_saved',
+        kwargs: { 
+          name: item.name,
+          timestamp: item.timestamp
+        },
+      });
+      socketRef.current.send(deleteMessage);
+      // Optimistically update the UI
+      setSavedItems(prev => prev.filter(i => !(i.name === item.name && i.timestamp === item.timestamp)));
+    }
   };
 
-  const handleDeleteRecording = (index: number) => {
-    const updatedRecordings = recordings.filter((_, i) => i !== index);
-    setRecordings(updatedRecordings);
-    localStorage.setItem('recordings', JSON.stringify(updatedRecordings));
-  };
+  if (isLoading) {
+    return <div className="saved-container"><p>Loading...</p></div>;
+  }
 
-  const handleDownloadRecording = (url: string, name: string) => {
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${name}.webm`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  };
-
-  const handleCloseVideo = () => {
-    setSelectedRecording(null);
-  };
+  if (error) {
+    return <div className="saved-container"><p>Error: {error}</p></div>;
+  }
 
   return (
     <div className="saved-container">
-      <h1>Saved Recordings</h1>
-      {recordings.length > 0 ? (
-        <ul>
-          {recordings.map((recording, index) => (
-            <li key={index} className="recording-item">
-              <span onClick={() => handleRecordingClick(recording.url)}>
-                {recording.name}
-              </span>
-              <button className="delete-button" onClick={() => handleDeleteRecording(index)}>
-                Delete
-              </button>
-              <button
-                className="download-button"
-                onClick={() => handleDownloadRecording(recording.url, recording.name)}
-              >
-                Download
-              </button>
-            </li>
-          ))}
-        </ul>
+      <h1>保存された手話</h1>
+      {savedItems.length === 0 ? (
+        <p>保存された手話がありません。</p>
       ) : (
-        <p>No recordings saved.</p>
-      )}
-      {selectedRecording && (
-        <div className="video-overlay" onClick={handleCloseVideo}>
-          <div className="video-container" onClick={(e) => e.stopPropagation()}>
-            <button className="close-button" onClick={handleCloseVideo}>
-              X
-            </button>
-            <div className="video-wrapper">
-              <video src={selectedRecording} controls autoPlay className="video-content" />
+        <div className="album">
+          {savedItems.map((item, index) => (
+            <div key={`${item.name}-${item.timestamp}-${index}`} className="album-item">
+              <h3>{item.name}</h3>
+              <video width="320" height="240" controls>
+                <source src={`http://localhost:8000${item.video}`} type="video/webm" />
+                Your browser does not support the video tag.
+              </video>
+              <button onClick={() => handleDelete(item)}>削除する</button>
             </div>
-          </div>
+          ))}
         </div>
       )}
     </div>

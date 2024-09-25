@@ -1,3 +1,5 @@
+# server/main.py
+
 import numpy as np
 import torch
 from model import get_model
@@ -6,11 +8,13 @@ import glob
 import os
 import cv2
 import mediapipe as mp
-import numpy as np
 import base64
 import time
 import datetime
+import warnings
 
+# Suppress deprecation warnings from protobuf
+warnings.filterwarnings("ignore", category=UserWarning, module='google.protobuf')
 
 class Session:
     def __init__(self):
@@ -39,19 +43,31 @@ class Session:
                         if len(data.shape) == 2 and data.shape[1] == 256:
                             self.database.append((folder_name, data))
 
-        print("Initialized with database of length:",len(self.database))
+        print("Initialized with database of length:", len(self.database))
 
-        self.functions = {'recieve': self.recieve, 'stop_recording': self.stop_recording, 'reset_data': self.reset_data, 'record': self.record}
+        self.functions = {
+            'recieve': self.recieve,
+            'stop_recording': self.stop_recording,
+            'reset_data': self.reset_data,
+            'record': self.record,
+            'list_saved': self.list_saved,
+            'delete_saved': self.delete_saved,
+            'mouth_open': self.mouth_open
+        }
 
     def decode_image(self, base64_data):
-        if base64_data.startswith('data:image/jpeg;base64,'):
-            base64_data = base64_data.split(',')[1]
+        try:
+            if base64_data.startswith('data:image/jpeg;base64,'):
+                base64_data = base64_data.split(',')[1]
 
-        image_data = base64.b64decode(base64_data)
-        nparr = np.frombuffer(image_data, np.uint8)
-        image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+            image_data = base64.b64decode(base64_data)
+            nparr = np.frombuffer(image_data, np.uint8)
+            image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
-        return image
+            return image
+        except Exception as e:
+            print(f"Error decoding image: {e}")
+            return None
 
     def convert_mediapipe(self, image):
         try:
@@ -90,14 +106,18 @@ class Session:
             return np.zeros((42, 3))
 
     def getEmbedding(self, landmarks):
-        input = torch.tensor(np.array(landmarks), dtype=torch.float32, device=self.device).unsqueeze(0)
-        output = self.model(input).squeeze(0).detach().cpu().numpy()
-        return output
+        try:
+            input_tensor = torch.tensor(np.array(landmarks), dtype=torch.float32, device=self.device).unsqueeze(0)
+            output = self.model(input_tensor).squeeze(0).detach().cpu().numpy()
+            return output
+        except Exception as e:
+            print(f"Error getting embedding: {e}")
+            return np.zeros(256)  # Assuming embedding size is 256
 
     def recieve(self, frame, mode="translate"):
         current_landmarks = self.convert_mediapipe(self.decode_image(frame))
         self.hand_landmarks.append(current_landmarks)
-        if mode=='translate':
+        if mode == 'translate':
             if len(self.hand_landmarks) == 30 and len(self.database) > 0:
                 np.save('server/database/mostrecent.npy', np.array(self.hand_landmarks))
                 output = self.getEmbedding(self.hand_landmarks)
@@ -109,11 +129,10 @@ class Session:
                     if self.refreshCount == 4:
                         self.curr_sentence.clear()
                         self.refreshCount = 0
-                    
+
                     self.hand_landmarks = []
                     return 'No match found'
-                        
-                
+
                 if self.lastWord != sequence[0]:
                     self.curr_sentence.append(sequence[0])
                     self.lastWord = sequence[-1]
@@ -121,15 +140,16 @@ class Session:
 
                 for word in sequence[1:]:
                     self.curr_sentence.append(word)
-                
+
                 if len(self.curr_sentence) > 15:
                     self.curr_sentence.pop(0)
                 return ' '.join(self.curr_sentence)
-        
 
-        if mode=='record':
+        if mode == 'record':
             if self.mouth_open(frame):
                 return True
+
+        return False
 
     def reset_data(self):
         self.curr_sentence.clear()
@@ -143,45 +163,122 @@ class Session:
     def record(self, frame):
         return 'MOUTH_OPEN_TRUE' if self.recieve(frame, mode='record') else None
 
-    def stop_recording(self, name):
+    def stop_recording(self, name, video_data=None):
         embeddings = self.getEmbedding(self.hand_landmarks)
         directory_path = f'server/database/{name}'
-        
+
         os.makedirs(directory_path, exist_ok=True)
-        
+
         timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-        filename = f'{timestamp}.npy'
-        
-        file_path = os.path.join(directory_path, filename)
-        np.save(file_path, embeddings)
-        
-        print(f"Embeddings saved for {name} at {file_path}")
-        
+        filename_npy = f'{timestamp}.npy'
+        filename_video = f'{timestamp}.webm'  # You can choose a different format if preferred
+        file_path_npy = os.path.join(directory_path, filename_npy)
+        file_path_video = os.path.join(directory_path, filename_video)
+
+        # Save the .npy file
+        try:
+            np.save(file_path_npy, embeddings)
+            print(f"Embeddings saved for {name} at {file_path_npy}")
+        except Exception as e:
+            print(f"Failed to save embeddings: {e}")
+
+        # Save the video file if video_data is provided
+        if video_data:
+            try:
+                video_bytes = base64.b64decode(video_data)
+                with open(file_path_video, 'wb') as f:
+                    f.write(video_bytes)
+                print(f"Video saved for {name} at {file_path_video}")
+            except Exception as e:
+                print(f"Failed to save video: {e}")
+
+        # Clear landmarks after saving
+        self.hand_landmarks = []
+
+        # Optionally, add the new embedding to the database
         self.database.append((name, embeddings))
 
+    def list_saved(self):
+        saved = []
+        for folder_name in os.listdir("server/database"):
+            folder_path = os.path.join("server/database", folder_name)
+            if os.path.isdir(folder_path):
+                for file_name in os.listdir(folder_path):
+                    if file_name.endswith('.npy'):
+                        timestamp = file_name[:-4]
+                        video_filename = f"{timestamp}.webm"  # Ensure this matches the saved video format
+                        video_path = os.path.join(folder_path, video_filename)
+                        if os.path.exists(video_path):
+                            saved.append({
+                                "name": folder_name,
+                                "timestamp": timestamp,
+                                "video": f"/database/{folder_name}/{video_filename}"
+                            })
+        return saved
+
+    def delete_saved(self, name, timestamp):
+        directory_path = f'server/database/{name}'
+        filename_npy = f'{timestamp}.npy'
+        filename_video = f'{timestamp}.webm'
+        file_path_npy = os.path.join(directory_path, filename_npy)
+        file_path_video = os.path.join(directory_path, filename_video)
+        try:
+            if os.path.exists(file_path_npy):
+                os.remove(file_path_npy)
+                print(f"Deleted {file_path_npy}")
+            if os.path.exists(file_path_video):
+                os.remove(file_path_video)
+                print(f"Deleted {file_path_video}")
+            return "Deleted successfully"
+        except Exception as e:
+            return f"Error deleting files: {e}"
+
     def mouth_open(self, frame):
+        """
+        Detects if the mouth is open in the given frame.
+        Args:
+            frame (str): Base64-encoded image string.
+        Returns:
+            bool: True if mouth is open, False otherwise.
+        """
         image = self.decode_image(frame)
         if image is None:
-            raise ValueError("Decoded image is None. Check if the base64 input is correct.")
-        
-        image_np = np.array(image)
-        image_rgb = cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
+            return False
+
+        # Convert the image to RGB as Mediapipe expects RGB images
+        image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        # Process the image to detect face landmarks
         results = self.face_mesh.process(image_rgb)
 
         if results.multi_face_landmarks:
             for face_landmarks in results.multi_face_landmarks:
-                top_lip_landmarks = [13, 14]
-                bottom_lip_landmarks = [17, 18]
-                left_mouth_corner = 61
-                right_mouth_corner = 291
+                # Define landmarks for upper and lower lips
+                # Mediapipe Face Mesh landmarks:
+                # Upper lip: landmarks 13, 14, 15
+                # Lower lip: landmarks 17, 18, 19
+                upper_lip = [
+                    face_landmarks.landmark[13].y,
+                    face_landmarks.landmark[14].y,
+                    face_landmarks.landmark[15].y
+                ]
+                lower_lip = [
+                    face_landmarks.landmark[17].y,
+                    face_landmarks.landmark[18].y,
+                    face_landmarks.landmark[19].y
+                ]
 
-                top_lip_y = np.mean([face_landmarks.landmark[i].y for i in top_lip_landmarks])
-                bottom_lip_y = np.mean([face_landmarks.landmark[i].y for i in bottom_lip_landmarks])
+                # Calculate average y-coordinate for upper and lower lips
+                upper_avg = sum(upper_lip) / len(upper_lip)
+                lower_avg = sum(lower_lip) / len(lower_lip)
 
-                left_corner = face_landmarks.landmark[left_mouth_corner]
-                right_corner = face_landmarks.landmark[right_mouth_corner]
-                mouth_width = np.abs(right_corner.x - left_corner.x)
+                # Calculate the distance between upper and lower lips
+                lip_distance = lower_avg - upper_avg
 
-                mouth_open_threshold = mouth_width * 0.5  
-                return (bottom_lip_y - top_lip_y) > mouth_open_threshold
-
+                # Define a threshold for mouth openness
+                # This threshold may need adjustment based on your specific use case
+                print(lip_distance)
+                if lip_distance < 0.001:
+                    print("Failed to save embeddings: Mouth open")
+                    return True
+        return False

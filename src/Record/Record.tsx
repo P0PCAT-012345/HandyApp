@@ -1,3 +1,5 @@
+// src/Record/Record.tsx
+
 import React, { useEffect, useRef, useState } from 'react';
 import { FaRecordVinyl } from 'react-icons/fa';
 import './Record.css';
@@ -9,13 +11,13 @@ interface SocketMessageProps {
   function: string;
 }
 
-interface HomeProps {
+interface RecordProps {
   socketRef: React.MutableRefObject<WebSocket | null>;
   socketMessage: SocketMessageProps | null;
   isConnected: boolean;
 }
 
-const Record: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) => {
+const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }) => {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const [isVideoVisible, setIsVideoVisible] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
@@ -77,27 +79,29 @@ const Record: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) 
   };
 
   const handleSaveRecording = () => {
-    console.log(recordName);
-    if (recordName && socketRef.current) {
-      const message = JSON.stringify({
-        function: 'stop_recording',
-        kwargs: { name: recordName },
-      });
-
-      socketRef.current.send(message);
-    }
-
     if (recordName && recordedChunks.length > 0) {
       const blob = new Blob(recordedChunks, { type: 'video/webm' });
       const reader = new FileReader();
-      console.log('blob ready');
+
       reader.onloadend = () => {
-        console.log('Reading');
-        const base64data = reader.result;
-        console.log('Data ready');
-        if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-          console.log('Socket ready');
+        const base64data = (reader.result as string).split(',')[1]; // Remove the data URL part
+        const message = JSON.stringify({
+          function: 'stop_recording',
+          kwargs: { 
+            name: recordName,
+            video_data: base64data
+          },
+        });
+
+        // Assign socketRef.current to a local variable after ensuring it's not null
+        const socket = socketRef.current;
+        if (socket) {
+          socket.send(message);
+        } else {
+          console.error("WebSocket is not connected.");
+          // Optionally, display an error message to the user here
         }
+
         resetState();
       };
 
@@ -173,7 +177,6 @@ const Record: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) 
   }, [socketMessage]);
 
   return (
-    
     <div onClick={handleClick} className="record-container">
       {!isConnected && <LoadingScreen />}
       <Webcam
@@ -196,12 +199,13 @@ const Record: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) 
           src="/abc350image.png"
           style={{
             position: 'absolute',
-            top: `${webcamDimensions.top}px`, 
-            left: `${webcamDimensions.left}px`, 
-            width: `${webcamDimensions.width}px`, 
-            height: `${webcamDimensions.height}px`, 
-            objectFit: 'contain', 
+            top: `${webcamDimensions.top}px`,
+            left: `${webcamDimensions.left}px`,
+            width: `${webcamDimensions.width}px`,
+            height: `${webcamDimensions.height}px`,
+            objectFit: 'contain',
           }}
+          alt="Overlay"
         />
       )}
 

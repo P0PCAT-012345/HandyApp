@@ -1,3 +1,5 @@
+/* src/Record/Record.css */
+
 html, body {
   margin: 0;
   padding: 0;
@@ -78,6 +80,7 @@ html, body {
   font-size: 48px;
   color: white;
 }
+
 .save-overlay {
   display: flex;
   flex-direction: column;

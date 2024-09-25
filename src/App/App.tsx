@@ -1,3 +1,5 @@
+// src/App/App.tsx
+
 import React, { useEffect, useRef, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { FaPlay } from 'react-icons/fa';
@@ -139,6 +141,7 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
             height: `${webcamDimensions.height}px`,
             objectFit: 'contain',
           }}
+          alt="Overlay"
         />
       )}
 
@@ -167,7 +170,6 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
 const App: React.FC = () => {
   const socketRef = useRef<WebSocket | null>(null);
   const [socketMessage, setSocketMessage] = useState<SocketMessageProps | null>(null);
-
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
@@ -176,25 +178,29 @@ const App: React.FC = () => {
 
       socketRef.current.onopen = () => {
         setIsConnected(true);
-      };
-
-      socketRef.current.onclose = () => {
+        console.log("WebSocket connected");
       };
 
       socketRef.current.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data && data.result && data.function) {
-          setSocketMessage({ result: data.result, function: data.function });
+        try {
+          const data = JSON.parse(event.data);
+          if (data && data.result && data.function) {
+            setSocketMessage({ result: data.result, function: data.function });
+          }
+        } catch (error) {
+          console.error("Failed to parse WebSocket message:", error);
         }
       };
-        socketRef.current.onclose = () => {
-          setIsConnected(false);
-        };
 
-        socketRef.current.onerror = (error) => {
-          setIsConnected(false);
-        };
+      socketRef.current.onclose = () => {
+        setIsConnected(false);
+        console.log("WebSocket disconnected");
+      };
 
+      socketRef.current.onerror = (error) => {
+        setIsConnected(false);
+        console.error("WebSocket error:", error);
+      };
     };
 
     connectWebSocket();
@@ -202,11 +208,11 @@ const App: React.FC = () => {
     const intervalId = setInterval(() => {
       if (socketRef.current) {
         if (socketRef.current.readyState !== WebSocket.OPEN) {
-          setIsConnected(false);
+          console.log("WebSocket not open, attempting to reconnect...");
           connectWebSocket();
         }
       } else {
-        console.log('WebSocket is null, attempting to reconnect...');
+        console.log("WebSocket is null, attempting to reconnect...");
         connectWebSocket();
       }
     }, 5000);
@@ -224,9 +230,35 @@ const App: React.FC = () => {
       <div className="app-container">
         <MenuButton2 />
         <Routes>
-          <Route path="/" element={<Home socketRef={socketRef} socketMessage={socketMessage} isConnected={isConnected}/>} />
-          <Route path="/record" element={<Record socketRef={socketRef} socketMessage={socketMessage} isConnected={isConnected}/>} />
-          <Route path="/saved" element={<Saved />} />
+          <Route
+            path="/"
+            element={
+              <Home
+                socketRef={socketRef}
+                socketMessage={socketMessage}
+                isConnected={isConnected}
+              />
+            }
+          />
+          <Route
+            path="/record"
+            element={
+              <Record
+                socketRef={socketRef}
+                socketMessage={socketMessage}
+                isConnected={isConnected}
+              />
+            }
+          />
+          <Route
+            path="/saved"
+            element={
+              <Saved
+                socketRef={socketRef}
+                isConnected={isConnected}
+              />
+            }
+          />
         </Routes>
       </div>
     </Router>

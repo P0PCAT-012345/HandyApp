@@ -1,3 +1,5 @@
+/* src/components/MenuButton2.css */
+
 @import url('https://fonts.googleapis.com/css2?family=Product+Sans&display=swap');
 
 .open {
@@ -64,6 +66,7 @@
     height: auto;
     margin-right: -220px;
     transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    margin-bottom: 20px; /* Ensure consistent spacing */
 }
 
 .sub-menu li:first-child {
@@ -94,17 +97,6 @@
     padding-left: 10px;
     margin-top: 30px; 
 }
-
-.sub-menu li {
-    display: block;
-    float: right;
-    clear: both;
-    height: auto;
-    margin-right: -220px;
-    margin-bottom: 20px; 
-    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
 
 .open:hover .sub-menu {
     opacity: 1;
