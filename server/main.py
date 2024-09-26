@@ -234,51 +234,27 @@ class Session:
             return f"Error deleting files: {e}"
 
     def mouth_open(self, frame):
-        """
-        Detects if the mouth is open in the given frame.
-        Args:
-            frame (str): Base64-encoded image string.
-        Returns:
-            bool: True if mouth is open, False otherwise.
-        """
         image = self.decode_image(frame)
         if image is None:
-            return False
-
-        # Convert the image to RGB as Mediapipe expects RGB images
-        image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
-        # Process the image to detect face landmarks
+            raise ValueError("Decoded image is None. Check if the base64 input is correct.")
+        
+        image_np = np.array(image)
+        image_rgb = cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
         results = self.face_mesh.process(image_rgb)
 
         if results.multi_face_landmarks:
             for face_landmarks in results.multi_face_landmarks:
-                # Define landmarks for upper and lower lips
-                # Mediapipe Face Mesh landmarks:
-                # Upper lip: landmarks 13, 14, 15
-                # Lower lip: landmarks 17, 18, 19
-                upper_lip = [
-                    face_landmarks.landmark[13].y,
-                    face_landmarks.landmark[14].y,
-                    face_landmarks.landmark[15].y
-                ]
-                lower_lip = [
-                    face_landmarks.landmark[17].y,
-                    face_landmarks.landmark[18].y,
-                    face_landmarks.landmark[19].y
-                ]
+                top_lip_landmarks = [13, 14]
+                bottom_lip_landmarks = [17, 18]
+                left_mouth_corner = 61
+                right_mouth_corner = 291
 
-                # Calculate average y-coordinate for upper and lower lips
-                upper_avg = sum(upper_lip) / len(upper_lip)
-                lower_avg = sum(lower_lip) / len(lower_lip)
+                top_lip_y = np.mean([face_landmarks.landmark[i].y for i in top_lip_landmarks])
+                bottom_lip_y = np.mean([face_landmarks.landmark[i].y for i in bottom_lip_landmarks])
 
-                # Calculate the distance between upper and lower lips
-                lip_distance = lower_avg - upper_avg
+                left_corner = face_landmarks.landmark[left_mouth_corner]
+                right_corner = face_landmarks.landmark[right_mouth_corner]
+                mouth_width = np.abs(right_corner.x - left_corner.x)
 
-                # Define a threshold for mouth openness
-                # This threshold may need adjustment based on your specific use case
-                print(lip_distance)
-                if lip_distance < 0.001:
-                    print("Failed to save embeddings: Mouth open")
-                    return True
-        return False
+                mouth_open_threshold = mouth_width * 0.5  
+                return (bottom_lip_y - top_lip_y) > mouth_open_threshold

@@ -1,12 +1,40 @@
 // src/Saved/Saved.tsx
 
 import React, { useEffect, useState } from 'react';
+import {
+  Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Typography,
+  IconButton,
+  Menu,
+  MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  InputAdornment,
+  CircularProgress,
+} from '@mui/material';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import DeleteIcon from '@mui/icons-material/Delete';
+import DownloadIcon from '@mui/icons-material/Download';
+import SearchIcon from '@mui/icons-material/Search';
+import CloseIcon from '@mui/icons-material/Close';
 import './Saved.css';
 
 interface SavedItem {
   name: string;
-  timestamp: string;
+  timestamp: string; // ISO date string
   video: string; // URL to the video file
+  length: string; // Duration in format "mm:ss"
 }
 
 interface SavedProps {
@@ -16,12 +44,18 @@ interface SavedProps {
 
 const Saved: React.FC<SavedProps> = ({ socketRef, isConnected }) => {
   const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
+  const [filteredItems, setFilteredItems] = useState<SavedItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedItem, setSelectedItem] = useState<SavedItem | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [menuItem, setMenuItem] = useState<SavedItem | null>(null);
 
   useEffect(() => {
     if (socketRef.current && isConnected) {
-      // Request the list of saved items
       const requestList = JSON.stringify({ function: 'list_saved' });
       socketRef.current.send(requestList);
 
@@ -30,14 +64,15 @@ const Saved: React.FC<SavedProps> = ({ socketRef, isConnected }) => {
           const data = JSON.parse(event.data);
           if (data.function === 'list_saved' && data.result) {
             setSavedItems(data.result);
+            setFilteredItems(data.result);
             setIsLoading(false);
           } else if (data.error) {
             setError(data.error);
             setIsLoading(false);
           }
         } catch (err) {
-          console.error("Failed to parse message in Saved component:", err);
-          setError("Failed to parse server response.");
+          console.error('Failed to parse message in Saved component:', err);
+          setError('Failed to parse server response.');
           setIsLoading(false);
         }
       };
@@ -52,49 +87,240 @@ const Saved: React.FC<SavedProps> = ({ socketRef, isConnected }) => {
     }
   }, [socketRef, isConnected]);
 
-  const handleDelete = (item: SavedItem) => {
-    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-      const deleteMessage = JSON.stringify({
-        function: 'delete_saved',
-        kwargs: { 
-          name: item.name,
-          timestamp: item.timestamp
-        },
-      });
-      socketRef.current.send(deleteMessage);
-      // Optimistically update the UI
-      setSavedItems(prev => prev.filter(i => !(i.name === item.name && i.timestamp === item.timestamp)));
+  useEffect(() => {
+    if (searchQuery.trim() === '') {
+      setFilteredItems(savedItems);
+    } else {
+      const lowerCaseQuery = searchQuery.toLowerCase();
+      setFilteredItems(
+        savedItems.filter((item) =>
+          item.name.toLowerCase().includes(lowerCaseQuery)
+        )
+      );
     }
+  }, [searchQuery, savedItems]);
+
+  const handleDelete = (item: SavedItem) => {
+    if (window.confirm(`Are you sure you want to delete "${item.name}"?`)) {
+      if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+        const deleteMessage = JSON.stringify({
+          function: 'delete_saved',
+          kwargs: {
+            name: item.name,
+            timestamp: item.timestamp,
+          },
+        });
+        socketRef.current.send(deleteMessage);
+        setSavedItems((prev) =>
+          prev.filter(
+            (i) => !(i.name === item.name && i.timestamp === item.timestamp)
+          )
+        );
+        setFilteredItems((prev) =>
+          prev.filter(
+            (i) => !(i.name === item.name && i.timestamp === item.timestamp)
+          )
+        );
+      }
+    }
+    handleMenuClose();
   };
 
+  const handleDownload = (item: SavedItem) => {
+    const link = document.createElement('a');
+    link.href = `http://localhost:8000${item.video}`;
+    link.download = `${item.name}.webm`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    handleMenuClose();
+  };
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>, item: SavedItem) => {
+    setAnchorEl(event.currentTarget);
+    setMenuItem(item);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setMenuItem(null);
+  };
+
+  const openModal = (item: SavedItem) => {
+    setSelectedItem(item);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setSelectedItem(null);
+    setIsModalOpen(false);
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isModalOpen) {
+        closeModal();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isModalOpen]);
+
   if (isLoading) {
-    return <div className="saved-container"><p>Loading...</p></div>;
+    return (
+      <Box className="saved-container" display="flex" justifyContent="center" alignItems="center">
+        <CircularProgress />
+      </Box>
+    );
   }
 
   if (error) {
-    return <div className="saved-container"><p>Error: {error}</p></div>;
+    return (
+      <Box className="saved-container">
+        <Typography variant="h6" color="error">
+          Error: {error}
+        </Typography>
+      </Box>
+    );
   }
 
   return (
-    <div className="saved-container">
-      <h1>保存された手話</h1>
-      {savedItems.length === 0 ? (
-        <p>保存された手話がありません。</p>
-      ) : (
-        <div className="album">
-          {savedItems.map((item, index) => (
-            <div key={`${item.name}-${item.timestamp}-${index}`} className="album-item">
-              <h3>{item.name}</h3>
-              <video width="320" height="240" controls>
-                <source src={`http://localhost:8000${item.video}`} type="video/webm" />
-                Your browser does not support the video tag.
-              </video>
-              <button onClick={() => handleDelete(item)}>削除する</button>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+    <Box className="saved-container">
+      <Typography variant="h4" className="saved-title">
+        保存された手話
+      </Typography>
+      <Box className="search-bar">
+        <TextField
+          placeholder="検索..."
+          variant="outlined"
+          size="small"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          fullWidth
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          }}
+        />
+      </Box>
+      <TableContainer component={Paper} className="table-container">
+        <Table aria-label="saved signs table">
+          <TableHead>
+            <TableRow>
+              <TableCell className="table-header-cell">名前</TableCell>
+              <TableCell className="table-header-cell">長さ</TableCell>
+              <TableCell className="table-header-cell">日付</TableCell>
+              <TableCell className="table-header-cell" align="right">
+                アクション
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredItems.map((item, index) => (
+              <TableRow key={`${item.name}-${item.timestamp}-${index}`} className="table-row">
+                <TableCell className="table-cell">
+                  <Button
+                    onClick={() => openModal(item)}
+                    className="name-button"
+                  >
+                    {item.name}
+                  </Button>
+                </TableCell>
+                <TableCell className="table-cell">{item.length}</TableCell>
+                <TableCell className="table-cell">
+                  {new Date(item.timestamp).toLocaleDateString()}
+                </TableCell>
+                <TableCell className="table-cell" align="right">
+                  <IconButton
+                    aria-controls={menuItem === item ? 'actions-menu' : undefined}
+                    aria-haspopup="true"
+                    aria-expanded={menuItem === item ? 'true' : undefined}
+                    onClick={(e) => handleMenuOpen(e, item)}
+                  >
+                    <MoreVertIcon />
+                  </IconButton>
+                  <Menu
+                    id="actions-menu"
+                    anchorEl={anchorEl}
+                    open={menuItem === item}
+                    onClose={handleMenuClose}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'right',
+                    }}
+                    transformOrigin={{
+                      vertical: 'top',
+                      horizontal: 'right',
+                    }}
+                    disableScrollLock
+                  >
+                    <MenuItem onClick={() => handleDownload(item)}>
+                      <DownloadIcon fontSize="small" style={{ marginRight: '8px' }} />
+                      ダウンロード
+                    </MenuItem>
+                    <MenuItem onClick={() => handleDelete(item)}>
+                      <DeleteIcon fontSize="small" style={{ marginRight: '8px' }} />
+                      削除する
+                    </MenuItem>
+                  </Menu>
+                </TableCell>
+              </TableRow>
+            ))}
+            {filteredItems.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={4} align="center">
+                  <Typography variant="body1">保存された手話がありません。</Typography>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <Dialog
+        open={isModalOpen}
+        onClose={closeModal}
+        maxWidth="md"
+        fullWidth
+        aria-labelledby="video-preview-title"
+      >
+        <DialogTitle id="video-preview-title">
+          {selectedItem?.name} - プレビュー
+          <IconButton
+            aria-label="close"
+            onClick={closeModal}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500],
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
+          {selectedItem && (
+            <video
+              width="100%"
+              height="auto"
+              controls
+              src={`http://localhost:8000${selectedItem.video}`}
+            >
+              Your browser does not support the video tag.
+            </video>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeModal} color="primary">
+            閉じる
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 };
 
