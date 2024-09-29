@@ -1,6 +1,6 @@
 // src/Saved/Saved.tsx
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   Box,
   Table,
@@ -28,13 +28,13 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import DownloadIcon from '@mui/icons-material/Download';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
+import LoadingScreen from '../LoadingScreen/LoadingScreen';
 import './Saved.css';
 
 interface SavedItem {
   name: string;
-  timestamp: string; // ISO date string
-  video: string; // URL to the video file
-  length: string; // Duration in format "mm:ss"
+  timestamp: string;
+  video: string; // Array to store video chunks
 }
 
 interface SavedProps {
@@ -54,51 +54,66 @@ const Saved: React.FC<SavedProps> = ({ socketRef, isConnected }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [menuItem, setMenuItem] = useState<SavedItem | null>(null);
 
-  useEffect(() => {
-    if (socketRef.current && isConnected) {
-      const requestList = JSON.stringify({ function: 'list_saved' });
-      socketRef.current.send(requestList);
+  // Ref to track if initialization has occurred
+  const hasInitialized = useRef(false);
 
-      const handleMessage = (event: MessageEvent) => {
-        try {
-          const data = JSON.parse(event.data);
-          if (data.function === 'list_saved' && data.result) {
-            setSavedItems(data.result);
-            setFilteredItems(data.result);
+  useEffect(() => {
+    if (!isConnected) {hasInitialized.current = false;}
+    if (!isConnected || !socketRef.current || hasInitialized.current) return;
+  
+    hasInitialized.current = true;
+  
+    const requestList = JSON.stringify({ function: 'list_saved' });
+    socketRef.current.send(requestList);
+  
+    const newSavedItems: SavedItem[] = [];
+    const chunks: { [key: string]: string[] } = {};
+  
+    const handleMessage = (event: MessageEvent) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.function === 'list_saved' && data.result) {
+          if ("finished" in data.result) {
+            setSavedItems(newSavedItems);
+            setFilteredItems(newSavedItems);
             setIsLoading(false);
-          } else if (data.error) {
-            setError(data.error);
-            setIsLoading(false);
+          } else {
+            const { name, timestamp, chunk } = data.result;
+            const key = `${name}_${timestamp}`;
+  
+            if (!chunks[key]) {
+              chunks[key] = [];
+            }
+  
+            if (chunk === null) {
+              const videoData = chunks[key].join('');
+              const savedItem = {
+                name,
+                timestamp,
+                video: videoData,
+              };
+  
+              newSavedItems.push(savedItem);
+              delete chunks[key];
+            } else {
+              chunks[key].push(chunk);
+            }
           }
-        } catch (err) {
-          console.error('Failed to parse message in Saved component:', err);
-          setError('Failed to parse server response.');
+        } else if (data.error) {
+          setError(data.error);
           setIsLoading(false);
         }
-      };
+      } catch (err) {
+        console.error('Failed to parse message in Saved component:', err);
+        setError('Failed to parse server response.');
+        setIsLoading(false);
+      }
+    };
+  
+    socketRef.current.removeEventListener('message', handleMessage);
+    socketRef.current.addEventListener('message', handleMessage);
 
-      socketRef.current.addEventListener('message', handleMessage);
-
-      return () => {
-        if (socketRef.current) {
-          socketRef.current.removeEventListener('message', handleMessage);
-        }
-      };
-    }
-  }, [socketRef, isConnected]);
-
-  useEffect(() => {
-    if (searchQuery.trim() === '') {
-      setFilteredItems(savedItems);
-    } else {
-      const lowerCaseQuery = searchQuery.toLowerCase();
-      setFilteredItems(
-        savedItems.filter((item) =>
-          item.name.toLowerCase().includes(lowerCaseQuery)
-        )
-      );
-    }
-  }, [searchQuery, savedItems]);
+  }, [isConnected, socketRef]);
 
   const handleDelete = (item: SavedItem) => {
     if (window.confirm(`Are you sure you want to delete "${item.name}"?`)) {
@@ -128,7 +143,7 @@ const Saved: React.FC<SavedProps> = ({ socketRef, isConnected }) => {
 
   const handleDownload = (item: SavedItem) => {
     const link = document.createElement('a');
-    link.href = `http://localhost:8000${item.video}`;
+    link.href = `data:video/webm;base64,${item.video}`;
     link.download = `${item.name}.webm`;
     document.body.appendChild(link);
     link.click();
@@ -185,6 +200,8 @@ const Saved: React.FC<SavedProps> = ({ socketRef, isConnected }) => {
   }
 
   return (
+    <>
+    {!isConnected && <LoadingScreen />}
     <Box className="saved-container">
       <Typography variant="h4" className="saved-title">
         保存された手話
@@ -211,8 +228,6 @@ const Saved: React.FC<SavedProps> = ({ socketRef, isConnected }) => {
           <TableHead>
             <TableRow>
               <TableCell className="table-header-cell">名前</TableCell>
-              <TableCell className="table-header-cell">長さ</TableCell>
-              <TableCell className="table-header-cell">日付</TableCell>
               <TableCell className="table-header-cell" align="right">
                 アクション
               </TableCell>
@@ -228,10 +243,6 @@ const Saved: React.FC<SavedProps> = ({ socketRef, isConnected }) => {
                   >
                     {item.name}
                   </Button>
-                </TableCell>
-                <TableCell className="table-cell">{item.length}</TableCell>
-                <TableCell className="table-cell">
-                  {new Date(item.timestamp).toLocaleDateString()}
                 </TableCell>
                 <TableCell className="table-cell" align="right">
                   <IconButton
@@ -303,13 +314,12 @@ const Saved: React.FC<SavedProps> = ({ socketRef, isConnected }) => {
           </IconButton>
         </DialogTitle>
         <DialogContent dividers>
-          {selectedItem && (
-            <video
-              width="100%"
-              height="auto"
-              controls
-              src={`http://localhost:8000${selectedItem.video}`}
-            >
+        {selectedItem && (
+            <video controls>
+              <source
+                src={`data:video/webm;base64,${selectedItem.video}`}
+                type="video/webm"
+              />
               Your browser does not support the video tag.
             </video>
           )}
@@ -321,6 +331,7 @@ const Saved: React.FC<SavedProps> = ({ socketRef, isConnected }) => {
         </DialogActions>
       </Dialog>
     </Box>
+    </>
   );
 };
 
