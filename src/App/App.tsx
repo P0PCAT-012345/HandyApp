@@ -1,26 +1,30 @@
-// src/App/App.tsx
+// src/App.tsx
 
 import React, { useEffect, useRef, useState } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom'; // Added Navigate for redirection
 import { FaPlay } from 'react-icons/fa';
 import Webcam from 'react-webcam';
 import MenuButton2 from '../components/MenuButton2';
 import Record from '../Record/Record';
 import Saved from '../Saved/Saved';
 import LoadingScreen from '../LoadingScreen/LoadingScreen';
+import Login from '../Login/Login'; // Import the Login component
 import './App.css';
 
+// Define SocketMessageProps interface
 interface SocketMessageProps {
   result: string;
   function: string;
 }
 
+// Define HomeProps interface
 interface HomeProps {
   socketRef: React.MutableRefObject<WebSocket | null>;
   socketMessage: SocketMessageProps | null;
   isConnected: boolean;
 }
 
+// Home component
 const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) => {
   const [subtitleText, setSubtitleText] = useState<string>('');
   const [isVideoVisible, setIsVideoVisible] = useState(false);
@@ -171,6 +175,11 @@ const App: React.FC = () => {
   const socketRef = useRef<WebSocket | null>(null);
   const [socketMessage, setSocketMessage] = useState<SocketMessageProps | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const handleLogin = (username: string, password: string) => {
+    setIsAuthenticated(true);
+  };
 
   useEffect(() => {
     const connectWebSocket = () => {
@@ -230,35 +239,43 @@ const App: React.FC = () => {
       <div className="app-container">
         <MenuButton2 />
         <Routes>
-          <Route
-            path="/"
-            element={
-              <Home
-                socketRef={socketRef}
-                socketMessage={socketMessage}
-                isConnected={isConnected}
+          {!isAuthenticated ? (
+            <Route path="/" element={<Login onLogin={handleLogin} />} />
+          ) : (
+            <>
+              <Route
+                path="/"
+                element={
+                  <Home
+                    socketRef={socketRef}
+                    socketMessage={socketMessage}
+                    isConnected={isConnected}
+                  />
+                }
               />
-            }
-          />
-          <Route
-            path="/record"
-            element={
-              <Record
-                socketRef={socketRef}
-                socketMessage={socketMessage}
-                isConnected={isConnected}
+              <Route
+                path="/record"
+                element={
+                  <Record
+                    socketRef={socketRef}
+                    socketMessage={socketMessage}
+                    isConnected={isConnected}
+                  />
+                }
               />
-            }
-          />
-          <Route
-            path="/saved"
-            element={
-              <Saved
-                socketRef={socketRef}
-                isConnected={isConnected}
+              <Route
+                path="/saved"
+                element={
+                  <Saved
+                    socketRef={socketRef}
+                    isConnected={isConnected}
+                  />
+                }
               />
-            }
-          />
+              {/* Redirect unknown routes to home */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </>
+          )}
         </Routes>
       </div>
     </Router>

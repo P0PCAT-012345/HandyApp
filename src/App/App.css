@@ -1,15 +1,29 @@
+/* src/App.css */
+
+/* Reset and Global Styles */
 html, body {
   margin: 0;
   padding: 0;
   height: 100%;
   overflow: hidden; 
   background-color: black; 
+  font-family: Arial, sans-serif;
 }
 
 * {
   box-sizing: border-box;
 }
 
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* App Container */
 .app-container {
   position: absolute;
   top: 0;
@@ -23,6 +37,7 @@ html, body {
   align-items: center;
 }
 
+/* Home Component Styles */
 .home-container {
   position: relative;
   width: 100%;
@@ -176,4 +191,109 @@ div > div {
   text-align: center;
   white-space: pre-wrap;
   word-wrap: break-word;
+}
+
+/* Login Component Styles */
+
+/* Ensure these classes match those in Login.tsx */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100vh; /* Full viewport height */
+  background-color: #f9fafb; /* Light gray background */
+}
+
+.login-form {
+  background-color: #ffffff; /* White background */
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-title {
+  text-align: center;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: #333333; /* Dark text color */
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #555555; /* Medium gray */
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db; /* Light gray border */
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #3b82f6; /* Blue border on focus */
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); /* Blue shadow on focus */
+}
+
+.error-message {
+  color: #ef4444; /* Red color */
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.login-button {
+  margin-top: 0.5rem;
+}
+
+.additional-links {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.forgot-password-link {
+  color: #3b82f6; /* Blue color */
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.forgot-password-link:hover {
+  text-decoration: underline;
+}
+
+.signup-text {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #555555; /* Medium gray */
+}
+
+.signup-link {
+  color: #3b82f6; /* Blue color */
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.signup-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+  .login-form {
+    padding: 1.5rem;
+  }
+
+  .login-title {
+    font-size: 1.25rem;
+  }
 }

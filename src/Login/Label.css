@@ -1,0 +1,10 @@
+/* src/components/Label.css */
+
+.label {
+    font-size: 1rem; /* Base font size */
+    font-weight: 500; /* Medium */
+    cursor: pointer;
+    color: #374151; /* Dark Gray */
+    margin-bottom: 0.5rem; /* Space below label */
+  }
+  

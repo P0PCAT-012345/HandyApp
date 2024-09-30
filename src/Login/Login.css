@@ -1,0 +1,81 @@
+/* src/components/Login.css */
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100vh; /* Full viewport height */
+  background-color: #f9fafb; /* Light gray background */
+}
+
+.login-form {
+  background-color: #ffffff; /* White background */
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-title {
+  text-align: center;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: #333333; /* Dark text color */
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.error-message {
+  color: #ef4444; /* Red color */
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.login-button {
+  margin-top: 0.5rem;
+}
+
+.additional-links {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.forgot-password-link {
+  color: #3b82f6; /* Blue color */
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.forgot-password-link:hover {
+  text-decoration: underline;
+}
+
+.signup-text {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #555555; /* Medium gray */
+}
+
+.signup-link {
+  color: #3b82f6; /* Blue color */
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.signup-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+  .login-form {
+    padding: 1.5rem;
+  }
+
+  .login-title {
+    font-size: 1.25rem;
+  }
+}

@@ -1,0 +1,40 @@
+/* src/components/Button.css */
+
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    border-radius: 0.375rem; /* Rounded */
+    font-size: 1rem; /* Base font size */
+    font-weight: 500; /* Medium */
+    transition: background-color 0.2s, color 0.2s;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    border: none;
+  }
+  
+  .button-default {
+    background-color: #3b82f6; /* Blue */
+    color: #ffffff; /* White text */
+  }
+  
+  .button-default:hover {
+    background-color: #2563eb; /* Darker Blue on hover */
+  }
+  
+  .button-outline {
+    border: 1px solid #d1d5db; /* Light Gray border */
+    background-color: #ffffff; /* White background */
+    color: #3b82f6; /* Blue text */
+  }
+  
+  .button-outline:hover {
+    background-color: #f3f4f6; /* Light Gray background on hover */
+    color: #1e40af; /* Darker Blue text on hover */
+  }
+  
+  .button-fullWidth {
+    width: 100%;
+  }
+  
