@@ -29,7 +29,13 @@ Then run the web app on a new terminal. It will be hosted in localhost:3000
 ```bash
 yarn start
 ```
+Username is TEST, password is test123.
+You can also choose to create a new user. 
+A newly added sign will be accesible only by the user.
 
+ユーザー名はTEST、パスワードはtest123で使えます。
+新しいユーザーを登録できます。
+新しく追加された手話はユーザー個人だけが見られます。
 
 ## License
 

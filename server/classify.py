@@ -107,6 +107,6 @@ def toSentence(sentence, curr_sentence, lastWord, refreshCount):
     for word in sentence[1:]:
         curr_sentence.append(word)
     
-    if len(curr_sentence) > 15:
-        curr_sentence.pop(0)
+    # if len(curr_sentence) > 15:
+    #     curr_sentence.pop(0)
     return curr_sentence

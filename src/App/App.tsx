@@ -11,7 +11,7 @@ import Auth from '../Login/Auth'; // Import the Login component
 import './App.css';
 import '../VideoStyles.css'; // Import shared video styles
 import Webcam from 'react-webcam';
-import { FaPlay } from 'react-icons/fa';
+import { FaPlay, FaCopy } from 'react-icons/fa';
 
 interface SocketMessageProps {
   result: string;
@@ -39,6 +39,12 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
 
     socketRef.current?.send(message);
     setSubtitleText('');
+  };
+
+  const handleCopy = () => {
+    const textarea = document.querySelector('.text-box') as HTMLTextAreaElement;;
+    textarea?.select();
+    document.execCommand('copy');
   };
 
   useEffect(() => {
@@ -161,19 +167,22 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
       {/* Subtitle */}
       {subtitleText && (
         <div className="subtitle-container">
-          <p className="subtitle-text">{subtitleText}</p>
+          <p className="subtitle-text">{subtitleText.split(' ').slice(-15).join(' ')}</p>
         </div>
       )}
 
       {/* Text Box for Translation/Memo */}
       <div className="text-box-container">
-        <textarea
-          readOnly
-          value={subtitleText}
-          className="text-box"
-          aria-label="Translation Output"
-        />
-      </div>
+      <textarea
+        readOnly
+        value={subtitleText}
+        className="text-box"
+        aria-label="Translation Output"
+      />
+      <button className="copy-button" onClick={handleCopy}>
+        <FaCopy />
+      </button>
+    </div>
     </div>
   );
 };
