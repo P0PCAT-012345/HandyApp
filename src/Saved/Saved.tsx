@@ -58,6 +58,7 @@ const Saved: React.FC<SavedProps> = ({ socketRef, socketMessage, isConnected }) 
   const [isUploading, setIsUploading] = useState<boolean>(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+   const hasInitialized = useRef(false);
 
   useEffect(() => {
     if (!isConnected) {hasInitialized.current = false;}
@@ -83,13 +84,14 @@ const Saved: React.FC<SavedProps> = ({ socketRef, socketMessage, isConnected }) 
             setError(data.error);
             setIsLoading(false);
           }
-        } catch (err) {
-          console.error('Failed to parse message in Saved component:', err);
-          setError('サーバーの応答を解析できませんでした。');
-          setIsLoading(false);
-        }
-      };
-
+        } 
+      }
+      catch (err) {
+        console.error('Failed to parse message in Saved component:', err);
+        setError('サーバーの応答を解析できませんでした。');
+        setIsLoading(false);
+      }
+    }
       socketRef.current.addEventListener('message', handleMessage);
 
   }, [isConnected, socketRef]);
