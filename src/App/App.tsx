@@ -1,30 +1,29 @@
 // src/App.tsx
 
 import React, { useEffect, useRef, useState } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom'; // Added Navigate for redirection
-import { FaPlay } from 'react-icons/fa';
-import Webcam from 'react-webcam';
-import MenuButton2 from '../components/MenuButton2';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import Sidebar from '../components/Sidebar';
 import Record from '../Record/Record';
 import Saved from '../Saved/Saved';
+import Settings from '../Settings/Settings'; // Import Settings component
 import LoadingScreen from '../LoadingScreen/LoadingScreen';
 import Auth from '../Login/Auth'; // Import the Login component
 import './App.css';
+import '../VideoStyles.css'; // Import shared video styles
+import Webcam from 'react-webcam';
+import { FaPlay } from 'react-icons/fa';
 
-// Define SocketMessageProps interface
 interface SocketMessageProps {
   result: string;
   function: string;
 }
 
-// Define HomeProps interface
 interface HomeProps {
   socketRef: React.MutableRefObject<WebSocket | null>;
   socketMessage: SocketMessageProps | null;
   isConnected: boolean;
 }
 
-// Home component
 const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) => {
   const [subtitleText, setSubtitleText] = useState<string>('');
   const [isVideoVisible, setIsVideoVisible] = useState(false);
@@ -117,20 +116,14 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
   }, [socketMessage]);
 
   return (
-    <div onClick={handleClick} className="home-container">
+    <div onClick={handleClick} className="video-container home-container">
       {!isConnected && <LoadingScreen />}
       <Webcam
         audio={false}
         ref={webcamRef}
         className={`video-element ${isVideoVisible ? 'visible' : 'blurred'}`}
         style={{
-          transform: 'scaleX(-1)',
-          maxWidth: '100%',
-          maxHeight: '100%',
-          objectFit: 'contain',
-          margin: 'auto',
-          display: 'block',
-          filter: isVideoVisible ? 'none' : 'blur(10px)',
+          objectFit: 'contain', // Ensure the video fits vertically
         }}
       />
 
@@ -149,6 +142,7 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
         />
       )}
 
+      {/* Button Overlay */}
       {!isVideoVisible && (
         <div className="overlay">
           <button
@@ -156,17 +150,30 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
               event.stopPropagation();
               handleClick();
             }}
-            className="play-button"
+            className="button" // Ensures circular shape
+            aria-label="Play Video"
           >
-            <FaPlay className="play-icon" />
+            <FaPlay className="button-icon" />
           </button>
         </div>
       )}
+
+      {/* Subtitle */}
       {subtitleText && (
         <div className="subtitle-container">
           <p className="subtitle-text">{subtitleText}</p>
         </div>
       )}
+
+      {/* Text Box for Translation/Memo */}
+      <div className="text-box-container">
+        <textarea
+          readOnly
+          value={subtitleText}
+          className="text-box"
+          aria-label="Translation Output"
+        />
+      </div>
     </div>
   );
 };
@@ -255,56 +262,63 @@ const App: React.FC = () => {
 
   return (
     <Router>
-  <div className="app-container">
-    {!isAuthenticated ? (
-      <Auth
-        onLogin={handleLogin}
-        onSignUp={handleSignUp}
-        setIsAuthenticated={setIsAuthenticated}
-        socketMessage={socketMessage}
-        isConnected={isConnected}
-      />
-    ) : (
-      <>
-        <MenuButton2 />
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <Home
-                socketRef={socketRef}
-                socketMessage={socketMessage}
-                isConnected={isConnected}
-              />
-            }
-          />
-          <Route
-            path="/record"
-            element={
-              <Record
-                socketRef={socketRef}
-                socketMessage={socketMessage}
-                isConnected={isConnected}
-              />
-            }
-          />
-          <Route
-            path="/saved"
-            element={
-              <Saved
-                socketRef={socketRef}
-                socketMessage={socketMessage}
-                isConnected={isConnected}
-              />
-            }
-          />
-          {/* Redirect unknown routes to home */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </>
-    )}
-  </div>
-</Router>
+      <div className="app-container">
+        {/* Include the Sidebar */}
+        {isAuthenticated && <Sidebar />}
+        <div className="home-section">
+          <Routes>
+            {!isAuthenticated ? (
+              <Route path="/" element={<Auth onLogin={handleLogin} onSignUp={handleSignUp} setIsAuthenticated={setIsAuthenticated} socketMessage={socketMessage} isConnected={isConnected}/>} />
+            ) : (
+              <>
+                <Route
+                  path="/dashboard"
+                  element={
+                    <Home
+                      socketRef={socketRef}
+                      socketMessage={socketMessage}
+                      isConnected={isConnected}
+                    />
+                  }
+                />
+                <Route
+                  path="/record"
+                  element={
+                    <Record
+                      socketRef={socketRef}
+                      socketMessage={socketMessage}
+                      isConnected={isConnected}
+                    />
+                  }
+                />
+                <Route
+                  path="/saved"
+                  element={
+                    <Saved
+                      socketRef={socketRef}
+                      socketMessage={socketMessage}
+                      isConnected={isConnected}
+                    />
+                  }
+                />
+                {/* <Route
+                  path="/settings"
+                  element={
+                    <Settings
+                      socketRef={socketRef}
+                      isConnected={isConnected}
+                    /> */}
+                  {/* }
+                /> */}
+                {/* Add other routes as needed */}
+                {/* Redirect unknown routes to dashboard */}
+                <Route path="*" element={<Navigate to="/dashboard" replace />} />
+              </>
+            )}
+          </Routes>
+        </div>
+      </div>
+    </Router>
   );
 };
 
