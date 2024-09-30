@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { FaRecordVinyl } from 'react-icons/fa';
-import './Record.css';
+import '../VideoStyles.css'; // Use shared video styles
 import Webcam from 'react-webcam';
 import LoadingScreen from '../LoadingScreen/LoadingScreen';
 
@@ -26,6 +26,7 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
   const [isSaving, setIsSaving] = useState(false);
   const [recordName, setRecordName] = useState('');
   const [webcamDimensions, setWebcamDimensions] = useState({ width: 0, height: 0, top: 0, left: 0 }); 
+  const [subtitleText, setSubtitleText] = useState<string>(''); // Added State Variable
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -93,13 +94,11 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
           },
         });
 
-        // Assign socketRef.current to a local variable after ensuring it's not null
         const socket = socketRef.current;
         if (socket) {
           socket.send(message);
         } else {
           console.error("WebSocket is not connected.");
-          // Optionally, display an error message to the user here
         }
 
         resetState();
@@ -143,24 +142,32 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
   }, [isVideoVisible]);
 
   useEffect(() => {
-    if (isVideoVisible && webcamRef.current && countdown === 0 && isRecording) {
+    if (isVideoVisible && webcamRef.current && canvasRef.current) {
       const captureImage = () => {
         const video = webcamRef.current?.video;
-        if (!video || !canvasRef.current) return;
+        if (!video) return;
 
         const canvas = canvasRef.current;
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        const ctx = canvas.getContext('2d');
-        ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const ctx = canvas?.getContext('2d');
 
-        const base64Image = canvas.toDataURL('image/jpeg');
-        if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-          const message = JSON.stringify({
-            function: 'record',
-            args: [base64Image],
-          });
-          socketRef.current.send(message);
+        if (canvas && ctx) {
+          const videoWidth = video.videoWidth;
+          const videoHeight = video.videoHeight;
+
+          canvas.width = videoWidth;
+          canvas.height = videoHeight;
+
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+          const base64Image = canvas.toDataURL('image/jpeg');
+          if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+            const message = JSON.stringify({
+              function: 'record',
+              args: [base64Image],
+            });
+            socketRef.current.send(message);
+          }
         }
       };
 
@@ -171,26 +178,31 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
   }, [countdown, isVideoVisible, isRecording]);
 
   useEffect(() => {
-    if (socketMessage && socketMessage.function === 'record' && socketMessage.result === 'MOUTH_OPEN_TRUE') {
-      stopRecording();
+    if (socketMessage) {
+      if (socketMessage.function === 'record' && socketMessage.result === 'MOUTH_OPEN_TRUE') {
+        stopRecording();
+      }
+
+      // Handle subtitles if applicable
+      if (socketMessage.function === 'translate' && socketMessage.result) {
+        if (socketMessage.result === 'No match found') {
+          setSubtitleText('');
+        } else {
+          setSubtitleText(socketMessage.result);
+        }
+      }
     }
   }, [socketMessage]);
 
   return (
-    <div onClick={handleClick} className="record-container">
+    <div onClick={handleClick} className="video-container record-container">
       {!isConnected && <LoadingScreen />}
       <Webcam
         audio={false}
         ref={webcamRef}
         className={`video-element ${isVideoVisible ? 'visible' : 'blurred'}`}
         style={{
-          transform: 'scaleX(-1)',
-          maxWidth: '100%',
-          maxHeight: '100%',
-          objectFit: 'contain',
-          margin: 'auto',
-          display: 'block',
-          filter: isVideoVisible ? 'none' : 'blur(10px)',
+          objectFit: 'contain', // Ensure the video fits vertically
         }}
       />
 
@@ -209,6 +221,7 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
         />
       )}
 
+      {/* Button Overlay */}
       {!isVideoVisible && !isRecording && !isSaving && (
         <div className="overlay">
           <button
@@ -216,13 +229,18 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
               event.stopPropagation();
               handleClick();
             }}
-            className="record-button"
+            className="button" // Ensures circular shape
+            aria-label="Record Video"
           >
-            <FaRecordVinyl className="record-icon" />
+            <FaRecordVinyl className="button-icon" />
           </button>
         </div>
       )}
+
+      {/* Countdown Overlay */}
       {countdown > 0 && <div className="countdown-overlay">{countdown}</div>}
+
+      {/* Save Overlay */}
       {isSaving && (
         <div className="save-overlay">
           <input
@@ -230,11 +248,31 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
             placeholder="手話の名前を入力してください"
             value={recordName}
             onChange={(e) => setRecordName(e.target.value)}
+            aria-label="Record Name"
           />
-          <button onClick={handleSaveRecording}>保存する</button>
-          <button onClick={resetState}>キャンセル</button>
+          <div>
+            <button onClick={handleSaveRecording} aria-label="Save Recording">保存する</button>
+            <button onClick={resetState} aria-label="Cancel Saving">キャンセル</button>
+          </div>
         </div>
       )}
+
+      {/* Subtitle */}
+      {subtitleText && (
+        <div className="subtitle-container">
+          <p className="subtitle-text">{subtitleText}</p>
+        </div>
+      )}
+
+      {/* Text Box for Translation/Memo */}
+      <div className="text-box-container">
+        <textarea
+          readOnly
+          value={subtitleText}
+          className="text-box"
+          aria-label="Translation Output"
+        />
+      </div>
     </div>
   );
 };
