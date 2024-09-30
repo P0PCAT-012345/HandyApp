@@ -352,14 +352,13 @@ const Saved: React.FC<SavedProps> = ({ socketRef, socketMessage, isConnected }) 
           </IconButton>
         </DialogTitle>
         <DialogContent dividers className="dialog-content">
-          {selectedItem && (
-            <video
-              width="100%"
-              height="auto"
-              controls
-              src={`http://localhost:8000${selectedItem.video}`}
-              className="preview-video"
-            >
+        {selectedItem && (
+            <video controls className="preview-video">
+              
+              <source
+                src={`data:video/webm;base64,${selectedItem.video}`}
+                type="video/webm"
+              />
               ブラウザがビデオタグをサポートしていません。
             </video>
           )}

@@ -208,7 +208,7 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
 
       {isVideoVisible && (
         <img
-          src="/abc350image.png"
+          src="/blackperson.png"
           style={{
             position: 'absolute',
             top: `${webcamDimensions.top}px`,

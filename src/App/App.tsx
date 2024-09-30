@@ -135,7 +135,7 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
 
       {isVideoVisible && (
         <img
-          src="/abc350image.png"
+          src="/blackperson.png"
           style={{
             position: 'absolute',
             top: `${webcamDimensions.top}px`,

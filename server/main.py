@@ -128,7 +128,7 @@ class Session:
         if mode == 'translate':
             if len(self.hand_landmarks) == 30 and len(self.database) > 0:
                 output = self.getEmbedding(self.hand_landmarks)
-                sequence, costs = classify(output, 0.35, self.database)
+                sequence, costs = classify(output, 0.9, self.database)
                 self.hand_landmarks = []
                 if len(sequence) == 0:
                     self.lastWord = None
