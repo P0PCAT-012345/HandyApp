@@ -60,7 +60,7 @@ const Saved: React.FC<SavedProps> = ({ socketRef, socketMessage, isConnected }) 
   const fileInputRef = useRef<HTMLInputElement>(null);
    const hasInitialized = useRef(false);
 
-  useEffect(() => {
+   useEffect(() => {
     if (!isConnected) {hasInitialized.current = false;}
     if (!isConnected || !socketRef.current || hasInitialized.current) return;
   
@@ -80,19 +80,44 @@ const Saved: React.FC<SavedProps> = ({ socketRef, socketMessage, isConnected }) 
             setSavedItems(newSavedItems);
             setFilteredItems(newSavedItems);
             setIsLoading(false);
-          } else if (data.error) {
-            setError(data.error);
-            setIsLoading(false);
+          } else {
+            const { name, timestamp, chunk } = data.result;
+            const key = `${name}_${timestamp}`;
+  
+            if (!chunks[key]) {
+              chunks[key] = [];
+            }
+  
+            if (chunk === null) {
+              const videoData = chunks[key].join('');
+              const savedItem = {
+                name,
+                timestamp,
+                video: videoData,
+              };
+  
+              newSavedItems.push(savedItem);
+              delete chunks[key];
+            } else {
+              chunks[key].push(chunk);
+            }
           }
-        } 
-      }
-      catch (err) {
+        } else if (data.error) {
+          setError(data.error);
+
+          setIsLoading(false);
+        }
+      } catch (err) {
         console.error('Failed to parse message in Saved component:', err);
-        setError('サーバーの応答を解析できませんでした。');
+        setError('Failed to parse server response.');
         setIsLoading(false);
       }
-    }
-      socketRef.current.addEventListener('message', handleMessage);
+    };
+  
+    socketRef.current.removeEventListener('message', handleMessage);
+    socketRef.current.addEventListener('message', handleMessage);
+
+
 
   }, [isConnected, socketRef]);
 
