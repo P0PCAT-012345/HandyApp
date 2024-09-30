@@ -70,7 +70,7 @@ def chunk_min_arr(arr, K):
 def classify(embeddings, threshold, database, chunk=10): 
     costs = []
     candidates_names = []
-    for class_name, target_embedding in database:
+    for class_name, target_embedding, *_ in database:
         DTW_costs = partial_DTW(embeddings, target_embedding)
         costs.append(DTW_costs/len(target_embedding))
         candidates_names.append(class_name)

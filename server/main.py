@@ -17,7 +17,8 @@ import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module='google.protobuf')
 
 class Session:
-    def __init__(self):
+    def __init__(self, id):
+        self.id = id
         self.prev_left_hand = np.zeros((21, 3))
         self.prev_right_hand = np.zeros((21, 3))
         self.hand_landmarks = []
@@ -32,16 +33,21 @@ class Session:
         self.refreshCount = 0
 
         self.database = []
-        for folder_name in os.listdir("server/database"):
-            folder_path = os.path.join("server/database", folder_name)
+        for databaseFolder in ['sampleSet', id]:
+            if not os.path.isdir(f"server/database/{databaseFolder}"):
+                continue
+            for folder_name in os.listdir(f"server/database/{databaseFolder}"):
+                folder_path = os.path.join(f"server/database/{databaseFolder}", folder_name)
 
-            if os.path.isdir(folder_path):
-                for file_name in os.listdir(folder_path):
-                    if file_name.endswith('.npy'):
-                        file_path = os.path.join(folder_path, file_name)
-                        data = np.load(file_path)
-                        if len(data.shape) == 2 and data.shape[1] == 256:
-                            self.database.append((folder_name, data))
+                if os.path.isdir(folder_path):
+                    for file_name in os.listdir(folder_path):
+                        if file_name.endswith('.npy'):
+                            video_name = file_name[:-3] + 'webm'
+                            file_path_npy = os.path.join(folder_path, file_name)
+                            file_path_video = os.path.join(folder_path, video_name)
+                            data = np.load(file_path_npy)
+                            if len(data.shape) == 2 and data.shape[1] == 256:
+                                self.database.append((folder_name, data, file_path_npy, file_path_video))
 
         print("Initialized with database of length:", len(self.database))
 
@@ -119,7 +125,6 @@ class Session:
         self.hand_landmarks.append(current_landmarks)
         if mode == 'translate':
             if len(self.hand_landmarks) == 30 and len(self.database) > 0:
-                np.save('server/database/mostrecent.npy', np.array(self.hand_landmarks))
                 output = self.getEmbedding(self.hand_landmarks)
                 sequence, costs = classify(output, 0.35, self.database)
                 self.hand_landmarks = []
@@ -165,15 +170,15 @@ class Session:
 
     def stop_recording(self, name, video_data=None):
         embeddings = self.getEmbedding(self.hand_landmarks)
-        directory_path = f'server/database/{name}'
+        folder_path = f'server/database/{self.id}/{name}'
 
-        os.makedirs(directory_path, exist_ok=True)
+        os.makedirs(folder_path, exist_ok=True)
 
         timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
         filename_npy = f'{timestamp}.npy'
         filename_video = f'{timestamp}.webm'  # You can choose a different format if preferred
-        file_path_npy = os.path.join(directory_path, filename_npy)
-        file_path_video = os.path.join(directory_path, filename_video)
+        file_path_npy = os.path.join(folder_path, filename_npy)
+        file_path_video = os.path.join(folder_path, filename_video)
 
         # Save the .npy file
         try:
@@ -196,32 +201,54 @@ class Session:
         self.hand_landmarks = []
 
         # Optionally, add the new embedding to the database
-        self.database.append((name, embeddings))
+        self.database.append((name, embeddings, file_path_npy, file_path_video))
 
-    def list_saved(self):
-        saved = []
-        for folder_name in os.listdir("server/database"):
-            folder_path = os.path.join("server/database", folder_name)
-            if os.path.isdir(folder_path):
-                for file_name in os.listdir(folder_path):
-                    if file_name.endswith('.npy'):
-                        timestamp = file_name[:-4]
-                        video_filename = f"{timestamp}.webm"  # Ensure this matches the saved video format
-                        video_path = os.path.join(folder_path, video_filename)
+    async def list_saved(self):
+        if len(self.database) != 0:
+            saved = []
+            for class_name, _, _, video_path in self.database:
+                if os.path.exists(video_path):
+                    if video_path.endswith('.webm'):
+                        timestamp = os.path.basename(video_path)[:-5]
                         if os.path.exists(video_path):
                             saved.append({
-                                "name": folder_name,
+                                "name": class_name,
                                 "timestamp": timestamp,
-                                "video": f"/database/{folder_name}/{video_filename}"
+                                "video_path": video_path
                             })
-        return saved
-
+            print("starting chunks")
+            for item in saved:
+                video_path = item["video_path"]
+                with open(video_path, 'rb') as file:
+                    video_data = file.read()
+                    base64_data = base64.b64encode(video_data).decode('utf-8')
+                    chunk_size = 1024 * 1024 # 1 MB
+                    chunks = [base64_data[i:i+chunk_size] for i in range(0, len(base64_data), chunk_size)]
+                    for chunk in chunks:
+                        print("sending chunks...")
+                        yield {
+                            "name": item["name"],
+                            "timestamp": item["timestamp"],
+                            "chunk": chunk
+                        }
+                    yield {
+                        "name": item["name"],
+                        "timestamp": item["timestamp"],
+                        "chunk": None
+                    }
+            print("Item sent")
+            yield {
+                "finished": True
+            }
+            print("chunks sent successfully.")
+    
     def delete_saved(self, name, timestamp):
-        directory_path = f'server/database/{name}'
+        directory_path = f'server/database/{self.id}/{name}'
         filename_npy = f'{timestamp}.npy'
         filename_video = f'{timestamp}.webm'
         file_path_npy = os.path.join(directory_path, filename_npy)
         file_path_video = os.path.join(directory_path, filename_video)
+
         try:
             if os.path.exists(file_path_npy):
                 os.remove(file_path_npy)
@@ -229,6 +256,11 @@ class Session:
             if os.path.exists(file_path_video):
                 os.remove(file_path_video)
                 print(f"Deleted {file_path_video}")
+
+            # Remove the corresponding data from self.database
+            self.database = [(class_name, embeddings, npy_path, video_path) for class_name, embeddings, npy_path, video_path in self.database
+                            if not os.path.samefile(video_path, file_path_video)]
+
             return "Deleted successfully"
         except Exception as e:
             return f"Error deleting files: {e}"
@@ -256,5 +288,5 @@ class Session:
                 right_corner = face_landmarks.landmark[right_mouth_corner]
                 mouth_width = np.abs(right_corner.x - left_corner.x)
 
-                mouth_open_threshold = mouth_width * 0.5  
+                mouth_open_threshold = mouth_width * 0.5
                 return (bottom_lip_y - top_lip_y) > mouth_open_threshold

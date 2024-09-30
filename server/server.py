@@ -3,40 +3,35 @@ import websockets
 import json
 from datetime import datetime, timezone
 from main import Session
+import uuid
+
 
 sessionsList = {}
+namespace = uuid.NAMESPACE_DNS
 
 async def handler(websocket, path):
     global sessionsList
-    client_address = websocket.remote_address
+    client_address = websocket.remote_address[0]
+    print("Connected from: ", websocket.remote_address)
     try:
         if client_address not in sessionsList:
-            sessionsList[client_address] = Session()
-            print(client_address)
+            id = str(uuid.uuid5(namespace, client_address))
+            sessionsList[client_address] = Session(id)
             print("New session started")
         async for message in websocket:
-            response = process_message(sessionsList[client_address], message)
-            if response:
-                await websocket.send(response)
+            if "function" in message and json.loads(message)["function"] == "list_saved":
+                async for chunk in process_message(sessionsList[client_address], message):
+                    await websocket.send(chunk)
+            else:
+                response = process_message(sessionsList[client_address], message)
+                if response:
+                    await websocket.send(response)
     except websockets.exceptions.ConnectionClosed:
         print(f"Connection closed with {client_address}")
-    finally:
-        if client_address in sessionsList:
-            del sessionsList[client_address]
-            print(f"Session for {client_address} removed")
 
-def process_message(session, message):
+async def process_message(session, message):
     try:
         data = json.loads(message)
-        
-        if "requestTime" in data:
-            request_time = datetime.fromisoformat(data["requestTime"])  
-            current_time = datetime.now(timezone.utc)
-            time_difference = (current_time - request_time).total_seconds()
-
-            if time_difference > 2:
-                print("Ignoring message due to outdated requestTime")
-                return None
         
         if "function" in data:
             func_name = data["function"]
@@ -49,19 +44,23 @@ def process_message(session, message):
                     kwargs = data["kwargs"]
                 if 'args' in data:
                     args = data['args']
-                result = func(*args, **kwargs)
-                return json.dumps({"result": result, "function": func_name})
+                
+                if func_name == "list_saved":
+                    async for chunk in func(*args, **kwargs):
+                        yield json.dumps({"result": chunk, "function": func_name})
+                else:
+                    result = func(*args, **kwargs)
+                    yield json.dumps({"result": result, "function": func_name})
             else:
-                return json.dumps({"error": "Function not found"})
+                yield json.dumps({"error": "Function not found"})
         else:
-            return json.dumps({"error": "Invalid message format"})
+            yield json.dumps({"error": "Invalid message format"})
     except json.JSONDecodeError:
-        return json.dumps({"error": "Invalid JSON"})
-    except ValueError:
-        return json.dumps({"error": "Invalid requestTime format"})
+        yield json.dumps({"error": "Invalid JSON"})
+    
 
 print("Server Starting")
-start_server = websockets.serve(handler, "localhost", 8765, max_size=10000000)
+start_server = websockets.serve(handler, "127.0.0.1", 8765, max_size=10000000)
 print("Server Started Successfully")
 
 asyncio.get_event_loop().run_until_complete(start_server)
