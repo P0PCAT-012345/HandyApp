@@ -12,8 +12,6 @@ import {
   Paper,
   Typography,
   IconButton,
-  Menu,
-  MenuItem,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -22,11 +20,12 @@ import {
   TextField,
   InputAdornment,
   CircularProgress,
+  Tooltip,
 } from '@mui/material';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DownloadIcon from '@mui/icons-material/Download';
 import SearchIcon from '@mui/icons-material/Search';
+import UploadIcon from '@mui/icons-material/Upload';
 import CloseIcon from '@mui/icons-material/Close';
 import LoadingScreen from '../LoadingScreen/LoadingScreen';
 import './Saved.css';
@@ -56,12 +55,9 @@ const Saved: React.FC<SavedProps> = ({ socketRef, socketMessage, isConnected }) 
   const [selectedItem, setSelectedItem] = useState<SavedItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [isUploading, setIsUploading] = useState<boolean>(false);
 
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [menuItem, setMenuItem] = useState<SavedItem | null>(null);
-
-  // Ref to track if initialization has occurred
-  const hasInitialized = useRef(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!isConnected) {hasInitialized.current = false;}
@@ -83,46 +79,23 @@ const Saved: React.FC<SavedProps> = ({ socketRef, socketMessage, isConnected }) 
             setSavedItems(newSavedItems);
             setFilteredItems(newSavedItems);
             setIsLoading(false);
-          } else {
-            const { name, timestamp, chunk } = data.result;
-            const key = `${name}_${timestamp}`;
-  
-            if (!chunks[key]) {
-              chunks[key] = [];
-            }
-  
-            if (chunk === null) {
-              const videoData = chunks[key].join('');
-              const savedItem = {
-                name,
-                timestamp,
-                video: videoData,
-              };
-  
-              newSavedItems.push(savedItem);
-              delete chunks[key];
-            } else {
-              chunks[key].push(chunk);
-            }
+          } else if (data.error) {
+            setError(data.error);
+            setIsLoading(false);
           }
-        } else if (data.error) {
-          setError(data.error);
+        } catch (err) {
+          console.error('Failed to parse message in Saved component:', err);
+          setError('サーバーの応答を解析できませんでした。');
           setIsLoading(false);
         }
-      } catch (err) {
-        console.error('Failed to parse message in Saved component:', err);
-        setError('Failed to parse server response.');
-        setIsLoading(false);
-      }
-    };
-  
-    socketRef.current.removeEventListener('message', handleMessage);
-    socketRef.current.addEventListener('message', handleMessage);
+      };
+
+      socketRef.current.addEventListener('message', handleMessage);
 
   }, [isConnected, socketRef]);
 
   const handleDelete = (item: SavedItem) => {
-    if (window.confirm(`Are you sure you want to delete "${item.name}"?`)) {
+    if (window.confirm(`"${item.name}" を削除してもよろしいですか？`)) {
       if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
         const deleteMessage = JSON.stringify({
           function: 'delete_saved',
@@ -144,7 +117,6 @@ const Saved: React.FC<SavedProps> = ({ socketRef, socketMessage, isConnected }) 
         );
       }
     }
-    handleMenuClose();
   };
 
   const handleDownload = (item: SavedItem) => {
@@ -154,17 +126,6 @@ const Saved: React.FC<SavedProps> = ({ socketRef, socketMessage, isConnected }) 
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    handleMenuClose();
-  };
-
-  const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>, item: SavedItem) => {
-    setAnchorEl(event.currentTarget);
-    setMenuItem(item);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-    setMenuItem(null);
   };
 
   const openModal = (item: SavedItem) => {
@@ -175,6 +136,46 @@ const Saved: React.FC<SavedProps> = ({ socketRef, socketMessage, isConnected }) 
   const closeModal = () => {
     setSelectedItem(null);
     setIsModalOpen(false);
+  };
+
+  const handleUploadClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files && files[0]) {
+      uploadFile(files[0]);
+    }
+  };
+
+  const uploadFile = (file: File) => {
+    // Placeholder for upload functionality
+    // Implement your upload logic here using existing socketRef
+    // For example:
+    // const formData = new FormData();
+    // formData.append('file', file);
+    // fetch('your-upload-endpoint', {
+    //   method: 'POST',
+    //   body: formData,
+    // })
+    //   .then(response => response.json())
+    //   .then(data => {
+    //     // Handle success
+    //     setIsUploading(false);
+    //     // Refresh the list
+    //     const requestList = JSON.stringify({ function: 'list_saved' });
+    //     socketRef.current?.send(requestList);
+    //   })
+    //   .catch(error => {
+    //     console.error('Upload failed:', error);
+    //     setIsUploading(false);
+    //   });
+
+    // Since you requested not to modify socketRef much, the actual upload implementation is left as a placeholder.
+    alert('アップロード機能は現在実装されていません。');
   };
 
   useEffect(() => {
@@ -189,7 +190,7 @@ const Saved: React.FC<SavedProps> = ({ socketRef, socketMessage, isConnected }) 
 
   if (isLoading) {
     return (
-      <Box className="saved-container" display="flex" justifyContent="center" alignItems="center">
+      <Box className="saved-container loading-container" display="flex" justifyContent="center" alignItems="center">
         <CircularProgress />
       </Box>
     );
@@ -197,9 +198,9 @@ const Saved: React.FC<SavedProps> = ({ socketRef, socketMessage, isConnected }) 
 
   if (error) {
     return (
-      <Box className="saved-container">
+      <Box className="saved-container error-container">
         <Typography variant="h6" color="error">
-          Error: {error}
+          エラー: {error}
         </Typography>
       </Box>
     );
@@ -209,9 +210,30 @@ const Saved: React.FC<SavedProps> = ({ socketRef, socketMessage, isConnected }) 
     <>
     {!isConnected && <LoadingScreen />}
     <Box className="saved-container">
-      <Typography variant="h4" className="saved-title">
-        保存された手話
-      </Typography>
+      <Box className="header">
+        <Typography variant="h4" className="saved-title">
+          保存された手話
+        </Typography>
+        <Box className="upload-section">
+          <input
+            type="file"
+            accept="video/*"
+            ref={fileInputRef}
+            style={{ display: 'none' }}
+            onChange={handleFileChange}
+          />
+          <Tooltip title="アップロード">
+            <IconButton
+              color="primary"
+              onClick={handleUploadClick}
+              className="upload-button"
+            >
+              <UploadIcon />
+            </IconButton>
+          </Tooltip>
+          {isUploading && <CircularProgress size={24} className="upload-progress" />}
+        </Box>
+      </Box>
       <Box className="search-bar">
         <TextField
           placeholder="検索..."
@@ -226,7 +248,9 @@ const Saved: React.FC<SavedProps> = ({ socketRef, socketMessage, isConnected }) 
                 <SearchIcon />
               </InputAdornment>
             ),
+            style: { color: '#ffffff' }, // Ensure text is visible in dark mode
           }}
+          className="search-input"
         />
       </Box>
       <TableContainer component={Paper} className="table-container">
@@ -234,7 +258,7 @@ const Saved: React.FC<SavedProps> = ({ socketRef, socketMessage, isConnected }) 
           <TableHead>
             <TableRow>
               <TableCell className="table-header-cell">名前</TableCell>
-              <TableCell className="table-header-cell" align="right">
+              <TableCell className="table-header-cell action-header-cell" align="right">
                 アクション
               </TableCell>
             </TableRow>
@@ -250,45 +274,31 @@ const Saved: React.FC<SavedProps> = ({ socketRef, socketMessage, isConnected }) 
                     {item.name}
                   </Button>
                 </TableCell>
-                <TableCell className="table-cell" align="right">
-                  <IconButton
-                    aria-controls={menuItem === item ? 'actions-menu' : undefined}
-                    aria-haspopup="true"
-                    aria-expanded={menuItem === item ? 'true' : undefined}
-                    onClick={(e) => handleMenuOpen(e, item)}
-                  >
-                    <MoreVertIcon />
-                  </IconButton>
-                  <Menu
-                    id="actions-menu"
-                    anchorEl={anchorEl}
-                    open={menuItem === item}
-                    onClose={handleMenuClose}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'right',
-                    }}
-                    transformOrigin={{
-                      vertical: 'top',
-                      horizontal: 'right',
-                    }}
-                    disableScrollLock
-                  >
-                    <MenuItem onClick={() => handleDownload(item)}>
-                      <DownloadIcon fontSize="small" style={{ marginRight: '8px' }} />
-                      ダウンロード
-                    </MenuItem>
-                    <MenuItem onClick={() => handleDelete(item)}>
-                      <DeleteIcon fontSize="small" style={{ marginRight: '8px' }} />
-                      削除する
-                    </MenuItem>
-                  </Menu>
+                <TableCell className="table-cell action-cell" align="right">
+                  <Tooltip title="ダウンロード">
+                    <IconButton
+                      aria-label="download"
+                      onClick={() => handleDownload(item)}
+                      className="action-button download-button"
+                    >
+                      <DownloadIcon />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="削除する">
+                    <IconButton
+                      aria-label="delete"
+                      onClick={() => handleDelete(item)}
+                      className="action-button delete-button"
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Tooltip>
                 </TableCell>
               </TableRow>
             ))}
             {filteredItems.length === 0 && (
               <TableRow>
-                <TableCell colSpan={4} align="center">
+                <TableCell colSpan={2} align="center">
                   <Typography variant="body1">保存された手話がありません。</Typography>
                 </TableCell>
               </TableRow>
@@ -304,34 +314,31 @@ const Saved: React.FC<SavedProps> = ({ socketRef, socketMessage, isConnected }) 
         fullWidth
         aria-labelledby="video-preview-title"
       >
-        <DialogTitle id="video-preview-title">
+        <DialogTitle id="video-preview-title" className="dialog-title">
           {selectedItem?.name} - プレビュー
           <IconButton
             aria-label="close"
             onClick={closeModal}
-            sx={{
-              position: 'absolute',
-              right: 8,
-              top: 8,
-              color: (theme) => theme.palette.grey[500],
-            }}
+            className="close-button"
           >
             <CloseIcon />
           </IconButton>
         </DialogTitle>
-        <DialogContent dividers>
-        {selectedItem && (
-            <video controls>
-              <source
-                src={`data:video/webm;base64,${selectedItem.video}`}
-                type="video/webm"
-              />
-              Your browser does not support the video tag.
+        <DialogContent dividers className="dialog-content">
+          {selectedItem && (
+            <video
+              width="100%"
+              height="auto"
+              controls
+              src={`http://localhost:8000${selectedItem.video}`}
+              className="preview-video"
+            >
+              ブラウザがビデオタグをサポートしていません。
             </video>
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={closeModal} color="primary">
+          <Button onClick={closeModal} color="primary" className="close-dialog-button">
             閉じる
           </Button>
         </DialogActions>
