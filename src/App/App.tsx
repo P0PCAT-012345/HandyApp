@@ -8,7 +8,7 @@ import MenuButton2 from '../components/MenuButton2';
 import Record from '../Record/Record';
 import Saved from '../Saved/Saved';
 import LoadingScreen from '../LoadingScreen/LoadingScreen';
-import Login from '../Login/Login'; // Import the Login component
+import Auth from '../Login/Auth'; // Import the Login component
 import './App.css';
 
 // Define SocketMessageProps interface
@@ -177,8 +177,24 @@ const App: React.FC = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const handleLogin = (username: string, password: string) => {
-    setIsAuthenticated(true);
+  const handleLogin = (username: string, password: string, rememberMe: boolean) => {
+    const requestList = JSON.stringify(
+      { function: 'login', kwargs: { 
+        username: username,
+        password: password,
+        rememberMe: rememberMe
+    }, });
+    socketRef.current?.send(requestList);
+  };
+
+  const handleSignUp = (username: string, password: string, rememberMe: boolean) => {
+    const requestList = JSON.stringify(
+      { function: 'signup', kwargs: { 
+        username: username,
+        password: password,
+        rememberMe: rememberMe
+    }, });
+    socketRef.current?.send(requestList);
   };
 
   useEffect(() => {
@@ -191,9 +207,10 @@ const App: React.FC = () => {
       };
 
       socketRef.current.onmessage = (event) => {
+        console.log(event)
         try {
           const data = JSON.parse(event.data);
-          if (data && data.result && data.function) {
+          if (data && "result" in data && "function" in data) {
             setSocketMessage({ result: data.result, function: data.function });
           }
         } catch (error) {
@@ -234,51 +251,60 @@ const App: React.FC = () => {
     };
   }, []);
 
+  
+
   return (
     <Router>
-      <div className="app-container">
+  <div className="app-container">
+    {!isAuthenticated ? (
+      <Auth
+        onLogin={handleLogin}
+        onSignUp={handleSignUp}
+        setIsAuthenticated={setIsAuthenticated}
+        socketMessage={socketMessage}
+        isConnected={isConnected}
+      />
+    ) : (
+      <>
         <MenuButton2 />
         <Routes>
-          {!isAuthenticated ? (
-            <Route path="/" element={<Login onLogin={handleLogin} />} />
-          ) : (
-            <>
-              <Route
-                path="/"
-                element={
-                  <Home
-                    socketRef={socketRef}
-                    socketMessage={socketMessage}
-                    isConnected={isConnected}
-                  />
-                }
+          <Route
+            path="/"
+            element={
+              <Home
+                socketRef={socketRef}
+                socketMessage={socketMessage}
+                isConnected={isConnected}
               />
-              <Route
-                path="/record"
-                element={
-                  <Record
-                    socketRef={socketRef}
-                    socketMessage={socketMessage}
-                    isConnected={isConnected}
-                  />
-                }
+            }
+          />
+          <Route
+            path="/record"
+            element={
+              <Record
+                socketRef={socketRef}
+                socketMessage={socketMessage}
+                isConnected={isConnected}
               />
-              <Route
-                path="/saved"
-                element={
-                  <Saved
-                    socketRef={socketRef}
-                    isConnected={isConnected}
-                  />
-                }
+            }
+          />
+          <Route
+            path="/saved"
+            element={
+              <Saved
+                socketRef={socketRef}
+                socketMessage={socketMessage}
+                isConnected={isConnected}
               />
-              {/* Redirect unknown routes to home */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </>
-          )}
+            }
+          />
+          {/* Redirect unknown routes to home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </div>
-    </Router>
+      </>
+    )}
+  </div>
+</Router>
   );
 };
 

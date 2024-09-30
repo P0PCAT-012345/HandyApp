@@ -1,0 +1,110 @@
+/* src/components/Auth.css */
+
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100vh;
+  background-color: #f9fafb;
+}
+
+.auth-form {
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+}
+
+.auth-title {
+  text-align: center;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: #333333;
+}
+
+
+.error-message {
+  color: #ef4444;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.auth-button {
+  margin-top: 0.5rem;
+}
+
+.toggle-form {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #555555;
+}
+
+.toggle-link {
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 500;
+  cursor: pointer;
+  margin-left: 0.25rem;
+}
+
+.toggle-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+  .auth-form {
+    padding: 1.5rem;
+  }
+
+  .auth-title {
+    font-size: 1.25rem;
+  }
+}
+
+.remember-me-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.remember-me-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 14px;
+  border: 2px solid #007bff;
+  border-radius: 3px;
+  margin-right: 8px;
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.remember-me-checkbox:checked {
+  background-color: #007bff;
+}
+
+.remember-me-checkbox:checked::after {
+  content: '✓';
+  color: white;
+  position: absolute;
+  top: -4px;
+  left: 2px;
+  font-size: 16px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.remember-me-checkbox:checked::after {
+  opacity: 1;
+}
+
+.remember-me-label {
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+}

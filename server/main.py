@@ -13,6 +13,7 @@ import time
 import datetime
 import warnings
 
+
 # Suppress deprecation warnings from protobuf
 warnings.filterwarnings("ignore", category=UserWarning, module='google.protobuf')
 
@@ -58,8 +59,9 @@ class Session:
             'record': self.record,
             'list_saved': self.list_saved,
             'delete_saved': self.delete_saved,
-            'mouth_open': self.mouth_open
+            'mouth_open': self.mouth_open,
         }
+
 
     def decode_image(self, base64_data):
         try:
@@ -236,12 +238,12 @@ class Session:
                         "timestamp": item["timestamp"],
                         "chunk": None
                     }
-            print("Item sent")
-            yield {
-                "finished": True
-            }
-            print("chunks sent successfully.")
-    
+        print("Item sent")
+        yield {
+            "finished": True
+        }
+        print("chunks sent successfully.")
+
     def delete_saved(self, name, timestamp):
         directory_path = f'server/database/{self.id}/{name}'
         filename_npy = f'{timestamp}.npy'

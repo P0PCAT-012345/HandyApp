@@ -3,30 +3,56 @@ import websockets
 import json
 from datetime import datetime, timezone
 from main import Session
+from login import LoginSession
 import uuid
 
 
+loginSessionsList = {}
 sessionsList = {}
 namespace = uuid.NAMESPACE_DNS
 
 async def handler(websocket, path):
-    global sessionsList
+    global loginSessionsList, sessionsList
     client_address = websocket.remote_address[0]
     print("Connected from: ", websocket.remote_address)
+    loggingin = True
+    user = None
     try:
-        if client_address not in sessionsList:
-            id = str(uuid.uuid5(namespace, client_address))
-            sessionsList[client_address] = Session(id)
-            print("New session started")
+        if client_address not in loginSessionsList:
+            loginSessionsList[client_address] = LoginSession()
+            print("New login session started")
+        if loginSessionsList[client_address].rememberMe:
+            loggingin = False
+            user = loginSessionsList[client_address].user
+            async for chunk in process_message(loginSessionsList[client_address], json.dumps({"function": 'onOpen'})):
+                print("Auto log in")
+                await websocket.send(chunk)
+
         async for message in websocket:
-            if "function" in message and json.loads(message)["function"] == "list_saved":
-                async for chunk in process_message(sessionsList[client_address], message):
+            if loggingin:
+                async for chunk in process_message(loginSessionsList[client_address], message):
+                    value = json.loads(chunk).values()
+                    if len(value) != 2:
+                        continue
+                    result, function = value
+                    if (function == 'login' or function == 'signup') and result:
+                        loggingin = False
+                        user = loginSessionsList[client_address].user
+                        print("User Log in succesful")
+                    else:
+                        print("User Log in unsuccesful")
                     await websocket.send(chunk)
             else:
-                response = process_message(sessionsList[client_address], message)
-                if response:
-                    await websocket.send(response)
-    except websockets.exceptions.ConnectionClosed:
+                if user not in sessionsList:
+                    sessionsList[user]  = Session(user)
+                    print("Creating a new session for the user")
+                async for chunk in process_message(sessionsList[user], message):
+                    await websocket.send(chunk)
+    finally:
+        if client_address in loginSessionsList:
+            if not loginSessionsList[client_address].used:
+                loginSessionsList.pop(client_address)
+                print("Deleted unused login session")
         print(f"Connection closed with {client_address}")
 
 async def process_message(session, message):

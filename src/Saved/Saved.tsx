@@ -37,12 +37,18 @@ interface SavedItem {
   video: string; // Array to store video chunks
 }
 
+interface SocketMessageProps {
+  result: string;
+  function: string;
+}
+
 interface SavedProps {
   socketRef: React.MutableRefObject<WebSocket | null>;
+  socketMessage: SocketMessageProps | null;
   isConnected: boolean;
 }
 
-const Saved: React.FC<SavedProps> = ({ socketRef, isConnected }) => {
+const Saved: React.FC<SavedProps> = ({ socketRef, socketMessage, isConnected }) => {
   const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<SavedItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
