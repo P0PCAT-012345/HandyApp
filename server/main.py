@@ -14,7 +14,6 @@ import datetime
 import warnings
 
 
-# Suppress deprecation warnings from protobuf
 warnings.filterwarnings("ignore", category=UserWarning, module='google.protobuf')
 
 class Session:
@@ -120,7 +119,7 @@ class Session:
             return output
         except Exception as e:
             print(f"Error getting embedding: {e}")
-            return np.zeros(256)  # Assuming embedding size is 256
+            return np.zeros(256) 
 
     def recieve(self, frame, mode="translate"):
         current_landmarks = self.convert_mediapipe(self.decode_image(frame))
@@ -178,18 +177,16 @@ class Session:
 
         timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
         filename_npy = f'{timestamp}.npy'
-        filename_video = f'{timestamp}.webm'  # You can choose a different format if preferred
+        filename_video = f'{timestamp}.webm' 
         file_path_npy = os.path.join(folder_path, filename_npy)
         file_path_video = os.path.join(folder_path, filename_video)
 
-        # Save the .npy file
         try:
             np.save(file_path_npy, embeddings)
             print(f"Embeddings saved for {name} at {file_path_npy}")
         except Exception as e:
             print(f"Failed to save embeddings: {e}")
 
-        # Save the video file if video_data is provided
         if video_data:
             try:
                 video_bytes = base64.b64decode(video_data)
@@ -199,10 +196,8 @@ class Session:
             except Exception as e:
                 print(f"Failed to save video: {e}")
 
-        # Clear landmarks after saving
         self.hand_landmarks = []
 
-        # Optionally, add the new embedding to the database
         self.database.append((name, embeddings, file_path_npy, file_path_video))
 
     async def list_saved(self):
@@ -259,7 +254,6 @@ class Session:
                 os.remove(file_path_video)
                 print(f"Deleted {file_path_video}")
 
-            # Remove the corresponding data from self.database
             self.database = [(class_name, embeddings, npy_path, video_path) for class_name, embeddings, npy_path, video_path in self.database
                             if not os.path.samefile(video_path, file_path_video)]
 
