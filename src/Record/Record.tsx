@@ -72,7 +72,7 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
   };
 
   const stopRecording = () => {
-    if (mediaRecorderRef.current) {
+    if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
       setIsSaving(true);

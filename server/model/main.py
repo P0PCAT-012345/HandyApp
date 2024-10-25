@@ -2,8 +2,8 @@
 
 import numpy as np
 import torch
-from server.model.model import get_model
-from server.model.classify import classify, toSentence
+from model.model import get_model
+from model.classify import classify, toSentence
 import os
 import cv2
 import mediapipe as mp
@@ -278,9 +278,6 @@ class Session:
                 top_lip_y = np.mean([face_landmarks.landmark[i].y for i in top_lip_landmarks])
                 bottom_lip_y = np.mean([face_landmarks.landmark[i].y for i in bottom_lip_landmarks])
 
-                left_corner = face_landmarks.landmark[left_mouth_corner]
-                right_corner = face_landmarks.landmark[right_mouth_corner]
-                mouth_width = np.abs(right_corner.x - left_corner.x)
-
-                mouth_open_threshold = mouth_width * 0.5
-                return (bottom_lip_y - top_lip_y) > mouth_open_threshold
+                if (bottom_lip_y - top_lip_y) > 0.05:
+                    print("KUCHIPAKU!")
+                return (bottom_lip_y - top_lip_y) > 0.05

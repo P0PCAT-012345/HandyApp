@@ -2,8 +2,8 @@ import asyncio
 import websockets
 import json
 from datetime import datetime, timezone
-from server.model.main import Session
-from server.login.login import LoginSession
+from model.main import Session
+from login.login import LoginSession
 import uuid
 
 
