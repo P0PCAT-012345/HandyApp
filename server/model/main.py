@@ -120,10 +120,13 @@ class Session:
             return np.zeros(256) 
 
     def recieve(self, frame, mode="translate"):
+        if len(self.database) == 0:
+            print("Database is empty! Either record new signs or use an account with recorded signs")
+            return
         current_landmarks = self.convert_mediapipe(self.decode_image(frame))
         self.hand_landmarks.append(current_landmarks)
         if mode == 'translate':
-            if len(self.hand_landmarks) == 30 and len(self.database) > 0:
+            if len(self.hand_landmarks) == 30:
                 output = self.getEmbedding(self.hand_landmarks)
                 sequence, costs = classify(output, 0.9, self.database)
                 self.hand_landmarks = []
