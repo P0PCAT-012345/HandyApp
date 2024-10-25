@@ -23,3 +23,5 @@ yarn-debug.log*
 yarn-error.log*
 
 Handy Promo Video.mp4
+
+/server/__pycache__
