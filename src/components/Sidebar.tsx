@@ -86,7 +86,7 @@ const Sidebar: React.FC = () => {
         </li>
 
         {/* Settings */}
-        <li>
+        {/* <li>
           <NavLink
             to="/settings"
             className={({ isActive }) => (isActive ? 'active' : '')}
@@ -96,7 +96,7 @@ const Sidebar: React.FC = () => {
             {isOpen && <span className="links_name">Settings</span>}
           </NavLink>
           {!isOpen && <span className="tooltip">Settings</span>}
-        </li>
+        </li> */}
 
         {/* Documentation */}
         <li>
@@ -117,7 +117,7 @@ const Sidebar: React.FC = () => {
         <li className="spacer"></li>
 
         {/* Profile/Logout */}
-        <li>
+        {/* <li>
           <div
             className="profile-details"
             onClick={handleLogout}
@@ -130,7 +130,7 @@ const Sidebar: React.FC = () => {
             {isOpen && <span className="links_name">Logout</span>}
           </div>
           {!isOpen && <span className="tooltip">Logout</span>}
-        </li>
+        </li> */}
       </ul>
     </div>
   );

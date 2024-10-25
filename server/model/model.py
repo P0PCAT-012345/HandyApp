@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import time
 
 class spatialExtractor(nn.Module):
     def __init__(self, input_channels, hidden_channels, output_channels):
@@ -92,7 +91,7 @@ class TCNSignEmbedding(nn.Module):
 
         return x
 
-def get_model(path = 'server/weights.h5', device='cpu'):
+def get_model(path = 'server/model/weights.h5', device='cpu'):
     model = TCNSignEmbedding().to(device)
     state_dict = torch.load(path, map_location=device)
     model.load_state_dict(state_dict)

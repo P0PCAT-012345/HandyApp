@@ -2,14 +2,12 @@
 
 import numpy as np
 import torch
-from model import get_model
-from classify import classify, toSentence
-import glob
+from server.model.model import get_model
+from server.model.classify import classify, toSentence
 import os
 import cv2
 import mediapipe as mp
 import base64
-import time
 import datetime
 import warnings
 
@@ -127,7 +125,7 @@ class Session:
         if mode == 'translate':
             if len(self.hand_landmarks) == 30 and len(self.database) > 0:
                 output = self.getEmbedding(self.hand_landmarks)
-                sequence, costs = classify(output, 0.35, self.database)
+                sequence, costs = classify(output, 0.9, self.database)
                 self.hand_landmarks = []
                 if len(sequence) == 0:
                     self.lastWord = None
