@@ -182,6 +182,7 @@ class Session:
         try:
             np.save(file_path_npy, embeddings)
             print(f"Embeddings saved for {name} at {file_path_npy}")
+            print(f"Total timeframes {len(self.hand_landmarks)}")
         except Exception as e:
             print(f"Failed to save embeddings: {e}")
 
