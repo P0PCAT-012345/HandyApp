@@ -30,7 +30,6 @@ class Session:
         self.face_mesh = mp_face_mesh.FaceMesh(static_image_mode=False, min_detection_confidence=0.5)
         self.lastWord = None
         self.refreshCount = 0
-
         self.database = []
         self.classDescriptions = {}
         for databaseFolder in ['sampleSet', id]:
@@ -100,7 +99,6 @@ class Session:
             frame_landmarks = np.zeros((42, 3))
             left_hand_detected = False
             right_hand_detected = False
-
             if results.multi_hand_landmarks:
                 for hand_landmark, handedness in zip(results.multi_hand_landmarks, results.multi_handedness):
                     if handedness.classification[0].label == 'Left':
@@ -137,7 +135,7 @@ class Session:
     def recieve(self, frame, mode="translate"):
         if len(self.database) == 0:
             print("Database is empty! Either record new signs or use an account with recorded signs")
-            return
+            
         current_landmarks = self.convert_mediapipe(self.decode_image(frame))
         self.hand_landmarks.append(current_landmarks)
         if mode == 'translate':
@@ -254,11 +252,11 @@ class Session:
                 bottom_lip_landmarks = [17, 18]
                 left_mouth_corner = 61
                 right_mouth_corner = 291
-
+                
                 top_lip_y = np.mean([face_landmarks.landmark[i].y for i in top_lip_landmarks])
                 bottom_lip_y = np.mean([face_landmarks.landmark[i].y for i in bottom_lip_landmarks])
-
-                return (bottom_lip_y - top_lip_y) > 0.05
+                # print(bottom_lip_y-top_lip_y)
+                return (bottom_lip_y - top_lip_y) > 0.03
  
     
     async def send_video_files(self):

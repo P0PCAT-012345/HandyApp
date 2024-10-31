@@ -6,7 +6,6 @@ import Sidebar from '../components/Sidebar';
 import Record from '../Record/Record';
 import Saved from '../Saved/Saved';
 import FileViewer from '../Saved/FileViewer';
-import Settings from '../Settings/Settings'; // Import Settings component
 import LoadingScreen from '../LoadingScreen/LoadingScreen';
 import Auth from '../Login/Auth'; // Import the Login component
 import './App.css';
