@@ -234,17 +234,8 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
       {/* Button Overlay */}
       {!isVideoVisible && (
         <div className="overlay">
-          <button
-            onClick={(event) => {
-              event.stopPropagation();
-              handleClick();
-            }}
-            className="button" // Ensures circular shape
-            aria-label="Play Video"
-          >
-            <FaPlay className="button-icon" />
-          </button>
-        </div>
+          <h1 className="overlay-title">Tap to Start Translating</h1>
+      </div>
       )}
 
       {/* Subtitle */}
@@ -254,18 +245,7 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
         </div>
       )}
 
-      {/* Text Box for Translation/Memo */}
-      <div className="text-box-container">
-      <textarea
-        readOnly
-        value={subtitleText}
-        className="text-box"
-        aria-label="Translation Output"
-      />
-      <button className="copy-button" onClick={handleCopy}>
-        <FaCopy />
-      </button>
-    </div>
+      
     </div>
   );
 };

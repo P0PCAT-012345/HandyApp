@@ -224,17 +224,8 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
       {/* Button Overlay */}
       {!isVideoVisible && !isRecording && !isSaving && (
         <div className="overlay">
-          <button
-            onClick={(event) => {
-              event.stopPropagation();
-              handleClick();
-            }}
-            className="button" // Ensures circular shape
-            aria-label="Record Video"
-          >
-            <FaRecordVinyl className="button-icon" />
-          </button>
-        </div>
+          <h1 className="overlay-title">Tap to Start Recording</h1>
+      </div>
       )}
 
       {/* Countdown Overlay */}
@@ -264,15 +255,7 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
         </div>
       )}
 
-      {/* Text Box for Translation/Memo */}
-      <div className="text-box-container">
-        <textarea
-          readOnly
-          value={subtitleText}
-          className="text-box"
-          aria-label="Translation Output"
-        />
-      </div>
+      
     </div>
   );
 };
