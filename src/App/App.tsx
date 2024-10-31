@@ -217,7 +217,7 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
 
       {isVideoVisible && (
         <img
-          src="/blackperson.png"
+          src="/greyperson.png"
           style={{
             position: 'absolute',
             top: `${webcamDimensions.top}px`,
@@ -233,7 +233,7 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
       {/* Button Overlay */}
       {!isVideoVisible && (
         <div className="overlay">
-          <h1 className="overlay-title">Tap to Start Translating</h1>
+          <h1 className="overlay-title">画面をクリックすると翻訳が始まります</h1>
       </div>
       )}
 

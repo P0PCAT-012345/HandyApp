@@ -193,10 +193,11 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
       }
     }
   }, [socketMessage]);
-
+  
   return (
     <div onClick={handleClick} className="video-container record-container">
       {!isConnected && <LoadingScreen />}
+      
       <Webcam
         audio={false}
         ref={webcamRef}
@@ -208,7 +209,7 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
 
       {isVideoVisible && (
         <img
-          src="/blackperson.png"
+          src="/greyperson.png"
           style={{
             position: 'absolute',
             top: `${webcamDimensions.top}px`,
@@ -216,15 +217,15 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
             width: `${webcamDimensions.width}px`,
             height: `${webcamDimensions.height}px`,
             objectFit: 'contain',
+            zIndex: 1, 
           }}
           alt="Overlay"
         />
       )}
-
       {/* Button Overlay */}
       {!isVideoVisible && !isRecording && !isSaving && (
         <div className="overlay">
-          <h1 className="overlay-title">Tap to Start Recording</h1>
+          <h1 className="overlay-title">画面をクリックして録画が始まり、口を開けると終了します</h1>
       </div>
       )}
 

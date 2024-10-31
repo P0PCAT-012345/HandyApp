@@ -1,19 +1,18 @@
 .video-container {
   position: relative;
   width: 100%;
-  height: 100%; /* Ensure the height is set */
+  height: 100%; 
   background-color: black;
   overflow: hidden;
   display: flex;
-  justify-content: center; /* Center the video horizontally */
-  align-items: center; /* Center the video vertically */
+  justify-content: center; 
 }
 
 .video-element {
   width: auto;
   height: 100%;
-  object-fit: contain; /* Ensure the video fits vertically without cropping */
-  transform: scaleX(-1); /* Mirror the video */
+  object-fit: contain; 
+  transform: scaleX(-1);
   transition: filter 0.5s;
 }
 
@@ -70,12 +69,12 @@
 }
 
 .button:active {
-  transform: scale(0.95); /* Slightly shrink on click */
+  transform: scale(0.95);
 }
 
 .button-icon {
   color: rgb(214, 214, 255);
-  font-size: 36px; /* Adjusted icon size for better fit */
+  font-size: 36px; 
 }
 
 .countdown-overlay {
@@ -94,7 +93,6 @@
 }
 
 .subtitle-container, .save-overlay {
-  /* Shared styles if needed */
 }
 
 .save-overlay {
@@ -140,9 +138,9 @@
 
 .text-box-container {
   position: absolute;
-  top: 20px; /* Adjust as needed */
-  right: 20px; /* Adjust as needed */
-  width: 300px; /* Adjust size as needed */
+  top: 20px; 
+  right: 20px; 
+  width: 300px; 
   z-index: 12;
 }
 
@@ -175,7 +173,6 @@
   font-size: 1.2rem;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .button {
       width: 60px;

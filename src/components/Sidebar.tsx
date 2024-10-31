@@ -5,8 +5,8 @@ import {
   FaBars,
   FaTimes,
   FaHandPaper,
-  FaRegSave,
-  FaFileAlt,
+  FaCamera,
+  FaFolder,
   FaBook,
 } from 'react-icons/fa';
 import './Sidebar.css';
@@ -51,7 +51,7 @@ const Sidebar: React.FC<SidebarProps> = ({ setCurrentComponent }) => {
         {/* Record */}
         <li onClick={() => setCurrentComponent("record")}>
           <div className="nav-item" aria-label="Record">
-            <FaRegSave className="icon" />
+            <FaCamera className="icon" />
             {isOpen && <span className="links_name">Record</span>}
           </div>
           {!isOpen && <span className="tooltip">Record</span>}
@@ -60,7 +60,7 @@ const Sidebar: React.FC<SidebarProps> = ({ setCurrentComponent }) => {
         {/* Files */}
         <li onClick={() => setCurrentComponent("saved")}>
           <div className="nav-item" aria-label="Files">
-            <FaFileAlt className="icon" />
+            <FaFolder className="icon" />
             {isOpen && <span className="links_name">Files</span>}
           </div>
           {!isOpen && <span className="tooltip">Files</span>}
