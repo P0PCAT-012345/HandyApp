@@ -13,6 +13,7 @@ class LoginSession:
             "signup": self.signup,
             'onOpen': self.onOpen,
         }
+        self.async_functions = {}
 
 
     def onOpen(self):

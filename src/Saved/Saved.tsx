@@ -60,66 +60,66 @@ const Saved: React.FC<SavedProps> = ({ socketRef, socketMessage, isConnected }) 
   const fileInputRef = useRef<HTMLInputElement>(null);
    const hasInitialized = useRef(false);
 
-   useEffect(() => {
-    if (!isConnected) {hasInitialized.current = false;}
-    if (!isConnected || !socketRef.current || hasInitialized.current) return;
+  //  useEffect(() => {
+  //   if (!isConnected) {hasInitialized.current = false;}
+  //   if (!isConnected || !socketRef.current || hasInitialized.current) return;
   
-    hasInitialized.current = true;
+  //   hasInitialized.current = true;
   
-    const requestList = JSON.stringify({ function: 'list_saved' });
-    socketRef.current.send(requestList);
+  //   const requestList = JSON.stringify({ function: 'list_saved' });
+  //   socketRef.current.send(requestList);
   
-    const newSavedItems: SavedItem[] = [];
-    const chunks: { [key: string]: string[] } = {};
+  //   const newSavedItems: SavedItem[] = [];
+  //   const chunks: { [key: string]: string[] } = {};
   
-    const handleMessage = (event: MessageEvent) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.function === 'list_saved' && data.result) {
-          if ("finished" in data.result) {
-            setSavedItems(newSavedItems);
-            setFilteredItems(newSavedItems);
-            setIsLoading(false);
-          } else {
-            const { name, timestamp, chunk } = data.result;
-            const key = `${name}_${timestamp}`;
+  //   const handleMessage = (event: MessageEvent) => {
+  //     try {
+  //       const data = JSON.parse(event.data);
+  //       if (data.function === 'list_saved' && data.result) {
+  //         if ("finished" in data.result) {
+  //           setSavedItems(newSavedItems);
+  //           setFilteredItems(newSavedItems);
+  //           setIsLoading(false);
+  //         } else {
+  //           const { name, timestamp, chunk } = data.result;
+  //           const key = `${name}_${timestamp}`;
   
-            if (!chunks[key]) {
-              chunks[key] = [];
-            }
+  //           if (!chunks[key]) {
+  //             chunks[key] = [];
+  //           }
   
-            if (chunk === null) {
-              const videoData = chunks[key].join('');
-              const savedItem = {
-                name,
-                timestamp,
-                video: videoData,
-              };
+  //           if (chunk === null) {
+  //             const videoData = chunks[key].join('');
+  //             const savedItem = {
+  //               name,
+  //               timestamp,
+  //               video: videoData,
+  //             };
   
-              newSavedItems.push(savedItem);
-              delete chunks[key];
-            } else {
-              chunks[key].push(chunk);
-            }
-          }
-        } else if (data.error) {
-          setError(data.error);
+  //             newSavedItems.push(savedItem);
+  //             delete chunks[key];
+  //           } else {
+  //             chunks[key].push(chunk);
+  //           }
+  //         }
+  //       } else if (data.error) {
+  //         setError(data.error);
 
-          setIsLoading(false);
-        }
-      } catch (err) {
-        console.error('Failed to parse message in Saved component:', err);
-        setError('Failed to parse server response.');
-        setIsLoading(false);
-      }
-    };
+  //         setIsLoading(false);
+  //       }
+  //     } catch (err) {
+  //       console.error('Failed to parse message in Saved component:', err);
+  //       setError('Failed to parse server response.');
+  //       setIsLoading(false);
+  //     }
+  //   };
   
-    socketRef.current.removeEventListener('message', handleMessage);
-    socketRef.current.addEventListener('message', handleMessage);
+  //   socketRef.current.removeEventListener('message', handleMessage);
+  //   socketRef.current.addEventListener('message', handleMessage);
 
 
 
-  }, [isConnected, socketRef]);
+  // }, [isConnected, socketRef]);
 
   const handleDelete = (item: SavedItem) => {
     if (window.confirm(`"${item.name}" を削除してもよろしいですか？`)) {
@@ -215,23 +215,36 @@ const Saved: React.FC<SavedProps> = ({ socketRef, socketMessage, isConnected }) 
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isModalOpen]);
 
-  if (isLoading) {
-    return (
-      <Box className="saved-container loading-container" display="flex" justifyContent="center" alignItems="center">
-        <CircularProgress />
-      </Box>
-    );
-  }
 
-  if (error) {
-    return (
-      <Box className="saved-container error-container">
-        <Typography variant="h6" color="error">
-          エラー: {error}
-        </Typography>
-      </Box>
-    );
-  }
+  
+  // useEffect(() => {
+  //   if (!isConnected) return;
+
+  //   if (socketMessage?.function == 'append' && socketMessage?.result){
+      
+  //         const data = JSON.parse(socketMessage?.result);
+  //   }
+  // }, [socketMessage, isConnected])
+
+
+
+  // if (isLoading) {
+  //   return (
+  //     <Box className="saved-container loading-container" display="flex" justifyContent="center" alignItems="center">
+  //       <CircularProgress />
+  //     </Box>
+  //   );
+  // }
+
+  // if (error) {
+  //   return (
+  //     <Box className="saved-container error-container">
+  //       <Typography variant="h6" color="error">
+  //         エラー: {error}
+  //       </Typography>
+  //     </Box>
+  //   );
+  // }
 
   return (
     <>

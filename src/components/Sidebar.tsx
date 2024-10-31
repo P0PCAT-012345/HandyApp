@@ -1,39 +1,32 @@
 // src/components/Sidebar.tsx
 
 import React, { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
 import {
   FaBars,
   FaTimes,
   FaHandPaper,
   FaRegSave,
   FaFileAlt,
-  FaCogs,
   FaBook,
-  FaSignOutAlt,
 } from 'react-icons/fa';
 import './Sidebar.css';
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  setCurrentComponent: (component: string) => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ setCurrentComponent }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const navigate = useNavigate();
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
-  };
-
-  const handleLogout = () => {
-    // Implement your logout logic here (e.g., clearing tokens)
-    // Then navigate to the login page
-    navigate('/login');
-    window.location.reload(); // Optionally reload the page
   };
 
   return (
     <div className={`sidebar ${isOpen ? 'open' : ''}`}>
       {/* Logo and Toggle Button */}
       <div className="logo-details">
-        {isOpen && <div className="logo_name">Handy</div>} {/* Renamed to Handy */}
+        {isOpen && <div className="logo_name">Handy</div>}
         <div
           className="toggle-btn"
           onClick={toggleSidebar}
@@ -47,56 +40,31 @@ const Sidebar: React.FC = () => {
       {/* Navigation List */}
       <ul className="nav-list">
         {/* Translate */}
-        <li>
-          <NavLink
-            to="/dashboard"
-            className={({ isActive }) => (isActive ? 'active' : '')}
-            aria-label="Translate"
-          >
-            <FaHandPaper className="icon" /> {/* Updated to hand sign */}
+        <li onClick={() => setCurrentComponent("dashboard")}>
+          <div className="nav-item" aria-label="Translate">
+            <FaHandPaper className="icon" />
             {isOpen && <span className="links_name">Translate</span>}
-          </NavLink>
+          </div>
           {!isOpen && <span className="tooltip">Translate</span>}
         </li>
 
         {/* Record */}
-        <li>
-          <NavLink
-            to="/record"
-            className={({ isActive }) => (isActive ? 'active' : '')}
-            aria-label="Record"
-          >
+        <li onClick={() => setCurrentComponent("record")}>
+          <div className="nav-item" aria-label="Record">
             <FaRegSave className="icon" />
             {isOpen && <span className="links_name">Record</span>}
-          </NavLink>
+          </div>
           {!isOpen && <span className="tooltip">Record</span>}
         </li>
 
         {/* Files */}
-        <li>
-          <NavLink
-            to="/saved"
-            className={({ isActive }) => (isActive ? 'active' : '')}
-            aria-label="Files"
-          >
+        <li onClick={() => setCurrentComponent("saved")}>
+          <div className="nav-item" aria-label="Files">
             <FaFileAlt className="icon" />
             {isOpen && <span className="links_name">Files</span>}
-          </NavLink>
+          </div>
           {!isOpen && <span className="tooltip">Files</span>}
         </li>
-
-        {/* Settings */}
-        {/* <li>
-          <NavLink
-            to="/settings"
-            className={({ isActive }) => (isActive ? 'active' : '')}
-            aria-label="Settings"
-          >
-            <FaCogs className="icon" />
-            {isOpen && <span className="links_name">Settings</span>}
-          </NavLink>
-          {!isOpen && <span className="tooltip">Settings</span>}
-        </li> */}
 
         {/* Documentation */}
         <li>
@@ -104,7 +72,7 @@ const Sidebar: React.FC = () => {
             href="https://github.com/yoyo222/Handy-Website"
             target="_blank"
             rel="noopener noreferrer"
-            className="external-link"
+            className="nav-item external-link"
             aria-label="Documentation"
           >
             <FaBook className="icon" />
@@ -115,22 +83,6 @@ const Sidebar: React.FC = () => {
 
         {/* Spacer to Push Profile/Logout to Bottom */}
         <li className="spacer"></li>
-
-        {/* Profile/Logout */}
-        {/* <li>
-          <div
-            className="profile-details"
-            onClick={handleLogout}
-            role="button"
-            tabIndex={0}
-            aria-label="Logout"
-            onKeyPress={(e) => { if (e.key === 'Enter') handleLogout(); }}
-          >
-            <FaSignOutAlt className="profile-icon" />
-            {isOpen && <span className="links_name">Logout</span>}
-          </div>
-          {!isOpen && <span className="tooltip">Logout</span>}
-        </li> */}
       </ul>
     </div>
   );

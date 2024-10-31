@@ -71,7 +71,6 @@ const Auth: React.FC<AuthProps> = ({ onLogin, onSignUp, setIsAuthenticated, sock
   };
 
   useEffect(() => {
-    console.log(socketMessage)
     if (!isConnected) {
       setErrorMessage("ERROR 503: Server not connected");
       return;

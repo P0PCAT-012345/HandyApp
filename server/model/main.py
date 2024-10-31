@@ -10,6 +10,7 @@ import mediapipe as mp
 import base64
 import datetime
 import warnings
+import shutil
 
 
 warnings.filterwarnings("ignore", category=UserWarning, module='google.protobuf')
@@ -31,6 +32,7 @@ class Session:
         self.refreshCount = 0
 
         self.database = []
+        self.classDescriptions = {}
         for databaseFolder in ['sampleSet', id]:
             if not os.path.isdir(f"server/database/{databaseFolder}"):
                 continue
@@ -38,6 +40,7 @@ class Session:
                 folder_path = os.path.join(f"server/database/{databaseFolder}", folder_name)
 
                 if os.path.isdir(folder_path):
+                    self.classDescriptions[folder_name] = ''
                     for file_name in os.listdir(folder_path):
                         if file_name.endswith('.npy'):
                             video_name = file_name[:-3] + 'webm'
@@ -46,6 +49,12 @@ class Session:
                             data = np.load(file_path_npy)
                             if len(data.shape) == 2 and data.shape[1] == 256:
                                 self.database.append((folder_name, data, file_path_npy, file_path_video))
+                            print(data.shape)
+
+                        elif file_name.endswith('.txt'):
+                            with open(os.path.join(folder_path, file_name), 'r') as file:
+                                content = file.read()
+                                self.classDescriptions[folder_name] = content
 
         print("Initialized with database of length:", len(self.database))
 
@@ -54,9 +63,15 @@ class Session:
             'stop_recording': self.stop_recording,
             'reset_data': self.reset_data,
             'record': self.record,
-            'list_saved': self.list_saved,
-            'delete_saved': self.delete_saved,
+            'send_files': self.send_video_files,
+            'send_descriptions' : self.send_class_descriptions,
+            'delete_files': self.delete_files,
+            'delete_folders': self.delete_folders,
+            'update_description': self.update_class_description,
             'mouth_open': self.mouth_open,
+        }
+        self.async_functions = {
+            'send_files', 'stop_recording'
         }
 
 
@@ -117,7 +132,7 @@ class Session:
             return output
         except Exception as e:
             print(f"Error getting embedding: {e}")
-            return np.zeros(256) 
+            return np.zeros((1,256)) 
 
     def recieve(self, frame, mode="translate"):
         if len(self.database) == 0:
@@ -170,11 +185,14 @@ class Session:
     def record(self, frame):
         return 'MOUTH_OPEN_TRUE' if self.recieve(frame, mode='record') else None
 
-    def stop_recording(self, name, video_data=None):
+    async def stop_recording(self, name, video_data=None):
         embeddings = self.getEmbedding(self.hand_landmarks)
         folder_path = f'server/database/{self.id}/{name}'
 
-        os.makedirs(folder_path, exist_ok=True)
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+            with open(os.path.join(folder_path, 'description.txt'), 'w') as file:
+                file.write("")
 
         timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
         filename_npy = f'{timestamp}.npy'
@@ -202,67 +220,25 @@ class Session:
 
         self.database.append((name, embeddings, file_path_npy, file_path_video))
 
-    async def list_saved(self):
-        if len(self.database) != 0:
-            saved = []
-            for class_name, _, _, video_path in self.database:
-                if os.path.exists(video_path):
-                    if video_path.endswith('.webm'):
-                        timestamp = os.path.basename(video_path)[:-5]
-                        if os.path.exists(video_path):
-                            saved.append({
-                                "name": class_name,
-                                "timestamp": timestamp,
-                                "video_path": video_path
-                            })
-            print("starting chunks")
-            for item in saved:
-                video_path = item["video_path"]
-                with open(video_path, 'rb') as file:
-                    video_data = file.read()
-                    base64_data = base64.b64encode(video_data).decode('utf-8')
-                    chunk_size = 1024 * 1024 # 1 MB
-                    chunks = [base64_data[i:i+chunk_size] for i in range(0, len(base64_data), chunk_size)]
-                    for chunk in chunks:
-                        print("sending chunks...")
-                        yield {
-                            "name": item["name"],
-                            "timestamp": item["timestamp"],
-                            "chunk": chunk
-                        }
-                    yield {
-                        "name": item["name"],
-                        "timestamp": item["timestamp"],
-                        "chunk": None
-                    }
-        print("Item sent")
-        yield {
-            "finished": True
-        }
-        print("chunks sent successfully.")
 
-    def delete_saved(self, name, timestamp):
-        directory_path = f'server/database/{self.id}/{name}'
-        filename_npy = f'{timestamp}.npy'
-        filename_video = f'{timestamp}.webm'
-        file_path_npy = os.path.join(directory_path, filename_npy)
-        file_path_video = os.path.join(directory_path, filename_video)
-
-        try:
-            if os.path.exists(file_path_npy):
-                os.remove(file_path_npy)
-                print(f"Deleted {file_path_npy}")
-            if os.path.exists(file_path_video):
-                os.remove(file_path_video)
-                print(f"Deleted {file_path_video}")
-
-            self.database = [(class_name, embeddings, npy_path, video_path) for class_name, embeddings, npy_path, video_path in self.database
-                            if not os.path.samefile(video_path, file_path_video)]
-
-            return "Deleted successfully"
-        except Exception as e:
-            return f"Error deleting files: {e}"
-
+        with open(file_path_video, 'rb') as file:
+            video_data = file.read()
+            base64_data = base64.b64encode(video_data).decode('utf-8')
+            chunk_size = 1024 * 256
+            chunks = [base64_data[i:i+chunk_size] for i in range(0, len(base64_data), chunk_size)]
+            for chunk in chunks:
+                yield {
+                    "folder": name,
+                    "filename": timestamp,
+                    "chunk": chunk
+                }
+            yield {
+                    "folder": name,
+                    "filename": timestamp,
+                    "chunk": None
+                }
+        print("SENT VIDEO")
+    
     def mouth_open(self, frame):
         image = self.decode_image(frame)
         if image is None:
@@ -282,6 +258,101 @@ class Session:
                 top_lip_y = np.mean([face_landmarks.landmark[i].y for i in top_lip_landmarks])
                 bottom_lip_y = np.mean([face_landmarks.landmark[i].y for i in bottom_lip_landmarks])
 
-                if (bottom_lip_y - top_lip_y) > 0.05:
-                    print("KUCHIPAKU!")
                 return (bottom_lip_y - top_lip_y) > 0.05
+ 
+    
+    async def send_video_files(self):
+        print(f"Sending file with database of length {len(self.database)}")
+        if len(self.database) != 0:
+            yield len(self.database)
+            saved = []
+            for class_name, _, _, video_path in self.database:
+                if os.path.exists(video_path):
+                    if video_path.endswith('.webm'):
+                        timestamp = os.path.basename(video_path)[:-5]
+                        if os.path.exists(video_path):
+                            saved.append({
+                                "folder": class_name,
+                                "filename": timestamp,
+                                "video_path": video_path
+                            })
+            print("starting chunks")
+            for item in saved:
+                video_path = item["video_path"]
+                with open(video_path, 'rb') as file:
+                    video_data = file.read()
+                    base64_data = base64.b64encode(video_data).decode('utf-8')
+                    chunk_size = 1024 * 256
+                    chunks = [base64_data[i:i+chunk_size] for i in range(0, len(base64_data), chunk_size)]
+                    for chunk in chunks:
+                        yield {
+                            "folder": item["folder"],
+                            "filename": item["filename"],
+                            "chunk": chunk
+                        }
+                yield {
+                        "folder": item["folder"],
+                        "filename": item["filename"],
+                        "chunk": None
+                    }
+        else:
+            yield "NONE"
+        print("Item sent")
+        print("chunks sent successfully.")
+
+    def send_class_descriptions(self):
+        print(self.classDescriptions)
+        return self.classDescriptions
+
+    def delete_files(self, folder, files):
+        directory_path = f'server/database/{self.id}/{folder}'
+        toRemove = set(files)
+        try:
+            for filename in files:
+                filename_npy = f'{filename}.npy'
+                filename_video = f'{filename}.webm'
+                file_path_npy = os.path.join(directory_path, filename_npy)
+                file_path_video = os.path.join(directory_path, filename_video)
+
+                if os.path.exists(file_path_npy):
+                    os.remove(file_path_npy)
+                    print(f"Deleted {file_path_npy}")
+                if os.path.exists(file_path_video):
+                    os.remove(file_path_video)
+                    print(f"Deleted {file_path_video}")
+        
+        
+            newdatabase = []
+            for class_name, embeddings, npy_path, video_path in self.database:
+                if not os.path.basename(video_path)[:-5] in toRemove:
+                    newdatabase.append((class_name, embeddings, npy_path, video_path))
+            self.database = newdatabase
+        except Exception as e:
+                return f"Error deleting files: {e}"
+
+    def delete_folders(self, folders):
+        newdatabase = []
+        hash = set(folders)
+        for class_name, embeddings, npy_path, video_path in self.database:
+            if not class_name in hash:
+                newdatabase.append((class_name, embeddings, npy_path, video_path))
+        
+        for class_name in folders:
+            self.classDescriptions.pop(class_name)
+        self.database = newdatabase
+
+        for folder in folders:
+            directory_path = f'server/database/{self.id}/{folder}'
+            try:
+                if os.path.exists(directory_path):
+                    shutil.rmtree(directory_path)
+            except Exception as e:
+                return f"Error deleting folders: {e}"
+            
+
+    def update_class_description(self, folder, description):
+        path = os.path.join(f"server/database/{self.id}/{folder}/description.txt")
+        if os.path.exists(path):
+            with open(path, 'w') as file:
+                file.write(description)
+                self.classDescriptions[folder] = description

@@ -71,7 +71,7 @@ async def process_message(session, message):
                 if 'args' in data:
                     args = data['args']
                 
-                if func_name == "list_saved":
+                if func_name in session.async_functions:
                     async for chunk in func(*args, **kwargs):
                         yield json.dumps({"result": chunk, "function": func_name})
                 else:
