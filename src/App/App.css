@@ -10,14 +10,153 @@ html, body {
   box-sizing: border-box;
 }
 
+/* Import Roboto Font */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+/* Default Light Theme Variables */
+:root {
+  --background-color: #ffffff;
+  --text-color: #333333;
+  --divider-color: #e0e0e0;
+  --icon-color: #555555;
+  --sidebar-bg: #f0f0f0; 
+  --sidebar-hover-bg: #e0e0e0; 
+  --sidebar-hover-text: #333333; 
+  --button-bg: #e0e0e0;
+  --button-hover-bg: #d5d5d5;
+  --button-icon-color: #333333;
+  --select-bg: #ffffff;
+  --select-border: #cccccc;
+  --select-hover-border: #999999;
+  --select-focus-border: #6666ff;
+
+  --tooltip-bg: #ffffff;
+  --tooltip-text: #333333;
+
+  --overlay-background: rgba(0, 0, 0, 0.3);
+
+  --close-button-color: var(--text-color);
+
+  /* New Variables for Components */
+  --instruction-bg: rgba(255, 255, 255, 0.8);
+  --instruction-text-color: #333333;
+  --countdown-bg: rgba(0, 0, 0, 0.6);
+  --countdown-text-color: #ffffff;
+  --subtitle-bg: rgba(0, 0, 0, 0.6);
+  --subtitle-text-color: #ffffff;
+  --modal-bg-light: #ffffff;
+  --modal-bg-dark: #333333;
+  --button-primary-bg: #1976d2; /* MUI Primary Color */
+  --button-primary-hover-bg: #1565c0;
+  --button-secondary-bg: #e0e0e0;
+  --button-secondary-hover-bg: #d5d5d5;
+  --input-bg: #ffffff;
+  --input-border: #cccccc;
+  --popup-bg-light: #ffffff;
+  --popup-bg-dark: #333333;
+  --popup-text-color: #333333;
+  --popup-border: #cccccc;
+}
+
+/* Dark Theme Variables */
+body.dark-theme {
+  --background-color: #1e1e1e;
+  --text-color: #f0f0f0;
+  --divider-color: #444444;
+  --icon-color: #bbbbbb;
+  --sidebar-bg: #2c2c2c; 
+  --sidebar-hover-bg: #444444;
+  --sidebar-hover-text: #ffffff; 
+  --button-bg: #333333;
+  --button-hover-bg: #4d4d4d;
+  --button-icon-color: #f0f0f0;
+  --select-bg: #2c2c2c;
+  --select-border: #555555;
+  --select-hover-border: #777777;
+  --select-focus-border: #8888ff;
+
+  --tooltip-bg: #555555;
+  --tooltip-text: #ffffff;
+
+  --overlay-background: rgba(0, 0, 0, 0.5);
+
+  --close-button-color: var(--text-color);
+
+  /* New Variables for Components */
+  --instruction-bg: rgba(0, 0, 0, 0.8);
+  --instruction-text-color: #f0f0f0;
+  --countdown-bg: rgba(0, 0, 0, 0.8);
+  --countdown-text-color: #ffffff;
+  --subtitle-bg: rgba(0, 0, 0, 0.8);
+  --subtitle-text-color: #ffffff;
+  --modal-bg-light: #333333;
+  --modal-bg-dark: #555555;
+  --button-primary-bg: #90caf9; /* Light Blue for Dark Mode */
+  --button-primary-hover-bg: #64b5f6;
+  --button-secondary-bg: #444444;
+  --button-secondary-hover-bg: #555555;
+  --input-bg: #2c2c2c;
+  --input-border: #555555;
+  --popup-bg-light: #333333;
+  --popup-bg-dark: #555555;
+  --popup-text-color: #f0f0f0;
+  --popup-border: #555555;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto', sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
 .app-container {
+<<<<<<< Updated upstream
+=======
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+}
+
+.home-section {
+  margin-left: 78px; 
+  width: calc(100% - 78px);
+  transition: margin-left 0.5s ease, width 0.5s ease;
+  overflow: hidden; 
+  position: relative;
+  background-color: var(--background-color); 
+}
+
+.sidebar.open ~ .home-section {
+  margin-left: 250px; 
+  width: calc(100% - 250px);
+}
+
+.subtitle-container {
+>>>>>>> Stashed changes
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
+<<<<<<< Updated upstream
   height: 100%;
   overflow: hidden;
   background-color: black;
+=======
+  text-align: center;
+  z-index: 12;
+}
+
+.subtitle-text {
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 20px 40px; 
+  border-radius: 5px;
+  display: inline-block;
+  font-size: 2.4rem; 
+>>>>>>> Stashed changes
 }
 
 .home-container {
@@ -30,6 +169,7 @@ html, body {
   background-color: black; 
 }
 
+<<<<<<< Updated upstream
 .video-element {
   width: 100%;
   height: 100%;
@@ -50,10 +190,27 @@ html, body {
   justify-content: center;
   align-items: center;
   position: absolute;
+=======
+@media (max-width: 420px) {
+  .home-section {
+    margin-left: 78px;
+    width: calc(100% - 78px);
+  }
+
+  .sidebar.open ~ .home-section {
+    margin-left: 250px;
+    width: calc(100% - 250px);
+  }
+}
+
+.popup-warning {
+  position: fixed;
+>>>>>>> Stashed changes
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
+<<<<<<< Updated upstream
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 10;
 }
@@ -171,3 +328,19 @@ div > div {
   white-space: pre-wrap;
   word-wrap: break-word;
 }
+=======
+  background-color: rgba(255, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  color: white;
+  font-size: 1.2rem;
+  padding: 20px;
+  text-align: center;
+}
+
+.popup-warning p {
+  max-width: 600px;
+}
+>>>>>>> Stashed changes

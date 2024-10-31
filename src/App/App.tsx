@@ -5,6 +5,7 @@ import Webcam from 'react-webcam';
 import MenuButton2 from '../components/MenuButton2';
 import Record from '../Record/Record';
 import Saved from '../Saved/Saved';
+<<<<<<< Updated upstream
 import Settings from '../Settings/Settings';
 import LoadingScreen from '../LoadingScreen/LoadingScreen';
 import './App.css';
@@ -113,14 +114,100 @@ const Home: React.FC<{ socketRef: React.MutableRefObject<WebSocket | null>; isCo
 const App: React.FC = () => {
   const socketRef = useRef<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false); // State to track WebSocket connection status
+=======
+import Settings from '../Settings/Settings'; 
+import Auth from '../Login/Auth'; 
+import './App.css';
+import '../VideoStyles.css'; 
+import Home from './Home';
+import { useTranslation } from 'react-i18next';
+
+interface SocketMessageProps {
+  result: string;
+  function: string;
+}
+
+const App: React.FC = () => {
+  const socketRef = useRef<WebSocket | null>(null);
+  const [socketMessage, setSocketMessage] = useState<SocketMessageProps | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [popupBlocked, setPopupBlocked] = useState(false);
+
+  // Theme State
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
+  // Language State
+  const { i18n } = useTranslation();
+  const [language, setLanguage] = useState<string>('en');
+
+  // Camera State
+  const [cameraId, setCameraId] = useState<string>('');
+
+  // Load settings from localStorage on mount
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
+    const savedLanguage = localStorage.getItem('language');
+    const savedCameraId = localStorage.getItem('cameraId');
+
+    if (savedTheme) setTheme(savedTheme);
+    if (savedLanguage) {
+      setLanguage(savedLanguage);
+      i18n.changeLanguage(savedLanguage);
+    }
+    if (savedCameraId) setCameraId(savedCameraId);
+  }, [i18n]);
+
+  // Apply theme by adding a class to the body
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.body.classList.add('dark-theme');
+    } else {
+      document.body.classList.remove('dark-theme');
+    }
+  }, [theme]);
+
+  const handleLogin = (username: string, password: string, rememberMe: boolean) => {
+    const requestList = JSON.stringify({
+      function: 'login',
+      kwargs: { username, password, rememberMe },
+    });
+    socketRef.current?.send(requestList);
+  };
+
+  const handleSignUp = (username: string, password: string, rememberMe: boolean) => {
+    const requestList = JSON.stringify({
+      function: 'signup',
+      kwargs: { username, password, rememberMe },
+    });
+    socketRef.current?.send(requestList);
+  };
+>>>>>>> Stashed changes
 
   useEffect(() => {
     const connectWebSocket = () => {
       socketRef.current = new WebSocket('ws://localhost:8765');
 
       socketRef.current.onopen = () => {
+<<<<<<< Updated upstream
         console.log('WebSocket connection opened');
         setIsConnected(true); // WebSocket is connected
+=======
+        setIsConnected(true);
+        console.log("WebSocket connected");
+      };
+
+      socketRef.current.onmessage = (event) => {
+        console.log(event);
+        try {
+          const data = JSON.parse(event.data);
+          if (data && "result" in data && "function" in data) {
+            setSocketMessage({ result: data.result, function: data.function });
+          }
+        } catch (error) {
+          console.error("Failed to parse WebSocket message:", error);
+        }
+>>>>>>> Stashed changes
       };
 
       socketRef.current.onclose = () => {
@@ -160,6 +247,7 @@ const App: React.FC = () => {
     };
   }, []);
 
+<<<<<<< Updated upstream
   return (
     <Router>
       <div className="app-container">
@@ -170,6 +258,111 @@ const App: React.FC = () => {
           <Route path="/saved" element={<Saved />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>
+=======
+  useEffect(() => {
+    if (window.name !== 'appWindow') {
+      const windowFeatures = 'width=1200,height=800,resizable=yes,scrollbars=yes';
+      const newWindow = window.open(window.location.href, 'appWindow', windowFeatures);
+
+      if (newWindow) {
+        newWindow.focus();
+        setPopupBlocked(false);
+      } else {
+        setPopupBlocked(true);
+        console.warn('Pop-up was blocked. Please allow pop-ups for this website.');
+      }
+    }
+  }, []);
+
+  return (
+    <Router>
+      <div className="app-container">
+        {popupBlocked && (
+          <div className="popup-warning">
+            <p>
+              Pop-up was blocked. Please allow pop-ups for this website to open the application in a new window.
+            </p>
+          </div>
+        )}
+
+        {isAuthenticated && window.name === 'appWindow' && (
+          <Sidebar />
+        )}
+
+        {window.name === 'appWindow' && (
+          <div className="home-section">
+            <Routes>
+              {!isAuthenticated ? (
+                <Route
+                  path="/"
+                  element={
+                    <Auth
+                      onLogin={handleLogin}
+                      onSignUp={handleSignUp}
+                      setIsAuthenticated={setIsAuthenticated}
+                      socketMessage={socketMessage}
+                      isConnected={isConnected}
+                    />
+                  }
+                />
+              ) : (
+                <>
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <Home
+                        socketRef={socketRef}
+                        socketMessage={socketMessage}
+                        isConnected={isConnected}
+                        cameraId={cameraId} 
+                      />
+                    }
+                  />
+                  <Route
+                    path="/record"
+                    element={
+                      <Record
+                        socketRef={socketRef}
+                        socketMessage={socketMessage}
+                        isConnected={isConnected}
+                        cameraId={cameraId} 
+                        currentTheme={theme} 
+                      />
+                    }
+                  />
+                  <Route
+                    path="/saved"
+                    element={
+                      <Saved
+                        socketRef={socketRef}
+                        socketMessage={socketMessage}
+                        isConnected={isConnected}
+                      />
+                    }
+                  />
+                  <Route
+                    path="/settings"
+                    element={
+                      <Settings
+                        onThemeChange={(newTheme) => setTheme(newTheme)}
+                        onLanguageChange={(newLang) => {
+                          setLanguage(newLang);
+                          i18n.changeLanguage(newLang);
+                        }}
+                        onCameraChange={(newCameraId) => setCameraId(newCameraId)}
+                        currentTheme={theme}
+                        currentLanguage={language}
+                        currentCameraId={cameraId}
+                      />
+                    }
+                  />
+                  <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                </>
+              )}
+            </Routes>
+          </div>
+        )}
+>>>>>>> Stashed changes
       </div>
     </Router>
   );

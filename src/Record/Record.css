@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 html, body {
   margin: 0;
   padding: 0;
@@ -74,18 +75,35 @@ html, body {
   z-index: 11;
   font-size: 48px;
   color: white;
+=======
+/* src/components/Record/Record.css */
+
+.video-container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  background-color: var(--background-color);
+  overflow: hidden;
+  cursor: pointer;
+  font-family: 'Roboto', sans-serif;
+>>>>>>> Stashed changes
 }
 
-.save-overlay {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+.video-element {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.blurred-background {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
+<<<<<<< Updated upstream
   background-color: rgba(0, 0, 0, 0.7);
   z-index: 12;
   color: white;
@@ -106,9 +124,524 @@ html, body {
   padding: 10px 20px;
   margin: 5px;
   color: white;
-  cursor: pointer;
+=======
+  background-color: var(--overlay-background);
+  z-index: 5;
+  opacity: 1;
+  transition: opacity 0.3s ease;
 }
 
+.overlay-image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%; 
+  height: 100%; 
+  object-fit: contain;
+  z-index: 7;
+}
+
+.instruction-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  padding: 2rem 3rem; 
+  background-color: var(--instruction-bg);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 80%;
+  animation: fadeIn 1s ease-in-out;
+}
+
+.instruction-text {
+  color: var(--instruction-text-color);
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin: 0;
+  position: relative;
+}
+
+.instruction-details {
+  color: var(--instruction-text-color);
+  font-size: 1rem;
+  margin: 1rem 0;
+  text-align: left;
+}
+
+.instruction-text::before {
+  content: '📝 ';
+  position: absolute;
+  left: -2.5rem; /* Adjust based on font size */
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Close Instruction Button */
+.close-instruction-button {
+  margin-top: 1.5rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--button-primary-bg);
+  color: var(--button-icon-color);
+  border: none;
+  border-radius: 6px;
+>>>>>>> Stashed changes
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+<<<<<<< Updated upstream
 .save-overlay button:hover {
   background-color: darkred;
+=======
+.close-instruction-button:hover {
+  background-color: var(--button-primary-hover-bg);
+  transform: scale(1.05);
+}
+
+.close-instruction-button:active {
+  transform: scale(0.95);
+}
+
+/* Help Button */
+.help-button {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  background-color: var(--button-primary-bg);
+  color: var(--button-icon-color);
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  z-index: 20;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.help-button:hover {
+  background-color: var(--button-primary-hover-bg);
+  transform: scale(1.05);
+}
+
+.help-button:active {
+  transform: scale(0.95);
+}
+
+/* Help Popup Content */
+.help-popup-content {
+  padding: 2rem;
+  background-color: var(--popup-bg-light);
+  color: var(--popup-text-color);
+  border: 1px solid var(--popup-border);
+  border-radius: 8px;
+  max-width: 400px;
+  text-align: center;
+}
+
+body.dark-theme .help-popup-content {
+  background-color: var(--popup-bg-dark);
+  color: var(--popup-text-color);
+}
+
+.help-text {
+  margin-bottom: 1.5rem;
+  word-wrap: break-word;
+}
+
+.close-help-button {
+  padding: 0.5rem 1rem;
+  background-color: var(--button-primary-bg);
+  color: var(--button-icon-color);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.close-help-button:hover {
+  background-color: var(--button-primary-hover-bg);
+  transform: scale(1.05);
+}
+
+.close-help-button:active {
+  transform: scale(0.95);
+}
+
+/* Toggle Overlay Button */
+
+.toggle-overlay-button:hover {
+  background-color: var(--button-primary-hover-bg);
+  transform: scale(1.05);
+}
+
+.toggle-overlay-button:active {
+  transform: scale(0.95);
+}
+
+.toggle-overlay-button {
+  position: fixed;
+  bottom: 2rem;
+  left: 2rem;
+  background-color: var(--button-primary-bg);
+  color: var(--button-icon-color);
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  z-index: 20;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+/* Popup Toggle Button */
+.popup-toggle-button {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background-color: var(--button-primary-bg);
+  color: var(--button-icon-color);
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  z-index: 20;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.popup-toggle-button:hover {
+  background-color: var(--button-primary-hover-bg);
+  transform: scale(1.05);
+}
+
+.popup-toggle-button:active {
+  transform: scale(0.95);
+}
+
+/* Popup Content */
+.popup-content {
+  padding: 2rem;
+  background-color: var(--popup-bg-light);
+  color: var(--popup-text-color);
+  border: 1px solid var(--popup-border);
+  border-radius: 8px;
+  max-width: 400px;
+  text-align: center;
+}
+
+body.dark-theme .popup-content {
+  background-color: var(--popup-bg-dark);
+  color: var(--popup-text-color);
+}
+
+.popup-text {
+  margin-bottom: 1.5rem;
+  word-wrap: break-word;
+}
+
+.learn-button {
+  margin-top: 1rem;
+}
+
+.copy-button {
+  padding: 0.5rem 1rem;
+  background-color: var(--button-primary-bg);
+  color: var(--button-icon-color);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.copy-button:hover {
+  background-color: var(--button-primary-hover-bg);
+  transform: scale(1.05);
+}
+
+.copy-button:active {
+  transform: scale(0.95);
+}
+
+/* Subtitle */
+.subtitle-container {
+  position: absolute;
+  bottom: 3rem;
+  width: 100%;
+  text-align: center;
+  z-index: 12;
+}
+
+
+.subtitle-text {
+  background-color: var(--subtitle-bg);
+  color: var(--subtitle-text-color);
+  padding: 1.5rem 3rem;
+  border-radius: 8px;
+  display: inline-block;
+  font-size: 2.4rem;
+  position: relative;
+}
+
+.subtitle-text::before {
+  content: '💬 ';
+  position: absolute;
+  left: -2.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Saving Overlay */
+.saving-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 15;
+}
+
+.record-name-input {
+  margin-top: 1rem;
+  width: 80%;
+  max-width: 300px;
+}
+
+.save-recording-button {
+  margin-top: 1.5rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--button-primary-bg);
+  color: var(--button-icon-color);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.save-recording-button:hover {
+  background-color: var(--button-primary-hover-bg);
+  transform: scale(1.05);
+}
+
+.save-recording-button:active {
+  transform: scale(0.95);
+}
+
+/* Responsive Design Adjustments */
+@media (max-width: 1024px) {
+  .instruction-overlay {
+    padding: 1.5rem 2.5rem;
+  }
+
+  .instruction-text {
+    font-size: 1.3rem;
+  }
+
+  .instruction-text::before {
+    left: -2rem;
+  }
+
+  .instruction-details {
+    font-size: 1rem;
+  }
+
+  .subtitle-text {
+    font-size: 2rem;
+    padding: 1.2rem 2.5rem;
+  }
+
+  .subtitle-text::before {
+    left: -2rem;
+  }
+
+  .popup-toggle-button {
+    width: 50px;
+    height: 50px;
+  }
+
+  .popup-content {
+    padding: 1.5rem;
+  }
+
+  .copy-button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .help-button {
+    width: 45px;
+    height: 45px;
+  }
+
+  .help-popup-content {
+    padding: 1.5rem;
+  }
+
+  .close-help-button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .toggle-overlay-button {
+    width: 50px;
+    height: 50px;
+  }
+
+  .learn-button {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .instruction-overlay {
+    padding: 1rem 1.5rem;
+  }
+
+  .instruction-text {
+    font-size: 1.1rem;
+  }
+
+  .instruction-text::before {
+    left: -1.5rem;
+  }
+
+  .instruction-details {
+    font-size: 0.9rem;
+  }
+
+  .subtitle-text {
+    font-size: 1.8rem;
+    padding: 1rem 2rem;
+  }
+
+  .subtitle-text::before {
+    left: -1.5rem;
+  }
+
+  .popup-toggle-button {
+    width: 50px;
+    height: 50px;
+  }
+
+  .popup-content {
+    padding: 1.5rem;
+  }
+
+  .copy-button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .help-button {
+    width: 45px;
+    height: 45px;
+  }
+
+  .help-popup-content {
+    padding: 1.5rem;
+  }
+
+  .close-help-button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .toggle-overlay-button {
+    width: 50px;
+    height: 50px;
+  }
+
+  .learn-button {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@media (max-width: 420px) {
+  .instruction-overlay {
+    padding: 0.8rem 1rem;
+  }
+
+  .instruction-text {
+    font-size: 1rem;
+  }
+
+  .instruction-text::before {
+    left: -1rem;
+  }
+
+  .instruction-details {
+    font-size: 0.8rem;
+  }
+
+  .subtitle-text {
+    font-size: 1.5rem;
+    padding: 0.8rem 1.5rem;
+  }
+
+  .subtitle-text::before {
+    left: -1rem;
+  }
+
+  .popup-toggle-button {
+    width: 40px;
+    height: 40px;
+  }
+
+  .popup-content {
+    padding: 1rem;
+  }
+
+  .copy-button {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.8rem;
+  }
+
+  .help-button {
+    width: 40px;
+    height: 40px;
+  }
+
+  .help-popup-content {
+    padding: 1rem;
+  }
+
+  .close-help-button {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.8rem;
+  }
+
+  .toggle-overlay-button {
+    width: 40px;
+    height: 40px;
+  }
+
+  .learn-button {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+>>>>>>> Stashed changes
 }

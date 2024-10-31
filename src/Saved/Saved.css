@@ -1,5 +1,6 @@
 .saved-container {
   padding: 20px;
+<<<<<<< Updated upstream
   background-color: #121212;
   color: #fff;
   min-height: 100vh;
@@ -97,4 +98,147 @@
 
 .close-button:hover {
   background-color: darkred;
+=======
+  background-color: var(--background-color);
+  color: var(--text-color);
+  border-radius: 8px;
 }
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.saved-title {
+  font-size: 2rem;
+  color: var(--text-color);
+}
+
+.upload-section {
+  position: relative;
+}
+
+.upload-button {
+  background-color: var(--button-bg);
+  color: var(--button-icon-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.upload-button:hover {
+  background-color: var(--button-hover-bg);
+}
+
+.upload-progress {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.search-bar {
+  margin-bottom: 20px;
+}
+
+.search-input {
+  background-color: var(--select-bg);
+  border: 1px solid var(--select-border);
+  border-radius: 6px;
+}
+
+.table-container {
+  background-color: var(--background-color);
+}
+
+.table-header-cell {
+  font-weight: bold;
+  color: var(--text-color);
+}
+
+.table-cell {
+  color: var(--text-color);
+}
+
+.action-header-cell {
+  text-align: right;
+}
+
+.action-button {
+  color: var(--icon-color);
+}
+
+.download-button:hover {
+  color: #4caf50;
+}
+
+.delete-button:hover {
+  color: #f44336;
+}
+
+.dialog-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text-color);
+}
+
+.dialog-content {
+  background-color: var(--background-color);
+}
+
+.preview-video {
+  width: 100%;
+  height: auto;
+}
+
+.close-button {
+  color: var(--text-color);
+}
+
+.close-dialog-button {
+  color: var(--text-color);
+}
+
+.name-button {
+  background: none;
+  border: none;
+  color: var(--text-color);
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 1rem;
+}
+
+.name-button:hover {
+  color: #007bff;
+}
+
+@media (max-width: 768px) {
+  .saved-container {
+    padding: 15px;
+  }
+
+  .saved-title {
+    font-size: 1.5rem;
+  }
+
+  .search-input {
+    font-size: 0.9rem;
+  }
+
+  .table-header-cell,
+  .table-cell {
+    font-size: 0.9rem;
+  }
+
+  .dialog-title {
+    font-size: 1rem;
+  }
+
+  .preview-video {
+    height: auto;
+  }
+>>>>>>> Stashed changes
+}
+
+/* Theme Variables are already handled in App.css and Settings.css */
