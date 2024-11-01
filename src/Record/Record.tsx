@@ -6,7 +6,7 @@ import Webcam from 'react-webcam';
 import LoadingScreen from '../LoadingScreen/LoadingScreen';
 import { useLanguage } from '../contexts/LanguageContext';
 import { t } from '../translation';
-import { FaEye, FaEyeSlash } from 'react-icons/fa'; 
+import { FaEye, FaEyeSlash, FaQuestionCircle, FaGraduationCap } from 'react-icons/fa'; 
 
 interface SocketMessageProps {
   result: string;
@@ -29,6 +29,8 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
   const [recordName, setRecordName] = useState('');
   const [subtitleText, setSubtitleText] = useState<string>(''); 
   const [isOverlayVisible, setIsOverlayVisible] = useState(true); 
+  const [isHelpOpen, setIsHelpOpen] = useState(false); // State for Help modal
+  const [isEduPopupOpen, setIsEduPopupOpen] = useState(false); // State for Education popup
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const { language } = useLanguage(); 
@@ -129,6 +131,7 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
         const webcamElement = webcamRef.current?.video;
 
         if (webcamElement) {
+          // Implement any dimension updates if needed
         }
       };
 
@@ -199,8 +202,90 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
     setIsOverlayVisible((prev) => !prev);
   };
 
+  const toggleHelp = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.stopPropagation();
+    setIsHelpOpen(true);
+  };
+
+  const closeHelp = () => {
+    setIsHelpOpen(false);
+  };
+
+  const toggleEducation = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.stopPropagation();
+    setIsEduPopupOpen(true);
+    setTimeout(() => setIsEduPopupOpen(false), 5000); // Auto-close after 5 seconds
+  };
+
   return (
     <div onClick={handleClick} className="record-container">
+      {/* Help Button */}
+      <button className="help-button" onClick={toggleHelp} aria-label={t('help', language)}>
+        <FaQuestionCircle size={20} />
+        {t('Help', language)}
+      </button>
+
+      {/* Secondary Education Button */}
+      <button 
+        className="secondary-button" 
+        onClick={toggleEducation} 
+        aria-label={t('educational_resource', language)}
+      >
+        <FaGraduationCap size={20} />
+        {t('Want to Learn?', language)}
+      </button>
+
+{isHelpOpen && (
+  <div className="modal-overlay" onClick={closeHelp}>
+    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+      <button className="modal-close-button" onClick={closeHelp} aria-label={t('Close Help Modal', language)}>
+        &times;
+      </button>
+
+      <h2>{t('Recording Instructions', language)}</h2>
+      <p>{t('This is the Record feature. Here’s how to use it:', language)}</p>
+
+      <h3>{t('Starting the Recording', language)}</h3>
+      <p>
+        {t('Press anywhere on the screen to start. The blur will disappear, and after a 3-second countdown, you can begin signing. Make sure to adjust your position so your face and hands align with the person outline on the screen.', language)}
+      </p>
+
+      <h3>{t('Ending the Recording', language)}</h3>
+      <p>
+        {t('To end the recording, simply open your mouth. This will stop the recording automatically.', language)}
+      </p>
+
+      <h3>{t('Saving Your Sign', language)}</h3>
+      <p>
+        {t('Once the recording ends, enter a name for your sign and press "Save" to store it. You can view or delete past recordings in the "Files" section.', language)}
+      </p>
+
+      <h3>{t('Recording Tips', language)}</h3>
+      <p>
+        {t('keep_hands_in_frame', language)}<br />
+        {t('one_hand_sign_tip', language)}
+      </p>
+    </div>
+  </div>
+)}
+
+{/* Educational Popup */}
+{isEduPopupOpen && (
+  <div className="modal-overlay" onClick={() => setIsEduPopupOpen(false)}>
+    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+      <button className="modal-close-button" onClick={() => setIsEduPopupOpen(false)} aria-label={t('Close Education Popup', language)}>
+        &times;
+      </button>
+      <p>
+        {t('If you don’t know where to start, try learning 100 basic signs on Handspeak. Click the link below to visit the website. Once there, open any word, watch the video, and try recording it here!', language)}{' '}
+        <a href="https://www.handspeak.com/word/most-used/" target="_blank" rel="noopener noreferrer">
+          Handspeak.com
+        </a>
+      </p>
+    </div>
+  </div>
+)}
+
       {!isConnected && <LoadingScreen />}
       
       <Webcam
@@ -216,12 +301,7 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
           alt="Grey Person Overlay"
         />
       )}
-      
-      {!isVideoVisible && !isRecording && !isSaving && (
-        <div className="record-overlay">
-          <h1 className="record-overlay-title">{t('click_to_start_recording', language)}</h1>
-        </div>
-      )}
+    
 
       {countdown > 0 && <div className="countdown-overlay">{countdown}</div>}
 
@@ -247,14 +327,14 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
         </div>
       )}
 
+      {/* Toggle Overlay Button */}
       <button 
         className="toggle-overlay-button" 
         onClick={toggleOverlay}
-        aria-label={isOverlayVisible ? 'Hide Overlay' : 'Show Overlay'}
+        aria-label={isOverlayVisible ? t('hide_overlay', language) : t('show_overlay', language)}
       >
         {isOverlayVisible ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
       </button>
-      
     </div>
   );
 };

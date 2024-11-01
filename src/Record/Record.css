@@ -177,6 +177,111 @@ html, body {
   margin-right: 8px; 
 }
 
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  padding: 20px 30px;
+  border-radius: 8px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+/* Close Button */
+.modal-close-button {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+/* Help Button */
+.help-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 10px 14px;
+  background-color: #4b59f7;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.help-button:hover {
+  background-color: #3e47d0;
+  transform: translateY(-2px);
+}
+
+.help-button:active {
+  background-color: #2e36a0;
+  transform: translateY(0);
+}
+
+.help-button svg {
+  margin-right: 8px;
+}
+
+/* Secondary Button (Copy/Education) */
+.secondary-button {
+  position: absolute;
+  top: 80px; /* Adjust as needed */
+  right: 20px;
+  padding: 10px 14px;
+  background-color: #4b59f7;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.secondary-button:hover {
+  background-color: #3e47d0;
+  transform: translateY(-2px);
+}
+
+.secondary-button:active {
+  background-color: #2e36a0;
+  transform: translateY(0);
+}
+
+.secondary-button svg {
+  margin-right: 8px;
+}
+
+/* Responsive Adjustments */
 @media (max-width: 768px) {
   .record-video-element {
     height: 100%;
@@ -216,6 +321,15 @@ html, body {
 
   .toggle-overlay-button {
     padding: 10px 16px;
+  }
+
+  .help-button {
+    padding: 8px 12px;
+  }
+
+  .secondary-button {
+    padding: 8px 12px;
+    top: 70px; /* Adjust for smaller screens */
   }
 }
 
@@ -267,5 +381,34 @@ html, body {
     margin-right: 5px;
     width: 18px;
     height: 18px;
+  }
+
+  .help-button {
+    padding: 6px 10px;
+    right: 15px;
+    top: 15px;
+  }
+
+  .secondary-button {
+    padding: 6px 10px;
+    top: 65px;
+    right: 15px;
+  }
+
+  .secondary-button svg {
+    margin-right: 5px;
+    width: 18px;
+    height: 18px;
+  }
+
+  /* Modal Adjustments for Extra Small Screens */
+  .modal-content {
+    padding: 10px 15px;
+  }
+
+  .modal-close-button {
+    font-size: 1rem;
+    top: 5px;
+    right: 10px;
   }
 }

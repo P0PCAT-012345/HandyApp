@@ -138,7 +138,7 @@ interface Translations {
     },
     'login_error': {
       en: 'Login failed. Please check your credentials.',
-      jp: 'ログインに失敗しました。資格情報を確認してください。',
+      jp: 'ログインに失敗しました。入力情報を確認してください。',
     },
     'signup_error': {
       en: 'Sign up failed. Please try again.',
@@ -164,6 +164,155 @@ interface Translations {
         en: 'Your browser does not support the video tag.',
         jp: 'お使いのブラウザはビデオタグをサポートしていません。',
     },
+    'help': {
+      en: 'Help',
+      jp: 'ヘルプ',
+    },
+    'Help': {
+      en: 'Help',
+      jp: 'ヘルプ',
+    },
+    'educational_resource': {
+      en: 'Educational Resource',
+      jp: '教育リソース',
+    },
+    'Want to Learn?': {
+      en: 'Want to Learn?',
+      jp: '学びたいですか？',
+    },
+    'Close Help Modal': {
+      en: 'Close Help Modal',
+      jp: 'ヘルプを閉じる',
+    },
+    'Recording Instructions': {
+      en: 'Recording Instructions',
+      jp: '録画の手順',
+    },
+    'Starting the Recording': {
+      en: 'Starting the Recording',
+      jp: '録画の開始',
+    },
+    'Ending the Recording': {
+      en: 'Ending the Recording',
+      jp: '録画の終了',
+    },
+    'Saving Your Sign': {
+      en: 'Saving Your Sign',
+      jp: '手話の保存',
+    },
+    'Recording Tips': {
+      en: 'Recording Tips',
+      jp: '録画のヒント',
+    },
+    'If you don’t know where to start, try learning 100 basic ASL signs on Handspeak. Click the link below to visit the website. Once there, open any word, watch the video, and try recording it here!': {
+      en: 'If you don’t know where to start, try learning 100 basic signs on Handspeak. Click the link below to visit the website. Once there, open any word, watch the video, and try recording it here!',
+      jp: 'どこから始めればよいかわからない場合は、Handspeakで基本的なアメリカ手話を100個学んでみてください。以下のリンクをクリックしてウェブサイトにアクセスし、任意の単語を開き、ビデオを見て、Handyで録画してみてください！',
+    },
+    'hide_overlay': {
+      en: 'Hide Overlay',
+      jp: 'オーバーレイ（人型の枠）を隠す',
+    },
+    'show_overlay': {
+      en: 'Show Overlay',
+      jp: 'オーバーレイ（人型の枠）を表示',
+    },
+      'This is the Record feature. Here’s how to use it:': {
+        en: 'This is the Record feature. Here’s how to use it:',
+        jp: 'これは録画機能です。使い方は以下の通りです：',
+      },
+      'Press anywhere on the screen to start. The blur will disappear, and after a 3-second countdown, you can begin signing. Make sure to adjust your position so your face and hands align with the person outline on the screen.': {
+        en: 'Press anywhere on the screen to start. The blur will disappear, and after a 3-second countdown, you can begin signing. Make sure to adjust your position so your face and hands align with the person outline on the screen.',
+        jp: '画面のどこかを押して開始します。ぼかしが消え、3秒のカウントダウンの後に手話を始めることができます。顔と手が画面の人物の輪郭と一致するように位置を調整してください。',
+      },
+      'To end the recording, simply open your mouth. This will stop the recording automatically.': {
+        en: 'To end the recording, simply open your mouth. This will stop the recording automatically.',
+        jp: '録画を終了するには、口を開くだけです。これにより録画が自動的に停止します。',
+      },
+      'Once the recording ends, enter a name for your sign and press "Save" to store it. You can view or delete past recordings in the "Files" section.': {
+        en: 'Once the recording ends, enter a name for your sign and press "Save" to store it. You can view or delete past recordings in the "Files" section.',
+        jp: '録画が終了したら、手話の名前を入力し、「保存」を押して保存します。「ファイル」セクションで過去の録画を表示または削除できます。',
+      },
+        'keep_hands_in_frame': {
+        en: 'Always keep both hands inside the frame throughout the recording.',
+        jp: '録画中は常に両手をフレーム内に収めてください。',
+        },
+        'one_hand_sign_tip': {
+        en: 'For one-handed signs, keep your left hand on your stomach, as shown in the person outline.',
+        jp: '片手の手話の場合は、人物の輪郭に示されているように、左手をお腹に置いてください。',
+        },
+        'copy_subtitles': {
+            en: 'Copy as text',
+            jp: 'テキストとしてコピー',
+          },
+          'How to Use': {
+            en: 'How to Use',
+            jp: '使用方法',
+          },
+          'Help Instructions': {
+            en: 'Help Instructions',
+            jp: 'ヘルプの手順',
+          },
+          'Start Signing': {
+            en: 'Start Signing',
+            jp: '手話を開始',
+          },
+          'Positioning for Signs': {
+            en: 'Positioning for Signs',
+            jp: '手話の位置',
+          },
+          'Device Limitations': {
+            en: 'Device Limitations',
+            jp: 'デバイスの制限',
+          },
+          'Copying Subtitles': {
+            en: 'Copying Subtitles',
+            jp: '字幕のコピー',
+          },
+          'Disabling the Outline': {
+            en: 'Disabling the Outline',
+            jp: 'アウトラインを無効にする',
+          },
+          'Copied to your clipboard!': {
+            en: 'Copied to your clipboard!',
+            jp: 'クリップボードにコピーされました！',
+          },
+          'close_copy_popup': {
+            en: 'Close Copy Popup',
+            jp: 'コピーのポップアップを閉じる',
+          },
+          'Tap anywhere on the screen to begin. When the blur disappears, align your face with the outline for accurate sign recognition.': {
+            en: 'Tap anywhere on the screen to begin. When the blur disappears, align your face with the outline for accurate sign recognition.',
+            jp: '画面のどこかをタップして開始します。ぼかしが消えたら、顔を輪郭に合わせて正確な手話認識を行います。',
+          },
+          '- For two-handed signs, stay within the frame.': {
+            en: 'For two-handed signs, stay within the frame.',
+            jp: '両手を使う手話の場合、フレーム内に収めてください。',
+          },
+          '- For one-handed signs (like the alphabet), rest your left hand on your stomach, as shown in the outline.': {
+            en: 'For one-handed signs (like the alphabet), rest your left hand on your stomach, as shown in the outline.',
+            jp: '片手の手話（アルファベットなど）の場合、輪郭に示されているように左手をお腹に置いてください。',
+          },
+          'Tracking may be slower on some devices. If subtitles aren’t appearing, try signing a bit slower.': {
+            en: 'Tracking may be slower on some devices. If subtitles aren’t appearing, try signing a bit slower.',
+            jp: '一部のデバイスではトラッキングが遅くなる場合があります。字幕が表示されない場合は、少しゆっくり手話をしてみてください。',
+          },
+          'Press the "Copy" button under this help section to copy subtitles.': {
+            en: 'Press the "Copy" button under this help section to copy subtitles.',
+            jp: 'このヘルプセクションの下にある「コピー」ボタンを押して字幕をコピーします。',
+          },
+          'To hide the outline, tap the button in the bottom-right corner of the screen.': {
+            en: 'To hide the outline, tap the button in the bottom-right corner of the screen.',
+            jp: 'アウトラインを非表示にするには、画面の右下にあるボタンをタップしてください。',
+          },
+          'This app translates sign language into subtitles below your screen. Here’s how to get started:' : {
+            en: 'This app translates sign language into subtitles below your screen. Here’s how to get started:',
+            jp: 'このアプリは手話を画面下の字幕に翻訳します。始め方は以下の通りです：',
+          },
+          'Copy as text': {
+            en: 'Copy as text',
+            jp: 'テキストとしてコピーする',
+          },
+
   };
   
   export const t = (key: string, language: 'en' | 'jp') => {

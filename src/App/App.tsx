@@ -12,7 +12,7 @@ import Auth from '../Login/Auth'; // Import the Login component
 import './App.css';
 import '../VideoStyles.css'; // Corrected import path
 import Webcam from 'react-webcam';
-import { FaPlay, FaCopy } from 'react-icons/fa';
+import { FaPlay, FaCopy, FaQuestionCircle, FaCopy as FaCopyIcon } from 'react-icons/fa'; // Importing additional icons
 import { ThemeProvider } from '../contexts/ThemeContext'; // Import ThemeProvider
 import { LanguageProvider, useLanguage } from '../contexts/LanguageContext'; // Import LanguageProvider and useLanguage
 import { t } from '../translation'; // Import the translation function
@@ -111,6 +111,8 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
   const [subtitleText, setSubtitleText] = useState<string>('');
   const [isVideoVisible, setIsVideoVisible] = useState(false);
   const [isOverlayVisible, setIsOverlayVisible] = useState(true); // State for overlay visibility
+  const [isHelpOpen, setIsHelpOpen] = useState(false); // State for Help modal
+  const [isCopyPopupOpen, setIsCopyPopupOpen] = useState(false); // State for Copy popup
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const { language } = useLanguage(); // Access language only
@@ -141,8 +143,7 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
         const webcamElement = webcamRef.current?.video;
 
         if (webcamElement) {
-          const { width, height, top, left } = webcamElement.getBoundingClientRect();
-          setWebcamDimensions({ width, height, top, left });
+          // You can implement any dimension updates if needed
         }
       };
 
@@ -212,8 +213,89 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
     left: 0,
   });
 
+  const toggleHelp = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.stopPropagation();
+    setIsHelpOpen(true);
+  };
+
+  const closeHelp = () => {
+    setIsHelpOpen(false);
+  };
+
+  const handleCopy = () => {
+    if (subtitleText) {
+      navigator.clipboard.writeText(subtitleText)
+        .then(() => {
+          setIsCopyPopupOpen(true);
+          setTimeout(() => setIsCopyPopupOpen(false), 2000); // Auto-close after 2 seconds
+        })
+        .catch((err) => {
+          console.error('Failed to copy text: ', err);
+        });
+    }
+  };
+
   return (
     <div onClick={handleClick} className="video-container home-container">
+      {/* Help Button */}
+      <button className="help-button" onClick={toggleHelp} aria-label={t('help', language)}>
+        <FaQuestionCircle size={20} />
+        {t('Help', language)}
+      </button>
+
+      {/* Secondary Copy Button */}
+      <button 
+        className="secondary-button" 
+        onClick={handleCopy} 
+        aria-label={t('copy_subtitles', language)}
+      >
+        <FaCopyIcon size={20} />
+        {t('Copy as text', language)}
+      </button>
+
+      {/* Help Modal */}
+      {isHelpOpen && (
+        <div className="modal-overlay" onClick={closeHelp}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close-button" onClick={closeHelp} aria-label={t('Close Help Modal', language)}>
+              &times;
+            </button>
+
+            <h2>{t('How to Use', language)}</h2>
+            <p>{t('Help Instructions', language)}:</p>
+            <p>{t('This app translates sign language into subtitles below your screen. Here’s how to get started:', language)}</p>
+            
+            <h3>{t('Start Signing', language)}</h3>
+            <p>{t('Tap anywhere on the screen to begin. When the blur disappears, align your face with the outline for accurate sign recognition.', language)}</p>
+
+            <h3>{t('Positioning for Signs', language)}</h3>
+            <p>
+              {t('- For two-handed signs, stay within the frame.', language)}<br />
+              {t('- For one-handed signs (like the alphabet), rest your left hand on your stomach, as shown in the outline.', language)}
+            </p>
+
+            <h3>{t('Device Limitations', language)}</h3>
+            <p>{t('Tracking may be slower on some devices. If subtitles aren’t appearing, try signing a bit slower.', language)}</p>
+
+            <h3>{t('Copying Subtitles', language)}</h3>
+            <p>{t('Press the "Copy" button under this help section to copy subtitles.', language)}</p>
+
+            <h3>{t('Disabling the Outline', language)}</h3>
+            <p>{t('To hide the outline, tap the button in the bottom-right corner of the screen.', language)}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Copy Confirmation Popup */}
+      {isCopyPopupOpen && (
+        <div className="modal-overlay" onClick={() => setIsCopyPopupOpen(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close-button" onClick={() => setIsCopyPopupOpen(false)} aria-label={t('close_copy_popup', language)}>&times;</button>
+            <p>{t('Copied to your clipboard!', language)}</p>
+          </div>
+        </div>
+      )}
+
       <Webcam
         audio={false}
         ref={webcamRef}
@@ -231,13 +313,6 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
         />
       )}
 
-      {/* Button Overlay */}
-      {!isVideoVisible && (
-        <div className="overlay">
-          <h1 className="overlay-title">{t('click_to_start_translation', language)}</h1>
-        </div>
-      )}
-
       {/* Subtitle */}
       {subtitleText && (
         <div className="subtitle-container">
@@ -249,7 +324,7 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
       <button 
         className="toggle-overlay-button" 
         onClick={toggleOverlay}
-        aria-label={isOverlayVisible ? 'Hide Overlay' : 'Show Overlay'}
+        aria-label={isOverlayVisible ? t('hide_overlay', language) : t('show_overlay', language)}
       >
         {isOverlayVisible ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
       </button>
