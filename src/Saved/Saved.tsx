@@ -35,7 +35,7 @@ import { t } from '../translation';
 interface SavedItem {
   name: string;
   timestamp: string;
-  video: string; // Base64 string of video
+  video: string; 
 }
 
 interface SocketMessageProps {
@@ -136,9 +136,7 @@ const Saved: React.FC<SavedProps> = ({ socketRef, socketMessage, isConnected }) 
       });
 
       socketRef.current?.send(uploadMessage);
-      // Optionally, you can listen for confirmation from the server to add the item
       setIsUploading(false);
-      // Refresh the list
       fetchSavedItems();
     };
     reader.readAsDataURL(file);
@@ -172,7 +170,6 @@ const Saved: React.FC<SavedProps> = ({ socketRef, socketMessage, isConnected }) 
             setFilteredItems((prev) => [...prev, { name, timestamp, video: chunk }]);
           }
         } else if (data.function === 'upload_saved_success') {
-          // Handle successful upload
           fetchSavedItems();
         } else if (data.error) {
           setError(data.error);
@@ -344,7 +341,6 @@ const Saved: React.FC<SavedProps> = ({ socketRef, socketMessage, isConnected }) 
           </DialogActions>
         </Dialog>
 
-        {/* Error Message */}
         {error && (
           <Box mt={2}>
             <Typography variant="body1" color="error">

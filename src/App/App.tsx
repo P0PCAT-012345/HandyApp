@@ -16,6 +16,7 @@ import { FaPlay, FaCopy } from 'react-icons/fa';
 import { ThemeProvider } from '../contexts/ThemeContext'; // Import ThemeProvider
 import { LanguageProvider, useLanguage } from '../contexts/LanguageContext'; // Import LanguageProvider and useLanguage
 import { t } from '../translation'; // Import the translation function
+import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Importing icons
 
 interface SocketMessageProps {
   result: string;
@@ -109,15 +110,15 @@ class VideoChunkProcessor {
 const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) => {
   const [subtitleText, setSubtitleText] = useState<string>('');
   const [isVideoVisible, setIsVideoVisible] = useState(false);
-  const [webcamDimensions, setWebcamDimensions] = useState({
-    width: 0,
-    height: 0,
-    top: 0,
-    left: 0,
-  });
+  const [isOverlayVisible, setIsOverlayVisible] = useState(true); // State for overlay visibility
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const { language } = useLanguage(); // Access language only
+
+  const toggleOverlay = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.stopPropagation(); // Prevent triggering parent click
+    setIsOverlayVisible((prev) => !prev);
+  };
 
   const handleClick = () => {
     setIsVideoVisible((prev) => !prev);
@@ -127,12 +128,6 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
 
     socketRef.current?.send(message);
     setSubtitleText('');
-  };
-
-  const handleCopy = () => {
-    const textarea = document.querySelector('.text-box') as HTMLTextAreaElement;
-    textarea?.select();
-    document.execCommand('copy');
   };
 
   useEffect(() => {
@@ -209,6 +204,14 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
     }
   }, [socketMessage]);
 
+  // **Optional State for Webcam Dimensions (if needed)**
+  const [webcamDimensions, setWebcamDimensions] = useState({
+    width: 0,
+    height: 0,
+    top: 0,
+    left: 0,
+  });
+
   return (
     <div onClick={handleClick} className="video-container home-container">
       <Webcam
@@ -220,7 +223,7 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
         }}
       />
 
-      {isVideoVisible && (
+      {isVideoVisible && isOverlayVisible && (
         <img
           src="/greyperson.png"
           className="overlay-image"
@@ -241,6 +244,15 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
           <p className="subtitle-text">{subtitleText.split(' ').slice(-15).join(' ')}</p>
         </div>
       )}
+
+      {/* Toggle Overlay Button */}
+      <button 
+        className="toggle-overlay-button" 
+        onClick={toggleOverlay}
+        aria-label={isOverlayVisible ? 'Hide Overlay' : 'Show Overlay'}
+      >
+        {isOverlayVisible ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+      </button>
     </div>
   );
 };

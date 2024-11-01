@@ -1,11 +1,12 @@
 // src/Record/Record.tsx
 
 import React, { useEffect, useRef, useState } from 'react';
-import './Record.css'; // Updated CSS to use variables
+import './Record.css';
 import Webcam from 'react-webcam';
 import LoadingScreen from '../LoadingScreen/LoadingScreen';
 import { useLanguage } from '../contexts/LanguageContext';
 import { t } from '../translation';
+import { FaEye, FaEyeSlash } from 'react-icons/fa'; 
 
 interface SocketMessageProps {
   result: string;
@@ -26,10 +27,11 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
   const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [recordName, setRecordName] = useState('');
-  const [subtitleText, setSubtitleText] = useState<string>(''); // Added State Variable
+  const [subtitleText, setSubtitleText] = useState<string>(''); 
+  const [isOverlayVisible, setIsOverlayVisible] = useState(true); 
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const { language } = useLanguage(); // Access language
+  const { language } = useLanguage(); 
 
   const handleClick = () => {
     if (!isRecording && !isSaving && socketRef.current) {
@@ -86,7 +88,7 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
       const reader = new FileReader();
 
       reader.onloadend = () => {
-        const base64data = (reader.result as string).split(',')[1]; // Remove the data URL part
+        const base64data = (reader.result as string).split(',')[1]; 
         const message = JSON.stringify({
           function: 'stop_recording',
           kwargs: { 
@@ -127,7 +129,6 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
         const webcamElement = webcamRef.current?.video;
 
         if (webcamElement) {
-          // Centering is handled via CSS classes; no need to update state
         }
       };
 
@@ -183,7 +184,6 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
         stopRecording();
       }
 
-      // Handle subtitles if applicable
       if (socketMessage.function === 'translate' && socketMessage.result) {
         if (socketMessage.result === 'No match found') {
           setSubtitleText('');
@@ -194,6 +194,11 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
     }
   }, [socketMessage]);
 
+  const toggleOverlay = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.stopPropagation(); 
+    setIsOverlayVisible((prev) => !prev);
+  };
+
   return (
     <div onClick={handleClick} className="record-container">
       {!isConnected && <LoadingScreen />}
@@ -202,27 +207,24 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
         audio={false}
         ref={webcamRef}
         className={`record-video-element ${isVideoVisible ? 'visible' : 'blurred'}`}
-        // Removed inline style to allow CSS to handle object-fit
       />
 
-      {isVideoVisible && (
+      {isVideoVisible && isOverlayVisible && (
         <img
           src="/greyperson.png"
           className="record-overlay-image"
           alt="Grey Person Overlay"
         />
       )}
-      {/* Button Overlay */}
+      
       {!isVideoVisible && !isRecording && !isSaving && (
         <div className="record-overlay">
           <h1 className="record-overlay-title">{t('click_to_start_recording', language)}</h1>
         </div>
       )}
 
-      {/* Countdown Overlay */}
       {countdown > 0 && <div className="countdown-overlay">{countdown}</div>}
 
-      {/* Save Overlay */}
       {isSaving && (
         <div className="save-overlay">
           <input
@@ -239,12 +241,19 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
         </div>
       )}
 
-      {/* Subtitle */}
       {subtitleText && (
         <div className="subtitle-container">
           <p className="subtitle-text">{subtitleText}</p>
         </div>
       )}
+
+      <button 
+        className="toggle-overlay-button" 
+        onClick={toggleOverlay}
+        aria-label={isOverlayVisible ? 'Hide Overlay' : 'Show Overlay'}
+      >
+        {isOverlayVisible ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+      </button>
       
     </div>
   );

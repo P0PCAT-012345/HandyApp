@@ -1,18 +1,16 @@
 /* src/Record/Record.css */
 
-/* Ensure the html and body take full height */
 html, body {
   height: 100%;
   margin: 0;
   padding: 0;
 }
 
-/* Container Styling */
 .record-container {
   position: relative;
   width: 100%;
   height: 100%;
-  background-color: var(--background-color); /* Dynamic background */
+  background-color: var(--background-color); 
   overflow: hidden;
   display: flex;
   justify-content: center;
@@ -20,42 +18,36 @@ html, body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Video Element Styling */
 .record-video-element {
-  height: 100%; /* Occupy full height of the container */
-  width: auto; /* Maintain aspect ratio */
-  object-fit: contain; /* Ensure the entire video is visible */
-  transform: scaleX(-1); /* Flip the video horizontally */
+  height: 100%; 
+  width: auto; 
+  object-fit: contain; 
+  transform: scaleX(-1); 
   transition: filter 0.5s ease;
-  z-index: 2; /* Below the overlay image */
+  z-index: 2; 
 }
 
-/* Blurred State */
 .record-video-element.blurred {
   filter: blur(8px);
 }
 
-/* Visible State without Blue Outline */
 .record-video-element.visible {
   filter: none;
-  /* Removed box-shadow and border-radius to eliminate blue outline */
 }
 
-/* Overlay Image Styling */
 .record-overlay-image {
   position: absolute;
-  top: 50%; /* Center vertically */
-  left: 50%; /* Center horizontally */
-  transform: translate(-50%, -50%); /* Adjust position to center */
-  max-height: 100%; /* Prevent the image from exceeding container's height */
-  height: 100%; /* Fill the container's height */
-  width: auto; /* Maintain aspect ratio */
-  object-fit: contain; /* Ensure the image scales appropriately */
-  pointer-events: none; /* Allow clicks to pass through */
-  z-index: 3; /* Above the video */
+  top: 50%; 
+  left: 50%; 
+  transform: translate(-50%, -50%); 
+  max-height: 100%; 
+  height: 100%; 
+  width: auto; 
+  object-fit: contain;
+  pointer-events: none; 
+  z-index: 3; 
 }
 
-/* Overlay Styling */
 .record-overlay {
   display: flex;
   justify-content: center;
@@ -63,16 +55,16 @@ html, body {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%); /* Center the overlay */
-  width: 80%; /* Adjust as needed */
-  max-width: 600px; /* Adjust as needed */
-  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
-  color: var(--text-color); /* Dynamic text color */
+  transform: translate(-50%, -50%); 
+  width: 80%; 
+  max-width: 600px; 
+  background-color: rgba(0, 0, 0, 0.5);
+  color: var(--text-color); 
   padding: 20px;
   border-radius: 8px;
   text-align: center;
   transition: background-color 0.3s ease, color 0.3s ease;
-  z-index: 4; /* Above the overlay image */
+  z-index: 4; 
 }
 
 .record-overlay-title {
@@ -80,10 +72,9 @@ html, body {
   font-weight: bold;
   margin: 0;
   line-height: 1.2;
-  word-wrap: break-word; /* Prevent text overflow */
+  word-wrap: break-word; 
 }
 
-/* Countdown Overlay Styling */
 .countdown-overlay {
   position: absolute;
   top: 50%;
@@ -91,19 +82,18 @@ html, body {
   transform: translate(-50%, -50%);
   font-size: 4rem;
   color: var(--text-color);
-  z-index: 5; /* Above all other elements */
+  z-index: 5; 
 }
 
-/* Save Overlay Styling */
 .save-overlay {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: var(--input-bg); /* Dynamic background */
+  background-color: var(--input-bg); 
   padding: 20px 30px;
   border-radius: 8px;
-  z-index: 6; /* Above all other elements */
+  z-index: 6; 
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -138,13 +128,12 @@ html, body {
   background-color: #2e36a0;
 }
 
-/* Subtitle Styling */
 .subtitle-container {
   position: absolute;
   bottom: 20px;
   width: 100%;
   text-align: center;
-  z-index: 7; /* Above all other elements */
+  z-index: 7; 
 }
 
 .subtitle-text {
@@ -156,7 +145,38 @@ html, body {
   font-size: 1.2rem;
 }
 
-/* Responsive Design */
+.toggle-overlay-button {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  padding: 12px 18px; 
+  background-color: #4b59f7;
+  color: white;
+  border: none;
+  border-radius: 30px; 
+  cursor: pointer;
+  z-index: 8; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.toggle-overlay-button:hover {
+  background-color: #3e47d0;
+  transform: translateY(-2px); 
+}
+
+.toggle-overlay-button:active {
+  background-color: #2e36a0;
+  transform: translateY(0); 
+}
+
+.toggle-overlay-button svg {
+  margin-right: 8px; 
+}
+
 @media (max-width: 768px) {
   .record-video-element {
     height: 100%;
@@ -192,6 +212,10 @@ html, body {
 
   .save-overlay button {
     padding: 8px 16px;
+  }
+
+  .toggle-overlay-button {
+    padding: 10px 16px;
   }
 }
 
@@ -231,5 +255,17 @@ html, body {
 
   .save-overlay button {
     padding: 6px 12px;
+  }
+
+  .toggle-overlay-button {
+    padding: 8px 14px;
+    bottom: 15px;
+    right: 15px;
+  }
+
+  .toggle-overlay-button svg {
+    margin-right: 5px;
+    width: 18px;
+    height: 18px;
   }
 }

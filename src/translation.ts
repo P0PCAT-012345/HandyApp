@@ -144,7 +144,26 @@ interface Translations {
       en: 'Sign up failed. Please try again.',
       jp: 'サインアップに失敗しました。もう一度お試しください。',
     },
-    // Add more translation keys as needed
+    'saved_files': {
+    en: 'Saved Files',
+    jp: '保存されたファイル',
+    },
+    'search_folders': {
+        en: 'Search Folders',
+        jp: 'フォルダ検索',
+    },
+    'delete_selected': {
+        en: 'Delete Selected',
+        jp: '選択したものを削除',
+    },
+    'add_description': {
+        en: 'Click to add description...',
+        jp: '説明を追加するにはクリック...',
+    },
+    'browser_not_support': {
+        en: 'Your browser does not support the video tag.',
+        jp: 'お使いのブラウザはビデオタグをサポートしていません。',
+    },
   };
   
   export const t = (key: string, language: 'en' | 'jp') => {

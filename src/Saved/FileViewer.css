@@ -98,7 +98,6 @@
   background-color: #e4e4e4;
 }
 
-/* Search Bar */
 .search-container {
   display: flex;
   align-items: center;
@@ -129,7 +128,6 @@
   outline: none;
 }
 
-/* Scrollable content */
 .viewer-content {
   flex: 1;
   overflow: hidden;
@@ -294,14 +292,13 @@
 .video-player {
   width: 100%;
   height: auto;
-  max-width: none; /* Allow full expansion */
+  max-width: none; 
 }
 
 .close-dialog-button {
   color: var(--text-color) !important;
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
   .viewer-card {
     height: 90vh;

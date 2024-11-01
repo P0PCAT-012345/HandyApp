@@ -48,14 +48,12 @@ const FileViewer: React.FC<FileViewerProps> = ({
   const [selectedVideo, setSelectedVideo] = useState<FileType | null>(null);
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
   const { language } = useLanguage();
-  const [error, setError] = useState<string | null>(null); // Added error state
+  const [error, setError] = useState<string | null>(null); 
 
-  // Derived variable for filtered folders based on search query
   const filteredFolders = folders.filter((folder: FolderType) =>
     folder.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Function to parse links in text (if needed)
   const parseLinksInText = (text: string) => {
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     return text.split(urlRegex).map((part, index) => {
@@ -76,7 +74,6 @@ const FileViewer: React.FC<FileViewerProps> = ({
     });
   };
 
-  // Handler functions
   const handleFolderClick = (folderIndex: number) => {
     setCurrentFolder(folders[folderIndex]);
     setCurrentFolderIndex(folderIndex);
@@ -108,7 +105,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
     index: number,
     e: React.MouseEvent
   ) => {
-    e.stopPropagation(); // Prevent folder from opening when clicking checkbox
+    e.stopPropagation(); 
     setSelectedFolders((prev) =>
       prev.includes(index) ? prev.filter((f) => f !== index) : [...prev, index]
     );
@@ -116,7 +113,6 @@ const FileViewer: React.FC<FileViewerProps> = ({
 
   const handleDeleteSelected = () => {
     if (currentFolder && selectedFiles.length > 0) {
-      // Delete files from current folder
       const updatedFolders = [...folders];
       updatedFolders[currentFolderIndex!].files = currentFolder.files.filter(
         (file) => !selectedFiles.some((selectedFile) => selectedFile.name === file.name)
@@ -136,7 +132,6 @@ const FileViewer: React.FC<FileViewerProps> = ({
       });
       socketRef.current?.send(requestList);
     } else if (selectedFolders.length > 0) {
-      // Delete folders
       const updatedFolders = folders.filter((_, index) => !selectedFolders.includes(index));
       setFolders(updatedFolders);
       setSelectedFolders([]);
@@ -180,19 +175,16 @@ const FileViewer: React.FC<FileViewerProps> = ({
     socketRef.current?.send(requestList);
   };
 
-  // Effect to handle incoming WebSocket messages
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       try {
         const data = JSON.parse(event.data);
         if (data.function === 'send_descriptions' && data.result) {
-          // Assuming data.result is an array of folders
           setFolders(data.result);
         } else if (
           data.function === 'delete_files_success' ||
           data.function === 'delete_folders_success'
         ) {
-          // Optionally handle successful deletions
         } else if (data.error) {
           setError(data.error);
         }
@@ -213,13 +205,10 @@ const FileViewer: React.FC<FileViewerProps> = ({
     };
   }, [socketRef, language]);
 
-  // Remove the useEffect that incorrectly referenced setFilteredItems and savedItems
-
   return (
     <div className="file-viewer">
       <div className="container">
         <div className="viewer-card">
-          {/* Header */}
           <div className="viewer-header">
             {currentFolder && (
               <button onClick={handleBackClick} className="back-button">
@@ -240,7 +229,6 @@ const FileViewer: React.FC<FileViewerProps> = ({
             </button>
           </div>
 
-          {/* Search Bar - Only show when in folder view */}
           {!currentFolder && (
             <div className="search-container">
               <Search className="search-icon" />
@@ -254,7 +242,6 @@ const FileViewer: React.FC<FileViewerProps> = ({
             </div>
           )}
 
-          {/* Content */}
           <div className="viewer-content">
             {!currentFolder ? (
               // Folder View

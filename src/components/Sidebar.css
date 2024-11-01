@@ -8,7 +8,6 @@
 }
 
 .sidebar {
-    /* Removed position: fixed; */
     height: 100%;
     width: 78px;
     background: var(--sidebar-bg);
@@ -159,7 +158,6 @@
     min-width: 30px;
 }
 
-/* Responsive Design */
 @media (max-width: 420px) {
     .sidebar li .tooltip {
         display: none;

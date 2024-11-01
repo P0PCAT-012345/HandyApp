@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { t } from '../translation';
-import './Home.css'; // Ensure you import the correct CSS file
+import './Home.css'; 
 import Webcam from 'react-webcam';
 import LoadingScreen from '../LoadingScreen/LoadingScreen';
 
@@ -47,7 +47,6 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
 
         if (webcamElement) {
           const { width, height, top, left } = webcamElement.getBoundingClientRect();
-          // You can utilize these dimensions if needed
         }
       };
 
@@ -128,14 +127,12 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
         )}
       </div>
 
-      {/* Overlay */}
       {!isVideoVisible && (
         <div className="home-overlay">
           <h1 className="home-overlay-title">{t('click_to_start_translation', language)}</h1>
         </div>
       )}
 
-      {/* Subtitle */}
       {subtitleText && (
         <div className="subtitle-container">
           <p className="subtitle-text">{subtitleText.split(' ').slice(-15).join(' ')}</p>

@@ -8,8 +8,8 @@ import {
   FaCamera,
   FaFolder,
   FaBook,
-  FaCog, // Icon for Settings
-  FaSignOutAlt, // Icon for Logout
+  FaCog, 
+  FaSignOutAlt, 
 } from 'react-icons/fa';
 import './Sidebar.css';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -17,10 +17,10 @@ import { t } from '../translation';
 import Tooltip from '@mui/material/Tooltip';
 
 interface SidebarProps {
-  isOpen: boolean; // Receive open state
-  toggleSidebar: () => void; // Receive toggle function
+  isOpen: boolean; 
+  toggleSidebar: () => void; 
   setCurrentComponent: (component: string) => void;
-  onLogout: () => void; // New prop for Logout
+  onLogout: () => void; 
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, setCurrentComponent, onLogout }) => {
@@ -28,7 +28,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, setCurrentComp
 
   return (
     <div className={`sidebar ${isOpen ? 'open' : 'closed'}`}>
-      {/* Logo and Toggle Button */}
       <div className="logo-details">
         {isOpen && <div className="logo_name">Handy</div>}
         <div
@@ -41,9 +40,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, setCurrentComp
         </div>
       </div>
 
-      {/* Navigation List */}
       <ul className="nav-list">
-        {/* Translate */}
         <li onClick={() => setCurrentComponent("dashboard")}>
           <Tooltip title={isOpen ? '' : t('translate', language)} placement="right">
             <div className="nav-item" aria-label={t('translate', language)}>
@@ -53,7 +50,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, setCurrentComp
           </Tooltip>
         </li>
 
-        {/* Record */}
         <li onClick={() => setCurrentComponent("record")}>
           <Tooltip title={isOpen ? '' : t('record', language)} placement="right">
             <div className="nav-item" aria-label={t('record', language)}>
@@ -63,7 +59,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, setCurrentComp
           </Tooltip>
         </li>
 
-        {/* Files */}
         <li onClick={() => setCurrentComponent("saved")}>
           <Tooltip title={isOpen ? '' : t('files', language)} placement="right">
             <div className="nav-item" aria-label={t('files', language)}>
@@ -73,7 +68,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, setCurrentComp
           </Tooltip>
         </li>
 
-        {/* Documentation */}
         <li>
           <Tooltip title={isOpen ? '' : t('documentation', language)} placement="right">
             <a
@@ -88,8 +82,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, setCurrentComp
             </a>
           </Tooltip>
         </li>
-
-        {/* Settings */}
         <li onClick={() => setCurrentComponent("settings")}>
           <Tooltip title={isOpen ? '' : t('settings', language)} placement="right">
             <div className="nav-item" aria-label={t('settings', language)}>
@@ -99,10 +91,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, setCurrentComp
           </Tooltip>
         </li>
 
-        {/* Spacer to Push Logout to Bottom */}
         <li className="spacer"></li>
 
-        {/* Logout */}
         <li onClick={onLogout}>
           <Tooltip title={isOpen ? '' : t('logout', language)} placement="right">
             <div className="nav-item" aria-label={t('logout', language)}>

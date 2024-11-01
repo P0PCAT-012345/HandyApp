@@ -55,7 +55,6 @@
   color: var(--text-color);
 }
 
-/* Toggle Switch Styling */
 .toggle-switch {
   position: relative;
   width: 50px;
@@ -100,7 +99,6 @@
   transform: translateX(26px);
 }
 
-/* Language Select Styling */
 .language-select {
   padding: 8px 12px;
   font-size: 1rem;
@@ -111,7 +109,6 @@
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
-/* Responsive Design */
 @media (max-width: 600px) {
   .settings-box {
     padding: 15px;
