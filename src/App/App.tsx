@@ -94,7 +94,7 @@ class VideoChunkProcessor {
   }
 
   isReady(): boolean {
-    return this.startUpLength == 0;
+    return this.startUpLength === 0;
   }
 
   /**
@@ -216,7 +216,7 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
         ref={webcamRef}
         className={`video-element ${isVideoVisible ? 'visible' : 'blurred'}`}
         style={{
-          objectFit: 'contain',
+          objectFit: 'cover', // Ensures the video covers the container
         }}
       />
 

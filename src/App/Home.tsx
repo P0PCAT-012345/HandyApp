@@ -112,19 +112,21 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
   return (
     <div onClick={handleClick} className="home-container">
       {!isConnected && <LoadingScreen />}
-      <Webcam
-        audio={false}
-        ref={webcamRef}
-        className={`home-video-element ${isVideoVisible ? 'visible' : 'blurred'}`}
-      />
-
-      {isVideoVisible && (
-        <img
-          src="/greyperson.png"
-          className="home-overlay-image"
-          alt="Overlay"
+      <div className="video-wrapper">
+        <Webcam
+          audio={false}
+          ref={webcamRef}
+          className={`home-video-element ${isVideoVisible ? 'visible' : 'blurred'}`}
         />
-      )}
+
+        {isVideoVisible && (
+          <img
+            src="/greyperson.png"
+            className="home-overlay-image"
+            alt="Overlay"
+          />
+        )}
+      </div>
 
       {/* Overlay */}
       {!isVideoVisible && (

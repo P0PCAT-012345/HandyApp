@@ -1,5 +1,12 @@
 /* src/Record/Record.css */
 
+/* Ensure the html and body take full height */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 /* Container Styling */
 .record-container {
   position: relative;
@@ -15,11 +22,12 @@
 
 /* Video Element Styling */
 .record-video-element {
-  width: 100%; /* Make video take full width of container */
-  max-width: 800px; /* Optional: Limit maximum width */
-  height: auto; /* Maintain aspect ratio */
-  object-fit: contain; /* Ensure the video scales without cropping */
-  transition: filter 0.5s ease, box-shadow 0.3s ease;
+  height: 100%; /* Occupy full height of the container */
+  width: auto; /* Maintain aspect ratio */
+  object-fit: contain; /* Ensure the entire video is visible */
+  transform: scaleX(-1); /* Flip the video horizontally */
+  transition: filter 0.5s ease;
+  z-index: 2; /* Below the overlay image */
 }
 
 /* Blurred State */
@@ -27,22 +35,24 @@
   filter: blur(8px);
 }
 
-/* Visible State with Outline */
+/* Visible State without Blue Outline */
 .record-video-element.visible {
   filter: none;
-  box-shadow: 0 0 0 4px #4b59f7; /* Blue outline */
-  border-radius: 8px; /* Optional: Rounded corners */
+  /* Removed box-shadow and border-radius to eliminate blue outline */
 }
 
 /* Overlay Image Styling */
 .record-overlay-image {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  z-index: 1; /* Behind other elements */
+  top: 50%; /* Center vertically */
+  left: 50%; /* Center horizontally */
+  transform: translate(-50%, -50%); /* Adjust position to center */
+  max-height: 100%; /* Prevent the image from exceeding container's height */
+  height: 100%; /* Fill the container's height */
+  width: auto; /* Maintain aspect ratio */
+  object-fit: contain; /* Ensure the image scales appropriately */
+  pointer-events: none; /* Allow clicks to pass through */
+  z-index: 3; /* Above the video */
 }
 
 /* Overlay Styling */
@@ -62,6 +72,7 @@
   border-radius: 8px;
   text-align: center;
   transition: background-color 0.3s ease, color 0.3s ease;
+  z-index: 4; /* Above the overlay image */
 }
 
 .record-overlay-title {
@@ -69,6 +80,7 @@
   font-weight: bold;
   margin: 0;
   line-height: 1.2;
+  word-wrap: break-word; /* Prevent text overflow */
 }
 
 /* Countdown Overlay Styling */
@@ -79,7 +91,7 @@
   transform: translate(-50%, -50%);
   font-size: 4rem;
   color: var(--text-color);
-  z-index: 10;
+  z-index: 5; /* Above all other elements */
 }
 
 /* Save Overlay Styling */
@@ -91,7 +103,7 @@
   background-color: var(--input-bg); /* Dynamic background */
   padding: 20px 30px;
   border-radius: 8px;
-  z-index: 12;
+  z-index: 6; /* Above all other elements */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -132,7 +144,7 @@
   bottom: 20px;
   width: 100%;
   text-align: center;
-  z-index: 12;
+  z-index: 7; /* Above all other elements */
 }
 
 .subtitle-text {
@@ -147,7 +159,8 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .record-video-element {
-    max-width: 100%; /* Ensure responsiveness */
+    height: 100%;
+    width: auto;
   }
 
   .record-overlay {
@@ -162,5 +175,61 @@
   .subtitle-text {
     font-size: 1rem;
     padding: 8px 16px;
+  }
+
+  .countdown-overlay {
+    font-size: 3rem;
+  }
+
+  .save-overlay {
+    padding: 15px 20px;
+  }
+
+  .save-overlay input {
+    padding: 8px;
+    margin-bottom: 10px;
+  }
+
+  .save-overlay button {
+    padding: 8px 16px;
+  }
+}
+
+@media (max-width: 420px) {
+  .record-overlay-image {
+    max-height: 100%;
+    height: 100%;
+    width: auto;
+  }
+
+  .record-overlay {
+    width: 95%;
+    padding: 10px;
+  }
+
+  .record-overlay-title {
+    font-size: 1.2em;
+  }
+
+  .subtitle-text {
+    font-size: 0.9rem;
+    padding: 6px 12px;
+  }
+
+  .countdown-overlay {
+    font-size: 2.5rem;
+  }
+
+  .save-overlay {
+    padding: 10px 15px;
+  }
+
+  .save-overlay input {
+    padding: 6px;
+    margin-bottom: 8px;
+  }
+
+  .save-overlay button {
+    padding: 6px 12px;
   }
 }

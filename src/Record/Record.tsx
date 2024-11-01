@@ -1,7 +1,6 @@
 // src/Record/Record.tsx
 
 import React, { useEffect, useRef, useState } from 'react';
-import { FaRecordVinyl } from 'react-icons/fa';
 import './Record.css'; // Updated CSS to use variables
 import Webcam from 'react-webcam';
 import LoadingScreen from '../LoadingScreen/LoadingScreen';
@@ -27,7 +26,6 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
   const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [recordName, setRecordName] = useState('');
-  const [webcamDimensions, setWebcamDimensions] = useState({ width: 0, height: 0, top: 0, left: 0 }); 
   const [subtitleText, setSubtitleText] = useState<string>(''); // Added State Variable
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -129,8 +127,7 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
         const webcamElement = webcamRef.current?.video;
 
         if (webcamElement) {
-          const { width, height, top, left } = webcamElement.getBoundingClientRect();
-          setWebcamDimensions({ width, height, top, left });
+          // Centering is handled via CSS classes; no need to update state
         }
       };
 
@@ -198,38 +195,28 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
   }, [socketMessage]);
 
   return (
-    <div onClick={handleClick} className="video-container record-container">
+    <div onClick={handleClick} className="record-container">
       {!isConnected && <LoadingScreen />}
       
       <Webcam
         audio={false}
         ref={webcamRef}
-        className={`video-element ${isVideoVisible ? 'visible' : 'blurred'}`}
-        style={{
-          objectFit: 'contain', // Ensure the video fits vertically
-        }}
+        className={`record-video-element ${isVideoVisible ? 'visible' : 'blurred'}`}
+        // Removed inline style to allow CSS to handle object-fit
       />
 
       {isVideoVisible && (
         <img
           src="/greyperson.png"
-          style={{
-            position: 'absolute',
-            top: `${webcamDimensions.top}px`,
-            left: `${webcamDimensions.left}px`,
-            width: `${webcamDimensions.width}px`,
-            height: `${webcamDimensions.height}px`,
-            objectFit: 'contain',
-            zIndex: 1, 
-          }}
-          alt="Overlay"
+          className="record-overlay-image"
+          alt="Grey Person Overlay"
         />
       )}
       {/* Button Overlay */}
       {!isVideoVisible && !isRecording && !isSaving && (
-        <div className="overlay">
-          <h1 className="overlay-title">{t('click_to_start_recording', language)}</h1>
-      </div>
+        <div className="record-overlay">
+          <h1 className="record-overlay-title">{t('click_to_start_recording', language)}</h1>
+        </div>
       )}
 
       {/* Countdown Overlay */}
