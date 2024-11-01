@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { t } from '../translation';
-import './Home.css';
+import './Home.css'; // Ensure you import the correct CSS file
 import Webcam from 'react-webcam';
 import LoadingScreen from '../LoadingScreen/LoadingScreen';
 
@@ -21,12 +21,6 @@ interface HomeProps {
 const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) => {
   const [subtitleText, setSubtitleText] = useState<string>('');
   const [isVideoVisible, setIsVideoVisible] = useState(false);
-  const [webcamDimensions, setWebcamDimensions] = useState({
-    width: 0,
-    height: 0,
-    top: 0,
-    left: 0,
-  });
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const { language } = useLanguage();
@@ -53,7 +47,7 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
 
         if (webcamElement) {
           const { width, height, top, left } = webcamElement.getBoundingClientRect();
-          setWebcamDimensions({ width, height, top, left });
+          // You can utilize these dimensions if needed
         }
       };
 
@@ -116,26 +110,26 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
   }, [socketMessage]);
 
   return (
-    <div onClick={handleClick} className={`video-container home-container ${isVideoVisible ? 'visible' : 'blurred'}`}>
+    <div onClick={handleClick} className="home-container">
       {!isConnected && <LoadingScreen />}
       <Webcam
         audio={false}
         ref={webcamRef}
-        className="video-element"
+        className={`home-video-element ${isVideoVisible ? 'visible' : 'blurred'}`}
       />
 
       {isVideoVisible && (
         <img
           src="/greyperson.png"
-          className="overlay-image"
+          className="home-overlay-image"
           alt="Overlay"
         />
       )}
 
-      {/* Button Overlay */}
+      {/* Overlay */}
       {!isVideoVisible && (
-        <div className="overlay">
-          <h1 className="overlay-title">{t('click_to_start_translation', language)}</h1>
+        <div className="home-overlay">
+          <h1 className="home-overlay-title">{t('click_to_start_translation', language)}</h1>
         </div>
       )}
 

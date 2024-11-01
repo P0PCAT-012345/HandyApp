@@ -1,28 +1,27 @@
 /* src/Saved/FileViewer.css */
 
 .file-viewer {
+  padding: 20px;
+  background-color: var(--background-color);
   min-height: 100vh;
-  background-color: var(--background-color); /* Dynamic background */
-  padding: 2rem;
   box-sizing: border-box;
-  margin: 0; /* Removed centering */
+  width: 100%;
+  margin: 0;
   display: flex;
   flex-direction: column;
-  width: 100%; /* Ensure full width */
+  gap: 20px;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .container {
-  max-width: 100%; /* Removed max-width constraint */
-  margin: 0; /* Removed horizontal centering */
-  width: 100%; /* Ensure full width */
+  width: 100%;
   display: flex;
   flex-direction: column;
   height: 100%;
 }
 
 .viewer-card {
-  background-color: var(--input-bg); /* Dynamic background */
+  background-color: var(--input-bg);
   border-radius: 0.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   border: 1px solid var(--border-color);
@@ -37,7 +36,7 @@
   padding: 1rem;
   display: flex;
   align-items: center;
-  background-color: var(--sidebar-bg); /* Dynamic background */
+  background-color: var(--sidebar-bg);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
@@ -61,7 +60,7 @@
 }
 
 .back-button:hover {
-  background-color: var(--sidebar-bg-hover); /* Define in App.css */
+  background-color: var(--sidebar-bg-hover);
 }
 
 .delete-button {
@@ -71,14 +70,14 @@
   padding: 0.5rem 1rem;
   border-radius: 0.375rem;
   border: none;
-  background-color: #ef4444; /* Consider using a CSS variable */
+  background-color: #ef4444;
   color: white;
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
 .delete-button:hover {
-  background-color: #dc2626; /* Consider using a CSS variable */
+  background-color: #dc2626;
 }
 
 .refresh-button {
@@ -96,7 +95,7 @@
 }
 
 .refresh-button:hover {
-  background-color: #e4e4e4; /* Consider using a CSS variable */
+  background-color: #e4e4e4;
 }
 
 /* Search Bar */
@@ -179,7 +178,7 @@
 }
 
 .folder-icon-container.selected {
-  background-color: #3b82f6; /* Consider using a CSS variable */
+  background-color: #3b82f6;
 }
 
 .folder-icon-container.selected .folder-icon {
@@ -187,7 +186,7 @@
 }
 
 .folder-icon {
-  color: #3b82f6; /* Consider using a CSS variable */
+  color: #3b82f6;
   width: 1.5rem;
   height: 1.5rem;
 }
@@ -229,7 +228,7 @@
   width: 1.25rem;
   height: 1.25rem;
   border-radius: 0.25rem;
-  border: 2px solid #3b82f6; /* Consider using a CSS variable */
+  border: 2px solid #3b82f6;
   cursor: pointer;
   background-color: var(--background-color);
 }
@@ -246,7 +245,7 @@
 }
 
 .file-button:hover {
-  color: #3b82f6; /* Consider using a CSS variable */
+  color: #3b82f6;
 }
 
 .modal-overlay {
@@ -294,8 +293,12 @@
 
 .video-player {
   width: 100%;
-  max-width: 800px;
-  border-radius: 0.375rem;
+  height: auto;
+  max-width: none; /* Allow full expansion */
+}
+
+.close-dialog-button {
+  color: var(--text-color) !important;
 }
 
 /* Responsive Design */

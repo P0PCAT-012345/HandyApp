@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { FaRecordVinyl } from 'react-icons/fa';
-import './Record.css';
+import './Record.css'; // Updated CSS to use variables
 import Webcam from 'react-webcam';
 import LoadingScreen from '../LoadingScreen/LoadingScreen';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -27,11 +27,11 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
   const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [recordName, setRecordName] = useState('');
-  const [webcamDimensions, setWebcamDimensions] = useState({ width: 0, height: 0, top: 0, left: 0 });
-  const [subtitleText, setSubtitleText] = useState<string>('');
+  const [webcamDimensions, setWebcamDimensions] = useState({ width: 0, height: 0, top: 0, left: 0 }); 
+  const [subtitleText, setSubtitleText] = useState<string>(''); // Added State Variable
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const { language } = useLanguage();
+  const { language } = useLanguage(); // Access language
 
   const handleClick = () => {
     if (!isRecording && !isSaving && socketRef.current) {
@@ -88,7 +88,7 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
       const reader = new FileReader();
 
       reader.onloadend = () => {
-        const base64data = (reader.result as string).split(',')[1];
+        const base64data = (reader.result as string).split(',')[1]; // Remove the data URL part
         const message = JSON.stringify({
           function: 'stop_recording',
           kwargs: { 
@@ -176,7 +176,7 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
 
       const intervalId = setInterval(captureImage, 50);
 
-      return () => clearInterval(intervalId);
+      return () => clearInterval(intervalId); 
     }
   }, [countdown, isVideoVisible, isRecording]);
 
@@ -206,14 +206,22 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
         ref={webcamRef}
         className={`video-element ${isVideoVisible ? 'visible' : 'blurred'}`}
         style={{
-          objectFit: 'contain',
+          objectFit: 'contain', // Ensure the video fits vertically
         }}
       />
 
       {isVideoVisible && (
         <img
           src="/greyperson.png"
-          className="overlay-image"
+          style={{
+            position: 'absolute',
+            top: `${webcamDimensions.top}px`,
+            left: `${webcamDimensions.left}px`,
+            width: `${webcamDimensions.width}px`,
+            height: `${webcamDimensions.height}px`,
+            objectFit: 'contain',
+            zIndex: 1, 
+          }}
           alt="Overlay"
         />
       )}
@@ -221,7 +229,7 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
       {!isVideoVisible && !isRecording && !isSaving && (
         <div className="overlay">
           <h1 className="overlay-title">{t('click_to_start_recording', language)}</h1>
-        </div>
+      </div>
       )}
 
       {/* Countdown Overlay */}

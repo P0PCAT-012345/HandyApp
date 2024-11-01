@@ -1,0 +1,99 @@
+/* src/Home/HomeCombined.css */
+
+.home-video-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background-color: var(--background-color); /* Dynamic background */
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Center vertically and horizontally */
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  .home-video-element {
+    width: 100%; /* Make video take full width */
+    height: auto; /* Maintain aspect ratio */
+    object-fit: contain; /* Ensure the video scales without cropping */
+    transform: scaleX(-1); /* Mirror the video */
+    transition: filter 0.5s;
+  }
+  
+  .home-video-element.blurred {
+    filter: blur(10px);
+  }
+  
+  .home-video-element.visible {
+    filter: none;
+  }
+  
+  .home-overlay {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Center the overlay */
+    width: 80%; /* Adjust as needed */
+    max-width: 600px; /* Adjust as needed */
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
+    color: var(--text-color); /* Dynamic text color */
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  .home-overlay-title {
+    font-size: 2em;
+    font-weight: bold;
+    margin: 0;
+    line-height: 1.2;
+  }
+  
+  .home-overlay-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    z-index: 1; /* Behind other elements */
+  }
+  
+  .subtitle-container {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    text-align: center;
+    z-index: 12;
+  }
+  
+  .subtitle-text {
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    display: inline-block;
+    font-size: 1.2rem;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .home-overlay {
+      width: 90%;
+      padding: 15px;
+    }
+  
+    .home-overlay-title {
+      font-size: 1.5em;
+    }
+  
+    .subtitle-text {
+      font-size: 1rem;
+      padding: 8px 16px;
+    }
+  }
+  

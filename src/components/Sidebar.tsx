@@ -27,7 +27,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, setCurrentComp
   const { language } = useLanguage();
 
   return (
-    <div className={`sidebar ${isOpen ? 'open' : ''}`}>
+    <div className={`sidebar ${isOpen ? 'open' : 'closed'}`}>
       {/* Logo and Toggle Button */}
       <div className="logo-details">
         {isOpen && <div className="logo_name">Handy</div>}

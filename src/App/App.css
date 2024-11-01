@@ -37,19 +37,20 @@
   height: 100vh; /* Full viewport height */
 }
 
+.sidebar {
+  /* Sidebar styles remain unchanged */
+  /* Width changes based on open state */
+  transition: width 0.5s ease;
+}
+
 .home-section {
   flex: 1; /* Take up remaining space */
-  transition: margin-left 0.5s ease;
-  position: relative; /* For positioning child elements */
-  overflow: hidden; /* Prevent overflow */
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-.sidebar.open ~ .home-section {
-  margin-left: 250px; /* Open sidebar width */
-  width: calc(100% - 250px);
+  position: relative; /* For positioning child elements */
+  overflow: hidden; /* Prevent overflow */
+  transition: background-color 0.5s ease;
 }
 
 .subtitle-container {
@@ -68,6 +69,7 @@
   display: inline-block;
   font-size: 1.2rem;
 }
+
 
 /* Responsive Design */
 @media (max-width: 420px) {
