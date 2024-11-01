@@ -1,6 +1,5 @@
 /* src/App/App.css */
 
-/* Define light theme variables */
 :root[data-theme='light'] {
   --background-color: #ffffff;
   --text-color: #000000;
@@ -13,10 +12,8 @@
   --border-color: #ccc;
   --input-bg: #ffffff;
   --delete-icon-color: #ff5555;
-  /* Add any additional variables as needed */
 }
 
-/* Define dark theme variables */
 :root[data-theme='dark'] {
   --background-color: #121212;
   --text-color: #ffffff;
@@ -29,31 +26,27 @@
   --border-color: #555;
   --input-bg: #1e1e1e;
   --delete-icon-color: #ff7f7f;
-  /* Add any additional variables as needed */
 }
 
 .app-container {
   display: flex;
-  height: 100vh; /* Full viewport height */
+  height: 100vh; 
 }
 
 .sidebar {
-  /* Sidebar styles remain unchanged */
-  /* Width changes based on open state */
   transition: width 0.5s ease;
 }
 
 .home-section {
-  flex: 1; /* Take up remaining space */
+  flex: 1; 
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative; /* For positioning child elements */
-  overflow: hidden; /* Prevent overflow */
+  position: relative; 
+  overflow: hidden; 
   transition: background-color 0.5s ease;
 }
 
-/* Updated Styles for Video Container and Overlay Image */
 .video-container {
   position: relative;
   width: 100%;
@@ -61,28 +54,28 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden; /* Prevent overflow */
+  overflow: hidden; 
 }
 
 .video-element {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* Ensures the video covers the container */
-  transform: scaleX(-1); /* Flip the video horizontally */
+  object-fit: cover; 
+  transform: scaleX(-1); 
   transition: filter 0.5s ease, box-shadow 0.3s ease;
-  z-index: 2; /* Below the overlay image */
+  z-index: 2; 
 }
 
 .overlay-image {
   position: absolute;
-  top: 50%; /* Center vertically */
-  left: 50%; /* Center horizontally */
-  transform: translate(-50%, -50%); /* Adjust position to center */
-  height: 100%; /* Fill the container's height */
-  width: auto; /* Maintain aspect ratio */
-  object-fit: contain; /* Ensure the image scales appropriately */
-  pointer-events: none; /* Allow clicks to pass through */
-  z-index: 3; /* Above the video */
+  top: 50%; 
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 100%;
+  width: auto; 
+  object-fit: contain; 
+  pointer-events: none; 
+  z-index: 3; 
 }
 
 .subtitle-container {
@@ -90,7 +83,7 @@
   bottom: 20px;
   width: 100%;
   text-align: center;
-  z-index: 4; /* Above all other elements */
+  z-index: 4; 
 }
 
 .subtitle-text {
@@ -102,13 +95,12 @@
   font-size: 1.2rem;
 }
 
-/* Button Overlay */
 .overlay {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 5; /* Above overlay-image but below subtitles */
+  z-index: 5; 
 }
 
 .overlay-title {
@@ -117,41 +109,38 @@
   text-align: center;
 }
 
-/* Toggle Overlay Button Styling */
 .toggle-overlay-button {
   position: absolute;
   bottom: 20px;
   right: 20px;
-  padding: 12px 18px; /* Increased padding for larger size */
+  padding: 12px 18px; 
   background-color: #4b59f7;
   color: white;
   border: none;
-  border-radius: 30px; /* Rounded edges for modern look */
+  border-radius: 30px; 
   cursor: pointer;
-  z-index: 8; /* Above other elements */
+  z-index: 8; 
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .toggle-overlay-button:hover {
   background-color: #3e47d0;
-  transform: translateY(-2px); /* Slight lift on hover */
+  transform: translateY(-2px); 
 }
 
 .toggle-overlay-button:active {
   background-color: #2e36a0;
-  transform: translateY(0); /* Reset position on active */
+  transform: translateY(0); 
 }
 
-/* Optional: Icon Styling */
 .toggle-overlay-button svg {
-  margin-right: 8px; /* Space between icon and text if using text */
+  margin-right: 8px; 
 }
 
-/* Modal Overlay */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -165,7 +154,6 @@
   z-index: 1000;
 }
 
-/* Modal Content */
 .modal-content {
   background-color: var(--background-color);
   color: var(--text-color);
@@ -177,7 +165,6 @@
   position: relative;
 }
 
-/* Close Button */
 .modal-close-button {
   position: absolute;
   top: 10px;
@@ -189,7 +176,6 @@
   cursor: pointer;
 }
 
-/* Help Button */
 .help-button {
   position: absolute;
   top: 20px;
@@ -222,10 +208,9 @@
   margin-right: 8px;
 }
 
-/* Secondary Button (Copy/Education) */
 .secondary-button {
   position: absolute;
-  top: 80px; /* Adjust as needed */
+  top: 80px; 
   right: 20px;
   padding: 10px 14px;
   background-color: #4b59f7;
@@ -255,7 +240,6 @@
   margin-right: 8px;
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
   .overlay-image {
     height: 100%;
@@ -281,10 +265,9 @@
 
   .secondary-button {
     padding: 8px 12px;
-    top: 70px; /* Adjust for smaller screens */
+    top: 70px; 
   }
 
-  /* Modal Adjustments for Smaller Screens */
   .modal-content {
     padding: 15px 20px;
   }
@@ -341,7 +324,6 @@
     height: 18px;
   }
 
-  /* Modal Adjustments for Extra Small Screens */
   .modal-content {
     padding: 10px 15px;
   }

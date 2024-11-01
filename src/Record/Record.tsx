@@ -29,8 +29,8 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
   const [recordName, setRecordName] = useState('');
   const [subtitleText, setSubtitleText] = useState<string>(''); 
   const [isOverlayVisible, setIsOverlayVisible] = useState(true); 
-  const [isHelpOpen, setIsHelpOpen] = useState(false); // State for Help modal
-  const [isEduPopupOpen, setIsEduPopupOpen] = useState(false); // State for Education popup
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isEduPopupOpen, setIsEduPopupOpen] = useState(false); 
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const { language } = useLanguage(); 
@@ -131,7 +131,6 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
         const webcamElement = webcamRef.current?.video;
 
         if (webcamElement) {
-          // Implement any dimension updates if needed
         }
       };
 
@@ -214,18 +213,15 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
   const toggleEducation = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.stopPropagation();
     setIsEduPopupOpen(true);
-    setTimeout(() => setIsEduPopupOpen(false), 5000); // Auto-close after 5 seconds
+    setTimeout(() => setIsEduPopupOpen(false), 5000); 
   };
 
   return (
     <div onClick={handleClick} className="record-container">
-      {/* Help Button */}
       <button className="help-button" onClick={toggleHelp} aria-label={t('help', language)}>
         <FaQuestionCircle size={20} />
         {t('Help', language)}
       </button>
-
-      {/* Secondary Education Button */}
       <button 
         className="secondary-button" 
         onClick={toggleEducation} 
@@ -269,7 +265,6 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
   </div>
 )}
 
-{/* Educational Popup */}
 {isEduPopupOpen && (
   <div className="modal-overlay" onClick={() => setIsEduPopupOpen(false)}>
     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -327,7 +322,6 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
         </div>
       )}
 
-      {/* Toggle Overlay Button */}
       <button 
         className="toggle-overlay-button" 
         onClick={toggleOverlay}

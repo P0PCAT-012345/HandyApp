@@ -6,17 +6,17 @@ import Sidebar from '../components/Sidebar';
 import Record from '../Record/Record';
 import Saved from '../Saved/Saved';
 import FileViewer from '../Saved/FileViewer';
-import Settings from '../Settings/Settings'; // Corrected import path
+import Settings from '../Settings/Settings'; 
 import LoadingScreen from '../LoadingScreen/LoadingScreen';
-import Auth from '../Login/Auth'; // Import the Login component
+import Auth from '../Login/Auth'; 
 import './App.css';
-import '../VideoStyles.css'; // Corrected import path
+import '../VideoStyles.css'; 
 import Webcam from 'react-webcam';
-import { FaPlay, FaCopy, FaQuestionCircle, FaCopy as FaCopyIcon } from 'react-icons/fa'; // Importing additional icons
-import { ThemeProvider } from '../contexts/ThemeContext'; // Import ThemeProvider
-import { LanguageProvider, useLanguage } from '../contexts/LanguageContext'; // Import LanguageProvider and useLanguage
-import { t } from '../translation'; // Import the translation function
-import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Importing icons
+import { FaPlay, FaCopy, FaQuestionCircle, FaCopy as FaCopyIcon } from 'react-icons/fa'; 
+import { ThemeProvider } from '../contexts/ThemeContext'; 
+import { LanguageProvider, useLanguage } from '../contexts/LanguageContext';
+import { t } from '../translation'; 
+import { FaEye, FaEyeSlash } from 'react-icons/fa'; 
 
 interface SocketMessageProps {
   result: string;
@@ -61,19 +61,16 @@ class VideoChunkProcessor {
   }): void {
     const { folder, filename, chunk } = socketMessage.result;
 
-    // Initialize folder if not exists
     if (!this.folderData[folder]) {
       this.folderData[folder] = {};
     }
 
-    // Initialize filename entry if not exists
     if (!this.folderData[folder][filename]) {
       this.folderData[folder][filename] = {
         chunks: [],
       };
     }
 
-    // Add chunk to the appropriate filename
     this.folderData[folder][filename].chunks.push(chunk);
   }
 
@@ -89,7 +86,6 @@ class VideoChunkProcessor {
       this.startUpLength -= 1;
     }
 
-    // Concatenate chunks
     const fullVideo = fileEntry.chunks.join('');
     return fullVideo;
   }
@@ -110,15 +106,15 @@ class VideoChunkProcessor {
 const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) => {
   const [subtitleText, setSubtitleText] = useState<string>('');
   const [isVideoVisible, setIsVideoVisible] = useState(false);
-  const [isOverlayVisible, setIsOverlayVisible] = useState(true); // State for overlay visibility
-  const [isHelpOpen, setIsHelpOpen] = useState(false); // State for Help modal
-  const [isCopyPopupOpen, setIsCopyPopupOpen] = useState(false); // State for Copy popup
+  const [isOverlayVisible, setIsOverlayVisible] = useState(true); 
+  const [isHelpOpen, setIsHelpOpen] = useState(false); 
+  const [isCopyPopupOpen, setIsCopyPopupOpen] = useState(false); 
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const { language } = useLanguage(); // Access language only
+  const { language } = useLanguage(); 
 
   const toggleOverlay = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    e.stopPropagation(); // Prevent triggering parent click
+    e.stopPropagation();
     setIsOverlayVisible((prev) => !prev);
   };
 
@@ -143,7 +139,6 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
         const webcamElement = webcamRef.current?.video;
 
         if (webcamElement) {
-          // You can implement any dimension updates if needed
         }
       };
 
@@ -205,7 +200,6 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
     }
   }, [socketMessage]);
 
-  // **Optional State for Webcam Dimensions (if needed)**
   const [webcamDimensions, setWebcamDimensions] = useState({
     width: 0,
     height: 0,
@@ -227,7 +221,7 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
       navigator.clipboard.writeText(subtitleText)
         .then(() => {
           setIsCopyPopupOpen(true);
-          setTimeout(() => setIsCopyPopupOpen(false), 2000); // Auto-close after 2 seconds
+          setTimeout(() => setIsCopyPopupOpen(false), 2000); 
         })
         .catch((err) => {
           console.error('Failed to copy text: ', err);
@@ -237,13 +231,11 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
 
   return (
     <div onClick={handleClick} className="video-container home-container">
-      {/* Help Button */}
       <button className="help-button" onClick={toggleHelp} aria-label={t('help', language)}>
         <FaQuestionCircle size={20} />
         {t('Help', language)}
       </button>
 
-      {/* Secondary Copy Button */}
       <button 
         className="secondary-button" 
         onClick={handleCopy} 
@@ -253,7 +245,6 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
         {t('Copy as text', language)}
       </button>
 
-      {/* Help Modal */}
       {isHelpOpen && (
         <div className="modal-overlay" onClick={closeHelp}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -286,7 +277,6 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
         </div>
       )}
 
-      {/* Copy Confirmation Popup */}
       {isCopyPopupOpen && (
         <div className="modal-overlay" onClick={() => setIsCopyPopupOpen(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -301,7 +291,7 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
         ref={webcamRef}
         className={`video-element ${isVideoVisible ? 'visible' : 'blurred'}`}
         style={{
-          objectFit: 'cover', // Ensures the video covers the container
+          objectFit: 'cover', 
         }}
       />
 
@@ -313,14 +303,12 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
         />
       )}
 
-      {/* Subtitle */}
       {subtitleText && (
         <div className="subtitle-container">
           <p className="subtitle-text">{subtitleText.split(' ').slice(-15).join(' ')}</p>
         </div>
       )}
 
-      {/* Toggle Overlay Button */}
       <button 
         className="toggle-overlay-button" 
         onClick={toggleOverlay}
@@ -341,9 +329,7 @@ const App: React.FC = () => {
   const [currentComponent, setCurrentComponent] = useState("auth");
   const videoProcessorRef = useRef(new VideoChunkProcessor());
   const [folders, setFolders] = useState<FolderType[]>([]);
-  const { language } = useLanguage(); // Access language
-
-  // **1. Add Sidebar Open State**
+  const { language } = useLanguage(); 
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
 
@@ -388,11 +374,9 @@ const App: React.FC = () => {
     socketRef.current?.send(requestList);
   };
 
-  // Logout handler
   const handleLogout = () => {
     setIsAuthenticated(false);
     setCurrentComponent("auth");
-    // Optionally, you can send a logout message to the server
     const logoutMessage = JSON.stringify({
       function: 'logout',
       kwargs: {},
@@ -456,22 +440,17 @@ const App: React.FC = () => {
   const setUpDescriptions = (descriptions: { [folderName: string]: string } | string) => {
     const updatedFolders: FolderType[] = [];
 
-    // Loop through the provided descriptions
     for (const [name, description] of Object.entries(descriptions)) {
-      // Check if the folder already exists
       const existingFolderIndex = folders.findIndex(folder => folder.name === name);
 
       if (existingFolderIndex !== -1) {
-        // Overwrite existing folder description
         const existingFolder = { ...folders[existingFolderIndex], description };
         updatedFolders.push(existingFolder);
       } else {
-        // Create a new folder with the provided description
         updatedFolders.push({ name, description, files: [] });
       }
     }
 
-    // Update the state with the new list of folders
     setFolders(updatedFolders);
   };
 
@@ -480,23 +459,19 @@ const App: React.FC = () => {
     setFolders(prevFolders => {
       const updatedFolders = [...prevFolders];
 
-      // Find the folder index
       let folderIndex = updatedFolders.findIndex(f => f.name === folder);
 
-      // If folder doesn't exist, create it
       if (folderIndex === -1) {
         const newFolder: FolderType = {
           name: folder,
-          description: '', // Will be populated from existing state
+          description: '', 
           files: [{ name: filename, video: videoBase64 }],
         };
         updatedFolders.push(newFolder);
       } else {
-        // Check if file already exists in the folder
         const existingFileIndex = updatedFolders[folderIndex].files.findIndex(f => f.name === filename);
 
         if (existingFileIndex === -1) {
-          // Add new file to existing folder
           updatedFolders[folderIndex] = {
             ...updatedFolders[folderIndex],
             files: [
@@ -505,7 +480,6 @@ const App: React.FC = () => {
             ],
           };
         } else {
-          // Update existing file's video
           updatedFolders[folderIndex].files[existingFileIndex] = {
             name: filename,
             video: videoBase64,

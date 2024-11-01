@@ -177,7 +177,6 @@ html, body {
   margin-right: 8px; 
 }
 
-/* Modal Overlay */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -191,7 +190,6 @@ html, body {
   z-index: 1000;
 }
 
-/* Modal Content */
 .modal-content {
   background-color: var(--background-color);
   color: var(--text-color);
@@ -203,7 +201,6 @@ html, body {
   position: relative;
 }
 
-/* Close Button */
 .modal-close-button {
   position: absolute;
   top: 10px;
@@ -215,7 +212,6 @@ html, body {
   cursor: pointer;
 }
 
-/* Help Button */
 .help-button {
   position: absolute;
   top: 20px;
@@ -248,10 +244,9 @@ html, body {
   margin-right: 8px;
 }
 
-/* Secondary Button (Copy/Education) */
 .secondary-button {
   position: absolute;
-  top: 80px; /* Adjust as needed */
+  top: 80px; 
   right: 20px;
   padding: 10px 14px;
   background-color: #4b59f7;
@@ -329,7 +324,7 @@ html, body {
 
   .secondary-button {
     padding: 8px 12px;
-    top: 70px; /* Adjust for smaller screens */
+    top: 70px; 
   }
 }
 
@@ -401,7 +396,6 @@ html, body {
     height: 18px;
   }
 
-  /* Modal Adjustments for Extra Small Screens */
   .modal-content {
     padding: 10px 15px;
   }
