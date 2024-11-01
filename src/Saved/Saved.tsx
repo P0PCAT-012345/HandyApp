@@ -29,11 +29,13 @@ import UploadIcon from '@mui/icons-material/Upload';
 import CloseIcon from '@mui/icons-material/Close';
 import LoadingScreen from '../LoadingScreen/LoadingScreen';
 import './Saved.css';
+import { useLanguage } from '../contexts/LanguageContext';
+import { t } from '../translation';
 
 interface SavedItem {
   name: string;
   timestamp: string;
-  video: string; // Array to store video chunks
+  video: string; // Base64 string of video
 }
 
 interface SocketMessageProps {
@@ -51,78 +53,16 @@ const Saved: React.FC<SavedProps> = ({ socketRef, socketMessage, isConnected }) 
   const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<SavedItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null); // Added error state
   const [selectedItem, setSelectedItem] = useState<SavedItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isUploading, setIsUploading] = useState<boolean>(false);
-
   const fileInputRef = useRef<HTMLInputElement>(null);
-   const hasInitialized = useRef(false);
-
-  //  useEffect(() => {
-  //   if (!isConnected) {hasInitialized.current = false;}
-  //   if (!isConnected || !socketRef.current || hasInitialized.current) return;
-  
-  //   hasInitialized.current = true;
-  
-  //   const requestList = JSON.stringify({ function: 'list_saved' });
-  //   socketRef.current.send(requestList);
-  
-  //   const newSavedItems: SavedItem[] = [];
-  //   const chunks: { [key: string]: string[] } = {};
-  
-  //   const handleMessage = (event: MessageEvent) => {
-  //     try {
-  //       const data = JSON.parse(event.data);
-  //       if (data.function === 'list_saved' && data.result) {
-  //         if ("finished" in data.result) {
-  //           setSavedItems(newSavedItems);
-  //           setFilteredItems(newSavedItems);
-  //           setIsLoading(false);
-  //         } else {
-  //           const { name, timestamp, chunk } = data.result;
-  //           const key = `${name}_${timestamp}`;
-  
-  //           if (!chunks[key]) {
-  //             chunks[key] = [];
-  //           }
-  
-  //           if (chunk === null) {
-  //             const videoData = chunks[key].join('');
-  //             const savedItem = {
-  //               name,
-  //               timestamp,
-  //               video: videoData,
-  //             };
-  
-  //             newSavedItems.push(savedItem);
-  //             delete chunks[key];
-  //           } else {
-  //             chunks[key].push(chunk);
-  //           }
-  //         }
-  //       } else if (data.error) {
-  //         setError(data.error);
-
-  //         setIsLoading(false);
-  //       }
-  //     } catch (err) {
-  //       console.error('Failed to parse message in Saved component:', err);
-  //       setError('Failed to parse server response.');
-  //       setIsLoading(false);
-  //     }
-  //   };
-  
-  //   socketRef.current.removeEventListener('message', handleMessage);
-  //   socketRef.current.addEventListener('message', handleMessage);
-
-
-
-  // }, [isConnected, socketRef]);
+  const { language } = useLanguage();
 
   const handleDelete = (item: SavedItem) => {
-    if (window.confirm(`"${item.name}" を削除してもよろしいですか？`)) {
+    if (window.confirm(t('confirm_delete', language) || `"${item.name}" を削除してもよろしいですか？`)) {
       if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
         const deleteMessage = JSON.stringify({
           function: 'delete_saved',
@@ -179,210 +119,240 @@ const Saved: React.FC<SavedProps> = ({ socketRef, socketMessage, isConnected }) 
   };
 
   const uploadFile = (file: File) => {
-    // Placeholder for upload functionality
-    // Implement your upload logic here using existing socketRef
-    // For example:
-    // const formData = new FormData();
-    // formData.append('file', file);
-    // fetch('your-upload-endpoint', {
-    //   method: 'POST',
-    //   body: formData,
-    // })
-    //   .then(response => response.json())
-    //   .then(data => {
-    //     // Handle success
-    //     setIsUploading(false);
-    //     // Refresh the list
-    //     const requestList = JSON.stringify({ function: 'list_saved' });
-    //     socketRef.current?.send(requestList);
-    //   })
-    //   .catch(error => {
-    //     console.error('Upload failed:', error);
-    //     setIsUploading(false);
-    //   });
+    setIsUploading(true);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64data = (reader.result as string).split(',')[1];
+      const timestamp = new Date().toISOString();
+      const name = file.name.split('.').slice(0, -1).join('.');
 
-    // Since you requested not to modify socketRef much, the actual upload implementation is left as a placeholder.
-    alert('アップロード機能は現在実装されていません。');
+      const uploadMessage = JSON.stringify({
+        function: 'upload_saved',
+        kwargs: {
+          name,
+          timestamp,
+          video_data: base64data,
+        },
+      });
+
+      socketRef.current?.send(uploadMessage);
+      // Optionally, you can listen for confirmation from the server to add the item
+      setIsUploading(false);
+      // Refresh the list
+      fetchSavedItems();
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const fetchSavedItems = () => {
+    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+      const listMessage = JSON.stringify({
+        function: 'list_saved',
+        kwargs: {},
+      });
+      socketRef.current.send(listMessage);
+      setIsLoading(true);
+    }
   };
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isModalOpen) {
-        closeModal();
+    fetchSavedItems();
+  }, [isConnected]);
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.function === 'list_saved' && data.result) {
+          if (data.result === 'END') {
+            setIsLoading(false);
+          } else {
+            const { name, timestamp, chunk } = data.result;
+            setSavedItems((prev) => [...prev, { name, timestamp, video: chunk }]);
+            setFilteredItems((prev) => [...prev, { name, timestamp, video: chunk }]);
+          }
+        } else if (data.function === 'upload_saved_success') {
+          // Handle successful upload
+          fetchSavedItems();
+        } else if (data.error) {
+          setError(data.error);
+          setIsLoading(false);
+        }
+      } catch (err) {
+        console.error('Failed to parse message in Saved component:', err);
+        setError(t('error_parsing', language) || 'Failed to parse server response.');
+        setIsLoading(false);
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isModalOpen]);
 
+    if (socketRef.current) {
+      socketRef.current.addEventListener('message', handleMessage);
+    }
 
-  
-  // useEffect(() => {
-  //   if (!isConnected) return;
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.removeEventListener('message', handleMessage);
+      }
+    };
+  }, [socketRef, language]);
 
-  //   if (socketMessage?.function == 'append' && socketMessage?.result){
-      
-  //         const data = JSON.parse(socketMessage?.result);
-  //   }
-  // }, [socketMessage, isConnected])
-
-
-
-  // if (isLoading) {
-  //   return (
-  //     <Box className="saved-container loading-container" display="flex" justifyContent="center" alignItems="center">
-  //       <CircularProgress />
-  //     </Box>
-  //   );
-  // }
-
-  // if (error) {
-  //   return (
-  //     <Box className="saved-container error-container">
-  //       <Typography variant="h6" color="error">
-  //         エラー: {error}
-  //       </Typography>
-  //     </Box>
-  //   );
-  // }
+  useEffect(() => {
+    if (searchQuery === '') {
+      setFilteredItems(savedItems);
+    } else {
+      setFilteredItems(
+        savedItems.filter(item =>
+          item.name.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      );
+    }
+  }, [searchQuery, savedItems]);
 
   return (
     <>
-    {!isConnected && <LoadingScreen />}
-    <Box className="saved-container">
-      <Box className="header">
-        <Typography variant="h4" className="saved-title">
-          保存された手話
-        </Typography>
-        <Box className="upload-section">
-          <input
-            type="file"
-            accept="video/*"
-            ref={fileInputRef}
-            style={{ display: 'none' }}
-            onChange={handleFileChange}
-          />
-          <Tooltip title="アップロード">
-            <IconButton
-              color="primary"
-              onClick={handleUploadClick}
-              className="upload-button"
-            >
-              <UploadIcon />
-            </IconButton>
-          </Tooltip>
-          {isUploading && <CircularProgress size={24} className="upload-progress" />}
+      {!isConnected && <LoadingScreen />}
+      <Box className="saved-container">
+        <Box className="header">
+          <Typography variant="h4" className="saved-title">
+            {t('files', language)}
+          </Typography>
+          <Box className="upload-section">
+            <input
+              type="file"
+              accept="video/*"
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+            />
+            <Tooltip title={t('upload', language)}>
+              <IconButton
+                color="primary"
+                onClick={handleUploadClick}
+                className="upload-button"
+              >
+                <UploadIcon />
+              </IconButton>
+            </Tooltip>
+            {isUploading && <CircularProgress size={24} className="upload-progress" />}
+          </Box>
         </Box>
-      </Box>
-      <Box className="search-bar">
-        <TextField
-          placeholder="検索..."
-          variant="outlined"
-          size="small"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          fullWidth
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-            style: { color: '#ffffff' }, // Ensure text is visible in dark mode
-          }}
-          className="search-input"
-        />
-      </Box>
-      <TableContainer component={Paper} className="table-container">
-        <Table aria-label="saved signs table">
-          <TableHead>
-            <TableRow>
-              <TableCell className="table-header-cell">名前</TableCell>
-              <TableCell className="table-header-cell action-header-cell" align="right">
-                アクション
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredItems.map((item, index) => (
-              <TableRow key={`${item.name}-${item.timestamp}-${index}`} className="table-row">
-                <TableCell className="table-cell">
-                  <Button
-                    onClick={() => openModal(item)}
-                    className="name-button"
-                  >
-                    {item.name}
-                  </Button>
-                </TableCell>
-                <TableCell className="table-cell action-cell" align="right">
-                  <Tooltip title="ダウンロード">
-                    <IconButton
-                      aria-label="download"
-                      onClick={() => handleDownload(item)}
-                      className="action-button download-button"
-                    >
-                      <DownloadIcon />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="削除する">
-                    <IconButton
-                      aria-label="delete"
-                      onClick={() => handleDelete(item)}
-                      className="action-button delete-button"
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </Tooltip>
-                </TableCell>
-              </TableRow>
-            ))}
-            {filteredItems.length === 0 && (
+        <Box className="search-bar">
+          <TextField
+            placeholder={t('search_placeholder', language)}
+            variant="outlined"
+            size="small"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            fullWidth
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+              style: { color: 'var(--text-color)' },
+            }}
+            className="search-input"
+          />
+        </Box>
+        <TableContainer component={Paper} className="table-container">
+          <Table aria-label="saved signs table">
+            <TableHead>
               <TableRow>
-                <TableCell colSpan={2} align="center">
-                  <Typography variant="body1">保存された手話がありません。</Typography>
+                <TableCell className="table-header-cell">{t('name', language) || 'Name'}</TableCell>
+                <TableCell className="table-header-cell action-header-cell" align="right">
+                  {t('action', language) || 'Action'}
                 </TableCell>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {filteredItems.map((item, index) => (
+                <TableRow key={`${item.name}-${item.timestamp}-${index}`} className="table-row">
+                  <TableCell className="table-cell">
+                    <Button
+                      onClick={() => openModal(item)}
+                      className="name-button"
+                    >
+                      {item.name}
+                    </Button>
+                  </TableCell>
+                  <TableCell className="table-cell action-cell" align="right">
+                    <Tooltip title={t('download', language)}>
+                      <IconButton
+                        aria-label={t('download', language)}
+                        onClick={() => handleDownload(item)}
+                        className="action-button download-button"
+                      >
+                        <DownloadIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title={t('delete', language)}>
+                      <IconButton
+                        aria-label={t('delete', language)}
+                        onClick={() => handleDelete(item)}
+                        className="action-button delete-button"
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {filteredItems.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={2} align="center">
+                    <Typography variant="body1">{t('no_saved_signs', language) || 'No saved signs found.'}</Typography>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
-      <Dialog
-        open={isModalOpen}
-        onClose={closeModal}
-        maxWidth="md"
-        fullWidth
-        aria-labelledby="video-preview-title"
-      >
-        <DialogTitle id="video-preview-title" className="dialog-title">
-          {selectedItem?.name} - プレビュー
-          <IconButton
-            aria-label="close"
-            onClick={closeModal}
-            className="close-button"
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent dividers className="dialog-content">
-        {selectedItem && (
-            <video controls className="preview-video">
-              
-              <source
-                src={`data:video/webm;base64,${selectedItem.video}`}
-                type="video/webm"
-              />
-              ブラウザがビデオタグをサポートしていません。
-            </video>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={closeModal} color="primary" className="close-dialog-button">
-            閉じる
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+        <Dialog
+          open={isModalOpen}
+          onClose={closeModal}
+          maxWidth="md"
+          fullWidth
+          aria-labelledby="video-preview-title"
+        >
+          <DialogTitle id="video-preview-title" className="dialog-title">
+            {selectedItem?.name} - {t('preview', language)}
+            <IconButton
+              aria-label="close"
+              onClick={closeModal}
+              className="close-button"
+            >
+              <CloseIcon />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent dividers className="dialog-content">
+            {selectedItem && (
+              <video controls className="preview-video">
+                <source
+                  src={`data:video/webm;base64,${selectedItem.video}`}
+                  type="video/webm"
+                />
+                {t('browser_not_support', language) || 'Your browser does not support the video tag.'}
+              </video>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={closeModal} color="primary" className="close-dialog-button">
+              {t('close', language)}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Error Message */}
+        {error && (
+          <Box mt={2}>
+            <Typography variant="body1" color="error">
+              {error}
+            </Typography>
+          </Box>
+        )}
+      </Box>
     </>
   );
 };

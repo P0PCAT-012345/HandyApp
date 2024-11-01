@@ -1,18 +1,50 @@
-/* src/App.css */
+/* src/App/App.css */
+
+/* Define light theme variables */
+:root[data-theme='light'] {
+  --background-color: #ffffff;
+  --text-color: #000000;
+  --sidebar-bg: #f0f0f0;
+  --sidebar-bg-hover: #e0e0e0;
+  --sidebar-text: #000000;
+  --toggle-bg: #ccc;
+  --toggle-bg-checked: #2196F3;
+  --toggle-knob: white;
+  --border-color: #ccc;
+  --input-bg: #ffffff;
+  --delete-icon-color: #ff5555;
+  /* Add any additional variables as needed */
+}
+
+/* Define dark theme variables */
+:root[data-theme='dark'] {
+  --background-color: #121212;
+  --text-color: #ffffff;
+  --sidebar-bg: #11101d;
+  --sidebar-bg-hover: #1c1b28;
+  --sidebar-text: #ffffff;
+  --toggle-bg: #555;
+  --toggle-bg-checked: #2196F3;
+  --toggle-knob: white;
+  --border-color: #555;
+  --input-bg: #1e1e1e;
+  --delete-icon-color: #ff7f7f;
+  /* Add any additional variables as needed */
+}
 
 .app-container {
   display: flex;
-  height: 100vh;
-  overflow: hidden; /* Prevent scrolling */
+  height: 100vh; /* Full viewport height */
 }
 
 .home-section {
-  margin-left: 78px; /* Closed sidebar width */
-  width: calc(100% - 78px);
-  transition: margin-left 0.5s ease, width 0.5s ease;
+  flex: 1; /* Take up remaining space */
+  transition: margin-left 0.5s ease;
+  position: relative; /* For positioning child elements */
   overflow: hidden; /* Prevent overflow */
-  position: relative;
-  background: #e4e9f7;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .sidebar.open ~ .home-section {
@@ -35,11 +67,6 @@
   border-radius: 5px;
   display: inline-block;
   font-size: 1.2rem;
-}
-
-.home-container {
-  width: 100%;
-  height: 100%;
 }
 
 /* Responsive Design */

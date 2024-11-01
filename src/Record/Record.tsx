@@ -2,9 +2,11 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { FaRecordVinyl } from 'react-icons/fa';
-import '../VideoStyles.css'; // Use shared video styles
+import './Record.css';
 import Webcam from 'react-webcam';
 import LoadingScreen from '../LoadingScreen/LoadingScreen';
+import { useLanguage } from '../contexts/LanguageContext';
+import { t } from '../translation';
 
 interface SocketMessageProps {
   result: string;
@@ -25,10 +27,11 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
   const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [recordName, setRecordName] = useState('');
-  const [webcamDimensions, setWebcamDimensions] = useState({ width: 0, height: 0, top: 0, left: 0 }); 
-  const [subtitleText, setSubtitleText] = useState<string>(''); // Added State Variable
+  const [webcamDimensions, setWebcamDimensions] = useState({ width: 0, height: 0, top: 0, left: 0 });
+  const [subtitleText, setSubtitleText] = useState<string>('');
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const { language } = useLanguage();
 
   const handleClick = () => {
     if (!isRecording && !isSaving && socketRef.current) {
@@ -85,7 +88,7 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
       const reader = new FileReader();
 
       reader.onloadend = () => {
-        const base64data = (reader.result as string).split(',')[1]; // Remove the data URL part
+        const base64data = (reader.result as string).split(',')[1];
         const message = JSON.stringify({
           function: 'stop_recording',
           kwargs: { 
@@ -173,7 +176,7 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
 
       const intervalId = setInterval(captureImage, 50);
 
-      return () => clearInterval(intervalId); 
+      return () => clearInterval(intervalId);
     }
   }, [countdown, isVideoVisible, isRecording]);
 
@@ -193,7 +196,7 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
       }
     }
   }, [socketMessage]);
-  
+
   return (
     <div onClick={handleClick} className="video-container record-container">
       {!isConnected && <LoadingScreen />}
@@ -203,30 +206,22 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
         ref={webcamRef}
         className={`video-element ${isVideoVisible ? 'visible' : 'blurred'}`}
         style={{
-          objectFit: 'contain', // Ensure the video fits vertically
+          objectFit: 'contain',
         }}
       />
 
       {isVideoVisible && (
         <img
           src="/greyperson.png"
-          style={{
-            position: 'absolute',
-            top: `${webcamDimensions.top}px`,
-            left: `${webcamDimensions.left}px`,
-            width: `${webcamDimensions.width}px`,
-            height: `${webcamDimensions.height}px`,
-            objectFit: 'contain',
-            zIndex: 1, 
-          }}
+          className="overlay-image"
           alt="Overlay"
         />
       )}
       {/* Button Overlay */}
       {!isVideoVisible && !isRecording && !isSaving && (
         <div className="overlay">
-          <h1 className="overlay-title">画面をクリックして録画が始まり、口を開けると終了します</h1>
-      </div>
+          <h1 className="overlay-title">{t('click_to_start_recording', language)}</h1>
+        </div>
       )}
 
       {/* Countdown Overlay */}
@@ -237,14 +232,14 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
         <div className="save-overlay">
           <input
             type="text"
-            placeholder="手話の名前を入力してください"
+            placeholder={t('enter_sign_name', language)}
             value={recordName}
             onChange={(e) => setRecordName(e.target.value)}
-            aria-label="Record Name"
+            aria-label={t('enter_sign_name', language)}
           />
           <div>
-            <button onClick={handleSaveRecording} aria-label="Save Recording">保存する</button>
-            <button onClick={resetState} aria-label="Cancel Saving">キャンセル</button>
+            <button onClick={handleSaveRecording} aria-label={t('save_recording', language)}>{t('save', language)}</button>
+            <button onClick={resetState} aria-label={t('cancel_saving', language)}>{t('cancel', language)}</button>
           </div>
         </div>
       )}
@@ -255,7 +250,6 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
           <p className="subtitle-text">{subtitleText}</p>
         </div>
       )}
-
       
     </div>
   );

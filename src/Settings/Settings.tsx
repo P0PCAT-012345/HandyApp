@@ -1,111 +1,71 @@
-  import React, { useState, useEffect } from 'react';
-  import './Settings.css';
+// src/components/Settings.tsx
 
-  type Language = 'english' | 'japanese';
+import React from 'react';
+import './Settings.css';
+import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
+import { t } from '../translation';
+import { FaLanguage } from 'react-icons/fa';
+import { FaSun, FaMoon } from 'react-icons/fa';
 
-  const translations: Record<Language, { [key: string]: string }> = {
-    english: {
-      settings: 'Settings',
-      language: 'Language',
-      theme: 'Theme',
-      camera: 'Camera',
-      light: 'Light',
-      dark: 'Dark',
-      english: 'English',
-      japanese: '日本語',
-    },
-    japanese: {
-      settings: '設定',
-      language: '言語',
-      theme: 'テーマ',
-      camera: 'カメラ',
-      light: 'ライト',
-      dark: 'ダーク',
-      english: '英語',
-      japanese: '日本語',
-    },
+const Settings: React.FC = () => {
+  const { theme, setTheme } = useTheme();
+  const { language, setLanguage } = useLanguage();
+
+  const handleThemeChange = () => {
+    const selectedTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(selectedTheme);
   };
 
-  const Settings: React.FC = () => {
-    const [language, setLanguage] = useState<Language>('english');
-    const [theme, setTheme] = useState('light');
-    const [cameras, setCameras] = useState<MediaDeviceInfo[]>([]);
-    const [camera, setCamera] = useState('');
+  const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedLang = e.target.value as 'en' | 'jp';
+    setLanguage(selectedLang);
+  };
 
-    const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setLanguage(e.target.value as Language);
-    };
+  return (
+    <div className="settings-container">
+      <h2 className="settings-title">{t('settings', language)}</h2>
 
-    const handleThemeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setTheme(e.target.value);
-    };
-
-    const handleCameraChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setCamera(e.target.value);
-    };
-
-    useEffect(() => {
-      const getCameras = async () => {
-        try {
-          const devices = await navigator.mediaDevices.enumerateDevices();
-          const videoDevices = devices.filter(device => device.kind === 'videoinput');
-          setCameras(videoDevices);
-          if (videoDevices.length > 0) {
-            setCamera(videoDevices[0].deviceId); // Set the default camera
-          }
-        } catch (err) {
-          console.error('Error accessing media devices', err);
-        }
-      };
-
-      getCameras();
-    }, []);
-
-    const t = translations[language];
-
-    return (
-      <div className={`settings-container ${theme === 'dark' ? 'dark-mode' : ''}`}>
-        <h1 className="settings-title">{t.settings}</h1>
-        <div className="settings-section">
-          <label className="settings-label">{t.language}</label>
-          <select
-            className="settings-select"
-            value={language}
-            onChange={handleLanguageChange}
-          >
-            <option value="english">{t.english}</option>
-            <option value="japanese">{t.japanese}</option>
-          </select>
+      <div className="settings-box">
+        <div className="settings-option">
+          <div className="icon-wrapper">
+            {theme === 'light' ? <FaSun /> : <FaMoon />}
+          </div>
+          <div className="option-details">
+            <label className="settings-label">{theme === 'dark' ? t('dark_mode', language) : t('light_mode', language)}</label>
+            <div className="toggle-switch">
+              <input
+                type="checkbox"
+                checked={theme === 'dark'}
+                onChange={handleThemeChange}
+                id="theme-toggle"
+                aria-label={t('toggle_dark_mode', language) || 'Toggle Dark Mode'}
+              />
+              <label htmlFor="theme-toggle" className="slider round"></label>
+            </div>
+          </div>
         </div>
 
-        <div className="settings-section">
-          <label className="settings-label">{t.theme}</label>
-          <select
-            className="settings-select"
-            value={theme}
-            onChange={handleThemeChange}
-          >
-            <option value="light">{t.light}</option>
-            <option value="dark">{t.dark}</option>
-          </select>
-        </div>
-
-        <div className="settings-section">
-          <label className="settings-label">{t.camera}</label>
-          <select
-            className="settings-select"
-            value={camera}
-            onChange={handleCameraChange}
-          >
-            {cameras.map(cam => (
-              <option key={cam.deviceId} value={cam.deviceId}>
-                {cam.label || `Camera ${cam.deviceId}`}
-              </option>
-            ))}
-          </select>
+        <div className="settings-option">
+          <div className="icon-wrapper">
+            <FaLanguage />
+          </div>
+          <div className="option-details">
+            <label className="settings-label">{t('language', language)}</label>
+            <select
+              value={language}
+              onChange={handleLanguageChange}
+              className="language-select"
+              aria-label={t('select_language', language) || 'Select Language'}
+            >
+              <option value="en">{t('english', language)}</option>
+              <option value="jp">{t('japanese', language)}</option>
+            </select>
+          </div>
         </div>
       </div>
-    );
-  };
+    </div>
+  );
+};
 
-  export default Settings;
+export default Settings;

@@ -1,6 +1,12 @@
+// src/Saved/FileViewer.tsx
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Folder, ChevronLeft, Trash2, Search, RefreshCw } from 'lucide-react';
 import './FileViewer.css';
+import { useLanguage } from '../contexts/LanguageContext';
+import { t } from '../translation';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 
 interface FileType {
   name: string;
@@ -26,9 +32,13 @@ interface FileViewerProps {
   setFolders: (folders: FolderType[]) => void;
 }
 
-
-const FileViewer: React.FC<FileViewerProps> = ({ socketRef, socketMessage, isConnected, folders, setFolders}) => {
-  
+const FileViewer: React.FC<FileViewerProps> = ({
+  socketRef,
+  socketMessage,
+  isConnected,
+  folders,
+  setFolders,
+}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentFolder, setCurrentFolder] = useState<FolderType | null>(null);
   const [currentFolderIndex, setCurrentFolderIndex] = useState<number | null>(null);
@@ -37,22 +47,25 @@ const FileViewer: React.FC<FileViewerProps> = ({ socketRef, socketMessage, isCon
   const [selectedFiles, setSelectedFiles] = useState<FileType[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<FileType | null>(null);
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
+  const { language } = useLanguage();
+  const [error, setError] = useState<string | null>(null); // Added error state
 
-  const filteredFolders = folders.filter(folder =>
+  // Derived variable for filtered folders based on search query
+  const filteredFolders = folders.filter((folder: FolderType) =>
     folder.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Link parsing function
+  // Function to parse links in text (if needed)
   const parseLinksInText = (text: string) => {
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     return text.split(urlRegex).map((part, index) => {
       if (part.match(urlRegex)) {
         return (
-          <a 
-            key={index} 
-            href={part} 
-            target="_blank" 
-            rel="noopener noreferrer" 
+          <a
+            key={index}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
             className="text-blue-500 underline"
           >
             {part}
@@ -63,6 +76,7 @@ const FileViewer: React.FC<FileViewerProps> = ({ socketRef, socketMessage, isCon
     });
   };
 
+  // Handler functions
   const handleFolderClick = (folderIndex: number) => {
     setCurrentFolder(folders[folderIndex]);
     setCurrentFolderIndex(folderIndex);
@@ -89,12 +103,14 @@ const FileViewer: React.FC<FileViewerProps> = ({ socketRef, socketMessage, isCon
     );
   };
 
-  const handleFolderCheckboxChange = (folder: FolderType, index: number, e: React.MouseEvent) => {
+  const handleFolderCheckboxChange = (
+    folder: FolderType,
+    index: number,
+    e: React.MouseEvent
+  ) => {
     e.stopPropagation(); // Prevent folder from opening when clicking checkbox
-    setSelectedFolders(prev => 
-      prev.includes(index)
-        ? prev.filter(f => f !== index)
-        : [...prev, index]
+    setSelectedFolders((prev) =>
+      prev.includes(index) ? prev.filter((f) => f !== index) : [...prev, index]
     );
   };
 
@@ -105,28 +121,32 @@ const FileViewer: React.FC<FileViewerProps> = ({ socketRef, socketMessage, isCon
       updatedFolders[currentFolderIndex!].files = currentFolder.files.filter(
         (file) => !selectedFiles.some((selectedFile) => selectedFile.name === file.name)
       );
-  
+
       setFolders(updatedFolders);
       setCurrentFolder(updatedFolders[currentFolderIndex!]);
       setSelectedFiles([]);
 
-      const fileNames = selectedFiles.map(file => file.name);
-      const requestList = JSON.stringify(
-        { function: 'delete_files', kwargs: { 
-          "folder": currentFolder.name,
-          "files": fileNames
-      }, });
+      const fileNames = selectedFiles.map((file) => file.name);
+      const requestList = JSON.stringify({
+        function: 'delete_files',
+        kwargs: {
+          folder: currentFolder.name,
+          files: fileNames,
+        },
+      });
       socketRef.current?.send(requestList);
     } else if (selectedFolders.length > 0) {
       // Delete folders
       const updatedFolders = folders.filter((_, index) => !selectedFolders.includes(index));
       setFolders(updatedFolders);
       setSelectedFolders([]);
-      const folderNames = selectedFolders.map(index => folders[index].name);
-      const requestList = JSON.stringify(
-        { function: 'delete_folders', kwargs: { 
-          "folders": folderNames
-      }, });
+      const folderNames = selectedFolders.map((index) => folders[index].name);
+      const requestList = JSON.stringify({
+        function: 'delete_folders',
+        kwargs: {
+          folders: folderNames,
+        },
+      });
       socketRef.current?.send(requestList);
     }
   };
@@ -137,11 +157,13 @@ const FileViewer: React.FC<FileViewerProps> = ({ socketRef, socketMessage, isCon
       updatedFolders[currentFolderIndex].description = e.target.value;
       setFolders(updatedFolders);
       setCurrentFolder(updatedFolders[currentFolderIndex]);
-      const requestList = JSON.stringify(
-        { function: 'update_description', kwargs: { 
-          "folder": updatedFolders[currentFolderIndex].name,
-          "description": e.target.value
-      }, });
+      const requestList = JSON.stringify({
+        function: 'update_description',
+        kwargs: {
+          folder: updatedFolders[currentFolderIndex].name,
+          description: e.target.value,
+        },
+      });
       socketRef.current?.send(requestList);
     }
   };
@@ -151,11 +173,47 @@ const FileViewer: React.FC<FileViewerProps> = ({ socketRef, socketMessage, isCon
   };
 
   const handleRefresh = () => {
-    const requestList = JSON.stringify(
-      { function: 'send_descriptions', kwargs: { 
-    }, });
+    const requestList = JSON.stringify({
+      function: 'send_descriptions',
+      kwargs: {},
+    });
     socketRef.current?.send(requestList);
-  }
+  };
+
+  // Effect to handle incoming WebSocket messages
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.function === 'send_descriptions' && data.result) {
+          // Assuming data.result is an array of folders
+          setFolders(data.result);
+        } else if (
+          data.function === 'delete_files_success' ||
+          data.function === 'delete_folders_success'
+        ) {
+          // Optionally handle successful deletions
+        } else if (data.error) {
+          setError(data.error);
+        }
+      } catch (err) {
+        console.error('Failed to parse message in FileViewer component:', err);
+        setError(t('error_parsing', language) || 'Failed to parse server response.');
+      }
+    };
+
+    if (socketRef.current) {
+      socketRef.current.addEventListener('message', handleMessage);
+    }
+
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.removeEventListener('message', handleMessage);
+      }
+    };
+  }, [socketRef, language]);
+
+  // Remove the useEffect that incorrectly referenced setFilteredItems and savedItems
 
   return (
     <div className="file-viewer">
@@ -164,26 +222,20 @@ const FileViewer: React.FC<FileViewerProps> = ({ socketRef, socketMessage, isCon
           {/* Header */}
           <div className="viewer-header">
             {currentFolder && (
-              <button
-                onClick={handleBackClick}
-                className="back-button"
-              >
+              <button onClick={handleBackClick} className="back-button">
                 <ChevronLeft />
               </button>
             )}
-            <h1>{currentFolder ? currentFolder.name : 'Saved'}</h1>
-            {((currentFolder && selectedFiles.length > 0) || (!currentFolder && selectedFolders.length > 0)) && (
-              <button
-                onClick={handleDeleteSelected}
-                className="delete-button"
-              >
+            <h1>{currentFolder ? currentFolder.name : t('saved_files', language) || 'Saved'}</h1>
+            {((currentFolder && selectedFiles.length > 0) ||
+              (!currentFolder && selectedFolders.length > 0)) && (
+              <button onClick={handleDeleteSelected} className="delete-button">
                 <Trash2 />
-                Delete Selected ({currentFolder ? selectedFiles.length : selectedFolders.length})
+                {t('delete_selected', language) || 'Delete Selected'} (
+                {currentFolder ? selectedFiles.length : selectedFolders.length})
               </button>
             )}
-            <button onClick={handleRefresh}
-              className="refresh-button"
-            >
+            <button onClick={handleRefresh} className="refresh-button">
               <RefreshCw />
             </button>
           </div>
@@ -194,7 +246,7 @@ const FileViewer: React.FC<FileViewerProps> = ({ socketRef, socketMessage, isCon
               <Search className="search-icon" />
               <input
                 type="text"
-                placeholder="Search folders..."
+                placeholder={t('search_folders', language) || 'Search folders...'}
                 value={searchQuery}
                 onChange={handleSearchChange}
                 className="search-input"
@@ -214,8 +266,10 @@ const FileViewer: React.FC<FileViewerProps> = ({ socketRef, socketMessage, isCon
                       onClick={() => handleFolderClick(index)}
                       className="folder-item"
                     >
-                      <div 
-                        className={`folder-icon-container ${selectedFolders.includes(index) ? 'selected' : ''}`}
+                      <div
+                        className={`folder-icon-container ${
+                          selectedFolders.includes(index) ? 'selected' : ''
+                        }`}
                         onClick={(e) => handleFolderCheckboxChange(folder, index, e)}
                       >
                         <Folder className="folder-icon" />
@@ -234,9 +288,8 @@ const FileViewer: React.FC<FileViewerProps> = ({ socketRef, socketMessage, isCon
                     value={currentFolder.description}
                     onChange={handleDescriptionChange}
                     className="description-input"
-                    placeholder="Click to add description..."
+                    placeholder={t('add_description', language) || 'Click to add description...'}
                   />
-
                 </div>
                 <div className="scrollable-container">
                   <div className="files-grid">
@@ -248,10 +301,7 @@ const FileViewer: React.FC<FileViewerProps> = ({ socketRef, socketMessage, isCon
                           onChange={() => handleCheckboxChange(file)}
                           className="file-checkbox"
                         />
-                        <button
-                          onClick={() => handleVideoClick(file)}
-                          className="file-button"
-                        >
+                        <button onClick={() => handleVideoClick(file)} className="file-button">
                           <span>{file.name}</span>
                         </button>
                       </div>
@@ -266,14 +316,23 @@ const FileViewer: React.FC<FileViewerProps> = ({ socketRef, socketMessage, isCon
 
       {/* Video Modal */}
       {isVideoOpen && selectedVideo && (
-      <div className="modal-overlay" onClick={() => setIsVideoOpen(false)}>
-        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-          <video controls className="video-player" src={`data:video/webm;base64,${selectedVideo.video}`}>
-            Your browser does not support the video tag.
-          </video>
+        <div className="modal-overlay" onClick={() => setIsVideoOpen(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <video controls className="video-player" src={`data:video/webm;base64,${selectedVideo.video}`}>
+              {t('browser_not_support', language) || 'Your browser does not support the video tag.'}
+            </video>
+          </div>
         </div>
-      </div>
-    )}
+      )}
+
+      {/* Error Message */}
+      {error && (
+        <Box mt={2}>
+          <Typography variant="body1" color="error">
+            {error}
+          </Typography>
+        </Box>
+      )}
     </div>
   );
 };

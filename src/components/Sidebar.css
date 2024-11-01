@@ -1,3 +1,5 @@
+/* src/components/Sidebar.css */
+
 * {
     margin: 0;
     padding: 0;
@@ -6,12 +8,11 @@
 }
 
 .sidebar {
-    position: fixed;
-    left: 0;
-    top: 0;
+    /* Removed position: fixed; */
     height: 100%;
     width: 78px;
-    background: #11101d;
+    background: var(--sidebar-bg);
+    color: var(--sidebar-text);
     padding: 10px 14px;
     z-index: 99;
     transition: width 0.5s ease;
@@ -37,7 +38,7 @@
 }
 
 .logo_name {
-    color: #fff;
+    color: var(--sidebar-text);
     font-size: 20px;
     font-weight: 600;
     opacity: 0;
@@ -50,7 +51,7 @@
 }
 
 .toggle-btn {
-    color: #fff;
+    color: var(--sidebar-text);
     font-size: 23px;
     cursor: pointer;
     transition: color 0.3s ease;
@@ -78,7 +79,7 @@
     display: flex;
     align-items: center;
     text-decoration: none;
-    color: #fff;
+    color: var(--sidebar-text);
     height: 50px;
     min-width: 50px;
     font-size: 18px;
@@ -89,7 +90,6 @@
     overflow: hidden;
 }
 
-/* Apply hover effect on nav-item for all items */
 .nav-item:hover {
     background: #fff;
     color: #11101d;

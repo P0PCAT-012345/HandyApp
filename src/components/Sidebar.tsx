@@ -1,6 +1,6 @@
 // src/components/Sidebar.tsx
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   FaBars,
   FaTimes,
@@ -8,19 +8,23 @@ import {
   FaCamera,
   FaFolder,
   FaBook,
+  FaCog, // Icon for Settings
+  FaSignOutAlt, // Icon for Logout
 } from 'react-icons/fa';
 import './Sidebar.css';
+import { useLanguage } from '../contexts/LanguageContext';
+import { t } from '../translation';
+import Tooltip from '@mui/material/Tooltip';
 
 interface SidebarProps {
+  isOpen: boolean; // Receive open state
+  toggleSidebar: () => void; // Receive toggle function
   setCurrentComponent: (component: string) => void;
+  onLogout: () => void; // New prop for Logout
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ setCurrentComponent }) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen);
-  };
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, setCurrentComponent, onLogout }) => {
+  const { language } = useLanguage();
 
   return (
     <div className={`sidebar ${isOpen ? 'open' : ''}`}>
@@ -30,7 +34,7 @@ const Sidebar: React.FC<SidebarProps> = ({ setCurrentComponent }) => {
         <div
           className="toggle-btn"
           onClick={toggleSidebar}
-          aria-label="Toggle Sidebar"
+          aria-label={isOpen ? t('close_sidebar', language) || 'Close Sidebar' : t('open_sidebar', language) || 'Open Sidebar'}
           aria-expanded={isOpen}
         >
           {isOpen ? <FaTimes /> : <FaBars />}
@@ -41,48 +45,72 @@ const Sidebar: React.FC<SidebarProps> = ({ setCurrentComponent }) => {
       <ul className="nav-list">
         {/* Translate */}
         <li onClick={() => setCurrentComponent("dashboard")}>
-          <div className="nav-item" aria-label="Translate">
-            <FaHandPaper className="icon" />
-            {isOpen && <span className="links_name">Translate</span>}
-          </div>
-          {!isOpen && <span className="tooltip">Translate</span>}
+          <Tooltip title={isOpen ? '' : t('translate', language)} placement="right">
+            <div className="nav-item" aria-label={t('translate', language)}>
+              <FaHandPaper className="icon" />
+              {isOpen && <span className="links_name">{t('translate', language)}</span>}
+            </div>
+          </Tooltip>
         </li>
 
         {/* Record */}
         <li onClick={() => setCurrentComponent("record")}>
-          <div className="nav-item" aria-label="Record">
-            <FaCamera className="icon" />
-            {isOpen && <span className="links_name">Record</span>}
-          </div>
-          {!isOpen && <span className="tooltip">Record</span>}
+          <Tooltip title={isOpen ? '' : t('record', language)} placement="right">
+            <div className="nav-item" aria-label={t('record', language)}>
+              <FaCamera className="icon" />
+              {isOpen && <span className="links_name">{t('record', language)}</span>}
+            </div>
+          </Tooltip>
         </li>
 
         {/* Files */}
         <li onClick={() => setCurrentComponent("saved")}>
-          <div className="nav-item" aria-label="Files">
-            <FaFolder className="icon" />
-            {isOpen && <span className="links_name">Files</span>}
-          </div>
-          {!isOpen && <span className="tooltip">Files</span>}
+          <Tooltip title={isOpen ? '' : t('files', language)} placement="right">
+            <div className="nav-item" aria-label={t('files', language)}>
+              <FaFolder className="icon" />
+              {isOpen && <span className="links_name">{t('files', language)}</span>}
+            </div>
+          </Tooltip>
         </li>
 
         {/* Documentation */}
         <li>
-          <a
-            href="https://github.com/yoyo222/Handy-Website"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="nav-item external-link"
-            aria-label="Documentation"
-          >
-            <FaBook className="icon" />
-            {isOpen && <span className="links_name">Documentation</span>}
-          </a>
-          {!isOpen && <span className="tooltip">Documentation</span>}
+          <Tooltip title={isOpen ? '' : t('documentation', language)} placement="right">
+            <a
+              href="https://github.com/yoyo222/Handy-Website"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="nav-item external-link"
+              aria-label={t('documentation', language)}
+            >
+              <FaBook className="icon" />
+              {isOpen && <span className="links_name">{t('documentation', language)}</span>}
+            </a>
+          </Tooltip>
         </li>
 
-        {/* Spacer to Push Profile/Logout to Bottom */}
+        {/* Settings */}
+        <li onClick={() => setCurrentComponent("settings")}>
+          <Tooltip title={isOpen ? '' : t('settings', language)} placement="right">
+            <div className="nav-item" aria-label={t('settings', language)}>
+              <FaCog className="icon" />
+              {isOpen && <span className="links_name">{t('settings', language)}</span>}
+            </div>
+          </Tooltip>
+        </li>
+
+        {/* Spacer to Push Logout to Bottom */}
         <li className="spacer"></li>
+
+        {/* Logout */}
+        <li onClick={onLogout}>
+          <Tooltip title={isOpen ? '' : t('logout', language)} placement="right">
+            <div className="nav-item" aria-label={t('logout', language)}>
+              <FaSignOutAlt className="icon" />
+              {isOpen && <span className="links_name">{t('logout', language)}</span>}
+            </div>
+          </Tooltip>
+        </li>
       </ul>
     </div>
   );

@@ -1,17 +1,21 @@
-// src/App.tsx
+// src/App/App.tsx
 
 import React, { useEffect, useRef, useState } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Record from '../Record/Record';
 import Saved from '../Saved/Saved';
 import FileViewer from '../Saved/FileViewer';
+import Settings from '../Settings/Settings'; // Corrected import path
 import LoadingScreen from '../LoadingScreen/LoadingScreen';
 import Auth from '../Login/Auth'; // Import the Login component
 import './App.css';
-import '../VideoStyles.css'; // Import shared video styles
+import '../VideoStyles.css'; // Corrected import path
 import Webcam from 'react-webcam';
 import { FaPlay, FaCopy } from 'react-icons/fa';
+import { ThemeProvider } from '../contexts/ThemeContext'; // Import ThemeProvider
+import { LanguageProvider, useLanguage } from '../contexts/LanguageContext'; // Import LanguageProvider and useLanguage
+import { t } from '../translation'; // Import the translation function
 
 interface SocketMessageProps {
   result: string;
@@ -37,10 +41,10 @@ interface FolderType {
 
 interface FolderData {
   [folderName: string]: {
-      [filename: string]: {
-          chunks: string[];
-      }
-  }
+    [filename: string]: {
+      chunks: string[];
+    };
+  };
 }
 
 class VideoChunkProcessor {
@@ -48,71 +52,72 @@ class VideoChunkProcessor {
   public startUpLength: number = -1;
 
   processChunk(socketMessage: {
-      result: {
-          folder: string;
-          filename: string;
-          chunk: string;
-      }
+    result: {
+      folder: string;
+      filename: string;
+      chunk: string;
+    };
   }): void {
-      const { folder, filename, chunk } = socketMessage.result;
+    const { folder, filename, chunk } = socketMessage.result;
 
-      // Initialize folder if not exists
-      if (!this.folderData[folder]) {
-          this.folderData[folder] = {};
-      }
+    // Initialize folder if not exists
+    if (!this.folderData[folder]) {
+      this.folderData[folder] = {};
+    }
 
-      // Initialize filename entry if not exists
-      if (!this.folderData[folder][filename]) {
-          this.folderData[folder][filename] = {
-              chunks: []
-          };
-      }
+    // Initialize filename entry if not exists
+    if (!this.folderData[folder][filename]) {
+      this.folderData[folder][filename] = {
+        chunks: [],
+      };
+    }
 
-      // Add chunk to the appropriate filename
-      this.folderData[folder][filename].chunks.push(chunk);
+    // Add chunk to the appropriate filename
+    this.folderData[folder][filename].chunks.push(chunk);
   }
 
   reconstructVideo(folder: string, filename: string): string {
-      const fileEntry = this.folderData[folder]?.[filename];
-      
-      if (!fileEntry) {
-          console.warn(`No chunks found for ${folder}/${filename}`);
-          return '';
-      }
+    const fileEntry = this.folderData[folder]?.[filename];
 
-      if (this.startUpLength > 0){
-        this.startUpLength -= 1
-      }
+    if (!fileEntry) {
+      console.warn(`No chunks found for ${folder}/${filename}`);
+      return '';
+    }
 
-      // Concatenate chunks
-      const fullVideo = fileEntry.chunks.join('');
-      return fullVideo;
+    if (this.startUpLength > 0) {
+      this.startUpLength -= 1;
+    }
+
+    // Concatenate chunks
+    const fullVideo = fileEntry.chunks.join('');
+    return fullVideo;
   }
 
-  isReady(): boolean {return this.startUpLength == 0}
+  isReady(): boolean {
+    return this.startUpLength == 0;
+  }
 
   /**
    * Get the entire folder data
    * @returns Complete FolderData object
    */
   getFolderData(): FolderData {
-      return this.folderData;
+    return this.folderData;
   }
-
 }
-
-
-
-
-
-
 
 const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) => {
   const [subtitleText, setSubtitleText] = useState<string>('');
   const [isVideoVisible, setIsVideoVisible] = useState(false);
-  const [webcamDimensions, setWebcamDimensions] = useState({ width: 0, height: 0, top: 0, left: 0 });
+  const [webcamDimensions, setWebcamDimensions] = useState({
+    width: 0,
+    height: 0,
+    top: 0,
+    left: 0,
+  });
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const { language } = useLanguage(); // Access language only
 
   const handleClick = () => {
     setIsVideoVisible((prev) => !prev);
@@ -125,7 +130,7 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
   };
 
   const handleCopy = () => {
-    const textarea = document.querySelector('.text-box') as HTMLTextAreaElement;;
+    const textarea = document.querySelector('.text-box') as HTMLTextAreaElement;
     textarea?.select();
     document.execCommand('copy');
   };
@@ -211,21 +216,14 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
         ref={webcamRef}
         className={`video-element ${isVideoVisible ? 'visible' : 'blurred'}`}
         style={{
-          objectFit: 'contain', // Ensure the video fits vertically
+          objectFit: 'contain',
         }}
       />
 
       {isVideoVisible && (
         <img
           src="/greyperson.png"
-          style={{
-            position: 'absolute',
-            top: `${webcamDimensions.top}px`,
-            left: `${webcamDimensions.left}px`,
-            width: `${webcamDimensions.width}px`,
-            height: `${webcamDimensions.height}px`,
-            objectFit: 'contain',
-          }}
+          className="overlay-image"
           alt="Overlay"
         />
       )}
@@ -233,8 +231,8 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
       {/* Button Overlay */}
       {!isVideoVisible && (
         <div className="overlay">
-          <h1 className="overlay-title">画面をクリックすると翻訳が始まります</h1>
-      </div>
+          <h1 className="overlay-title">{t('click_to_start_translation', language)}</h1>
+        </div>
       )}
 
       {/* Subtitle */}
@@ -243,8 +241,6 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
           <p className="subtitle-text">{subtitleText.split(' ').slice(-15).join(' ')}</p>
         </div>
       )}
-
-      
     </div>
   );
 };
@@ -257,47 +253,65 @@ const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentComponent, setCurrentComponent] = useState("auth");
   const videoProcessorRef = useRef(new VideoChunkProcessor());
-  const [folders, setFolders] = useState<FolderType[]>([
-    
-  ]);
+  const [folders, setFolders] = useState<FolderType[]>([]);
+  const { language } = useLanguage(); // Access language
+
+  // **1. Add Sidebar Open State**
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+  const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
 
   const onAuthentication = (state: boolean) => {
-    if (state){
+    if (state) {
       setIsAuthenticated(true);
-      console.log("Authenticated!")
+      console.log("Authenticated!");
       setCurrentComponent("dashboard");
-      const requestList = JSON.stringify(
-        { function: 'send_descriptions', kwargs: { 
-      }, });
+      const requestList = JSON.stringify({
+        function: 'send_descriptions',
+        kwargs: {},
+      });
       socketRef.current?.send(requestList);
-    }
-    else{
+    } else {
       setIsAuthenticated(false);
     }
-  }
+  };
 
   const handleLogin = (username: string, password: string, rememberMe: boolean) => {
     if (!isConnected) return;
-    const requestList = JSON.stringify(
-      { function: 'login', kwargs: { 
+    const requestList = JSON.stringify({
+      function: 'login',
+      kwargs: {
         username: username,
         password: password,
-        rememberMe: rememberMe
-    }, });
+        rememberMe: rememberMe,
+      },
+    });
     socketRef.current?.send(requestList);
   };
 
   const handleSignUp = (username: string, password: string, rememberMe: boolean) => {
     if (!isConnected) return;
-    const requestList = JSON.stringify(
-      { function: 'signup', kwargs: { 
+    const requestList = JSON.stringify({
+      function: 'signup',
+      kwargs: {
         username: username,
         password: password,
-        rememberMe: rememberMe
-    }, });
+        rememberMe: rememberMe,
+      },
+    });
     socketRef.current?.send(requestList);
   };
 
+  // Logout handler
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setCurrentComponent("auth");
+    // Optionally, you can send a logout message to the server
+    const logoutMessage = JSON.stringify({
+      function: 'logout',
+      kwargs: {},
+    });
+    socketRef.current?.send(logoutMessage);
+  };
 
   useEffect(() => {
     const connectWebSocket = () => {
@@ -352,16 +366,14 @@ const App: React.FC = () => {
     };
   }, []);
 
-  
-
   const setUpDescriptions = (descriptions: { [folderName: string]: string } | string) => {
     const updatedFolders: FolderType[] = [];
-  
+
     // Loop through the provided descriptions
     for (const [name, description] of Object.entries(descriptions)) {
       // Check if the folder already exists
       const existingFolderIndex = folders.findIndex(folder => folder.name === name);
-  
+
       if (existingFolderIndex !== -1) {
         // Overwrite existing folder description
         const existingFolder = { ...folders[existingFolderIndex], description };
@@ -371,13 +383,13 @@ const App: React.FC = () => {
         updatedFolders.push({ name, description, files: [] });
       }
     }
-  
+
     // Update the state with the new list of folders
     setFolders(updatedFolders);
   };
 
   const updateFoldersWithVideo = (folder: string, filename: string, videoBase64: string) => {
-    console.log("!")
+    console.log("!");
     setFolders(prevFolders => {
       const updatedFolders = [...prevFolders];
 
@@ -389,13 +401,12 @@ const App: React.FC = () => {
         const newFolder: FolderType = {
           name: folder,
           description: '', // Will be populated from existing state
-          files: [{ name: filename, video: videoBase64 }]
+          files: [{ name: filename, video: videoBase64 }],
         };
         updatedFolders.push(newFolder);
       } else {
         // Check if file already exists in the folder
-        const existingFileIndex = updatedFolders[folderIndex].files
-          .findIndex(f => f.name === filename);
+        const existingFileIndex = updatedFolders[folderIndex].files.findIndex(f => f.name === filename);
 
         if (existingFileIndex === -1) {
           // Add new file to existing folder
@@ -403,14 +414,14 @@ const App: React.FC = () => {
             ...updatedFolders[folderIndex],
             files: [
               ...updatedFolders[folderIndex].files,
-              { name: filename, video: videoBase64 }
-            ]
+              { name: filename, video: videoBase64 },
+            ],
           };
         } else {
           // Update existing file's video
           updatedFolders[folderIndex].files[existingFileIndex] = {
             name: filename,
-            video: videoBase64
+            video: videoBase64,
           };
         }
       }
@@ -419,54 +430,47 @@ const App: React.FC = () => {
     });
   };
 
-  
-
   useEffect(() => {
     if (!isConnected) return;
-    
-    if (socketMessage?.function == 'send_descriptions' && socketMessage?.result){
-      setUpDescriptions(socketMessage?.result);
-      console.log('description recieved');
-      const requestList = JSON.stringify(
-        { function: 'send_files', kwargs: { 
-      }, });
-      socketRef.current?.send(requestList);
-    }
-    else if ((socketMessage?.function == 'send_files' || socketMessage?.function == 'stop_recording') && socketMessage?.result){
-      if (!isNaN(Number(socketMessage.result)) && isFinite(Number(socketMessage.result))){
-        videoProcessorRef.current.startUpLength = Number(socketMessage.result);
-      }
-      else if (socketMessage.result == "NONE"){
-        setIsReady(true);
-      }
-      else {
-        const { folder, filename, chunk } = socketMessage.result as unknown as {
-          folder: string, 
-          filename: string, 
-          chunk: string
-        };
-        console.log({ folder, filename, chunk })
-        
-        videoProcessorRef.current.processChunk({
-          result: { folder, filename, chunk }
-        });
-        
 
-        if (!chunk){
+    if (socketMessage?.function === 'send_descriptions' && socketMessage?.result) {
+      setUpDescriptions(socketMessage?.result);
+      console.log('Descriptions received');
+      const requestList = JSON.stringify({
+        function: 'send_files',
+        kwargs: {},
+      });
+      socketRef.current?.send(requestList);
+    } else if (
+      (socketMessage?.function === 'send_files' || socketMessage?.function === 'stop_recording') &&
+      socketMessage?.result
+    ) {
+      if (!isNaN(Number(socketMessage.result)) && isFinite(Number(socketMessage.result))) {
+        videoProcessorRef.current.startUpLength = Number(socketMessage.result);
+      } else if (socketMessage.result === "NONE") {
+        setIsReady(true);
+      } else {
+        const { folder, filename, chunk } = socketMessage.result as unknown as {
+          folder: string;
+          filename: string;
+          chunk: string;
+        };
+        console.log({ folder, filename, chunk });
+
+        videoProcessorRef.current.processChunk({
+          result: { folder, filename, chunk },
+        });
+
+        if (!chunk) {
           const video = videoProcessorRef.current.reconstructVideo(folder, filename);
           updateFoldersWithVideo(folder, filename, video);
-          if (videoProcessorRef.current.isReady()){
+          if (videoProcessorRef.current.isReady()) {
             setIsReady(true);
           }
         }
       }
     }
   }, [socketMessage, isConnected]);
-
-
-
-
-
 
   const renderComponent = () => {
     if (!isAuthenticated) {
@@ -486,23 +490,35 @@ const App: React.FC = () => {
       case "record":
         return <Record socketRef={socketRef} socketMessage={socketMessage} isConnected={isConnected} />;
       case "saved":
-        return <FileViewer socketRef={socketRef} socketMessage={socketMessage} isConnected={isConnected} folders={folders} setFolders={setFolders} />
-        // return <Saved socketRef={socketRef} socketMessage={socketMessage} isConnected={isConnected} />;
-      // case "settings":
-      //   return <Settings socketRef={socketRef} isConnected={isConnected} />;
+        return <FileViewer socketRef={socketRef} socketMessage={socketMessage} isConnected={isConnected} folders={folders} setFolders={setFolders} />;
+      case "settings":
+        return <Settings />;
       default:
         return <Home socketRef={socketRef} socketMessage={socketMessage} isConnected={isConnected} />;
     }
   };
 
   return (
-    <div className="app-container">
-      {((!isConnected || !isReady) && isAuthenticated)  && 
-        <LoadingScreen/>
-      }
-      {isAuthenticated && <Sidebar setCurrentComponent={setCurrentComponent} />}
-      <div className="home-section">{renderComponent()}</div>
-    </div>
+    <ThemeProvider>
+      <LanguageProvider>
+        <Router>
+          <div className="app-container">
+            {isAuthenticated && (
+              <Sidebar 
+                isOpen={isSidebarOpen} 
+                toggleSidebar={toggleSidebar} 
+                setCurrentComponent={setCurrentComponent} 
+                onLogout={handleLogout} 
+              />
+            )}
+            <div className={`home-section ${isSidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
+              {((!isConnected || !isReady) && isAuthenticated) && <LoadingScreen />}
+              {renderComponent()}
+            </div>
+          </div>
+        </Router>
+      </LanguageProvider>
+    </ThemeProvider>
   );
 };
 
