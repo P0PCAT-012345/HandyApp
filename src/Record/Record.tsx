@@ -351,13 +351,13 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
         </div>
       )}
 
-      <button 
-        className="toggle-overlay-button" 
-        onClick={toggleOverlay}
-        aria-label={isOverlayVisible ? t('hide_overlay', language) : t('show_overlay', language)}
-      >
-        {isOverlayVisible ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
-      </button>
+    <button 
+      className="toggle-overlay-button" 
+      onClick={toggleOverlay}
+      aria-checked={isOverlayVisible}
+      role="switch"
+      aria-label={isOverlayVisible ? t('hide_overlay', language) : t('show_overlay', language)}
+    />
     </div>
   );
 };

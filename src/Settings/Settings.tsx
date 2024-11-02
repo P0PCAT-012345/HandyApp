@@ -18,7 +18,7 @@ const Settings: React.FC = () => {
   };
 
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedLang = e.target.value as 'en' | 'jp';
+    const selectedLang = e.target.value as 'jp' | 'en';
     setLanguage(selectedLang);
   };
 
