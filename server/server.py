@@ -46,6 +46,9 @@ async def handler(websocket, path):
                 if user not in sessionsList:
                     sessionsList[user]  = Session(user)
                     print("Creating a new session for the user")
+                data = json.loads(message)
+                if "function" in data and data["function"] == 'logout':
+                    break
                 async for chunk in process_message(sessionsList[user], message):
                     await websocket.send(chunk)
     finally:
@@ -58,7 +61,6 @@ async def handler(websocket, path):
 async def process_message(session, message):
     try:
         data = json.loads(message)
-        
         if "function" in data:
             func_name = data["function"]
             
