@@ -48,14 +48,14 @@ class Session:
                             data = np.load(file_path_npy)
                             if len(data.shape) == 2 and data.shape[1] == 256:
                                 self.database.append((folder_name, data, file_path_npy, file_path_video))
-                            print(data.shape)
+                            # print(data.shape)
 
                         elif file_name.endswith('.txt'):
                             with open(os.path.join(folder_path, file_name), 'r') as file:
                                 content = file.read()
                                 self.classDescriptions[folder_name] = content
 
-        print("Initialized with database of length:", len(self.database))
+        # print("Initialized with database of length:", len(self.database))
 
         self.functions = {
             'recieve': self.recieve,
@@ -133,8 +133,8 @@ class Session:
             return np.zeros((1,256)) 
 
     def recieve(self, frame, mode="translate"):
-        if len(self.database) == 0:
-            print("Database is empty! Either record new signs or use an account with recorded signs")
+        # if len(self.database) == 0:
+        #     print("Database is empty! Either record new signs or use an account with recorded signs")
             
         current_landmarks = self.convert_mediapipe(self.decode_image(frame))
         self.hand_landmarks.append(current_landmarks)
@@ -178,7 +178,7 @@ class Session:
         self.hand_landmarks = []
         self.lastWord = None
         self.refreshCount = 0
-        print("Reseted")
+        # print("Reseted")
 
     def record(self, frame):
         return 'MOUTH_OPEN_TRUE' if self.recieve(frame, mode='record') else None
@@ -200,8 +200,8 @@ class Session:
 
         try:
             np.save(file_path_npy, embeddings)
-            print(f"Embeddings saved for {name} at {file_path_npy}")
-            print(f"Total timeframes {len(self.hand_landmarks)}")
+            # print(f"Embeddings saved for {name} at {file_path_npy}")
+            # print(f"Total timeframes {len(self.hand_landmarks)}")
         except Exception as e:
             print(f"Failed to save embeddings: {e}")
 
@@ -210,7 +210,7 @@ class Session:
                 video_bytes = base64.b64decode(video_data)
                 with open(file_path_video, 'wb') as f:
                     f.write(video_bytes)
-                print(f"Video saved for {name} at {file_path_video}")
+                # print(f"Video saved for {name} at {file_path_video}")
             except Exception as e:
                 print(f"Failed to save video: {e}")
 
@@ -235,7 +235,7 @@ class Session:
                     "filename": timestamp,
                     "chunk": None
                 }
-        print("SENT VIDEO")
+        # print("SENT VIDEO")
     
     def mouth_open(self, frame):
         image = self.decode_image(frame)
@@ -260,7 +260,7 @@ class Session:
  
     
     async def send_video_files(self):
-        print(f"Sending file with database of length {len(self.database)}")
+        # print(f"Sending file with database of length {len(self.database)}")
         if len(self.database) != 0:
             yield len(self.database)
             saved = []
@@ -274,7 +274,7 @@ class Session:
                                 "filename": timestamp,
                                 "video_path": video_path
                             })
-            print("starting chunks")
+            # print("starting chunks")
             for item in saved:
                 video_path = item["video_path"]
                 with open(video_path, 'rb') as file:
@@ -295,11 +295,11 @@ class Session:
                     }
         else:
             yield "NONE"
-        print("Item sent")
-        print("chunks sent successfully.")
+        # print("Item sent")
+        # print("chunks sent successfully.")
 
     def send_class_descriptions(self):
-        print(self.classDescriptions)
+        # print(self.classDescriptions)
         return self.classDescriptions
 
     def delete_files(self, folder, files):
@@ -314,10 +314,10 @@ class Session:
 
                 if os.path.exists(file_path_npy):
                     os.remove(file_path_npy)
-                    print(f"Deleted {file_path_npy}")
+                    # print(f"Deleted {file_path_npy}")
                 if os.path.exists(file_path_video):
                     os.remove(file_path_video)
-                    print(f"Deleted {file_path_video}")
+                    # print(f"Deleted {file_path_video}")
         
         
             newdatabase = []

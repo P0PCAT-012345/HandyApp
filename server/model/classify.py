@@ -84,8 +84,8 @@ def classify(embeddings, threshold, database, chunk=10):
         if prevPredict!=candidates_names[result] and result!=len(database):
             prevPredict = candidates_names[result]
             sentence.append(candidates_names[result])
-            print(costs[result][i], candidates_names[result], i)
-    print(sentence)
+            # print(costs[result][i], candidates_names[result], i)
+    # print(sentence)
     return sentence, costs
 
 
