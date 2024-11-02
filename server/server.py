@@ -48,6 +48,7 @@ async def handler(websocket, path):
                     print("Creating a new session for the user")
                 data = json.loads(message)
                 if "function" in data and data["function"] == 'logout':
+                    loginSessionsList[client_address].rememberMe = False
                     break
                 async for chunk in process_message(sessionsList[user], message):
                     await websocket.send(chunk)
