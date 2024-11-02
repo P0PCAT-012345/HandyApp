@@ -178,7 +178,7 @@ interface Translations {
     },
     'Want to Learn?': {
       en: 'Want to Learn?',
-      jp: '学びたいですか？',
+      jp: '手話を学ぶ',
     },
     'Close Help Modal': {
       en: 'Close Help Modal',
@@ -204,9 +204,9 @@ interface Translations {
       en: 'Recording Tips',
       jp: '録画のヒント',
     },
-    'If you don’t know where to start, try learning 100 basic ASL signs on Handspeak. Click the link below to visit the website. Once there, open any word, watch the video, and try recording it here!': {
-      en: 'If you don’t know where to start, try learning 100 basic signs on Handspeak. Click the link below to visit the website. Once there, open any word, watch the video, and try recording it here!',
-      jp: 'どこから始めればよいかわからない場合は、Handspeakで基本的なアメリカ手話を100個学んでみてください。以下のリンクをクリックしてウェブサイトにアクセスし、任意の単語を開き、ビデオを見て、Handyで録画してみてください！',
+    'new learning': {
+      en: 'If you don’t know where to start, try starting from learning basic signs on Handspeak. Click the link below to visit the website. Once there, open any word, watch the video, and try recording it here!',
+      jp: 'どこから始めればよいかわからない場合は、Handspeakで基本的なアメリカ手話を学んでみてください。以下のリンクをクリックしてウェブサイトにアクセスし、任意の単語を開き、動画を見て、Handyで録画してみてください！',
     },
     'hide_overlay': {
       en: 'Hide Overlay',
@@ -216,8 +216,8 @@ interface Translations {
       en: 'Show Overlay',
       jp: 'オーバーレイ（人型の枠）を表示',
     },
-      'This is the Record feature. Here’s how to use it:': {
-        en: 'This is the Record feature. Here’s how to use it:',
+      'This is the Record feature.': {
+        en: 'This is the Record feature. Here\'s how to use it:',
         jp: 'これは録画機能です。使い方は以下の通りです：',
       },
       'Press anywhere on the screen to start. The blur will disappear, and after a 3-second countdown, you can begin signing. Make sure to adjust your position so your face and hands align with the person outline on the screen.': {
@@ -312,6 +312,22 @@ interface Translations {
             en: 'Copy as text',
             jp: 'テキストとしてコピーする',
           },
+          "screen_paused": {
+            "en": "Screen Paused",
+            "jp": "画面が一時停止されています"
+          },
+          "press_help_for_instructions": {
+            "en": "Press help for detailed instructions",
+            "jp": "詳しい手順についてはヘルプを押してください"
+          },
+         "tap_to_start_recording": {
+            "en": "Tap anywhere to start recording",
+            "jp": "録画を開始するには、どこでもタップしてください"
+          },
+          "tap_to_start_translating": {
+            "en": "Tap anywhere to start translation",
+            "jp": "翻訳を開始するには、どこでもタップしてください"
+          }
 
   };
   

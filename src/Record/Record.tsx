@@ -30,15 +30,27 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
   const [subtitleText, setSubtitleText] = useState<string>(''); 
   const [isOverlayVisible, setIsOverlayVisible] = useState(true); 
   const [isHelpOpen, setIsHelpOpen] = useState(false);
-  const [isEduPopupOpen, setIsEduPopupOpen] = useState(false); 
+  const [isEduPopupOpen, setIsEduPopupOpen] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(true);
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const { language } = useLanguage(); 
+
+  // Tutorial timeout effect
+  useEffect(() => {
+    if (showTutorial) {
+      const timer = setTimeout(() => {
+        setShowTutorial(false);
+      }, 8000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   const handleClick = () => {
     if (!isRecording && !isSaving && socketRef.current) {
       setIsVideoVisible(true);
       setCountdown(3);
+      setShowTutorial(false);
       const message = JSON.stringify({
         function: 'reset_data',
       });
@@ -129,15 +141,13 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
     if (isVideoVisible && webcamRef.current) {
       const updateWebcamDimensions = () => {
         const webcamElement = webcamRef.current?.video;
-
         if (webcamElement) {
+          // Add any specific dimension updates if needed
         }
       };
 
       updateWebcamDimensions();
-
       window.addEventListener('resize', updateWebcamDimensions);
-
       return () => {
         window.removeEventListener('resize', updateWebcamDimensions);
       };
@@ -175,8 +185,7 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
       };
 
       const intervalId = setInterval(captureImage, 50);
-
-      return () => clearInterval(intervalId); 
+      return () => clearInterval(intervalId);
     }
   }, [countdown, isVideoVisible, isRecording]);
 
@@ -213,7 +222,7 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
   const toggleEducation = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.stopPropagation();
     setIsEduPopupOpen(true);
-    setTimeout(() => setIsEduPopupOpen(false), 5000); 
+    setTimeout(() => setIsEduPopupOpen(false), 5000);
   };
 
   return (
@@ -231,55 +240,55 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
         {t('Want to Learn?', language)}
       </button>
 
-{isHelpOpen && (
-  <div className="modal-overlay" onClick={closeHelp}>
-    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-      <button className="modal-close-button" onClick={closeHelp} aria-label={t('Close Help Modal', language)}>
-        &times;
-      </button>
+      {isHelpOpen && (
+        <div className="modal-overlay" onClick={closeHelp}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close-button" onClick={closeHelp} aria-label={t('Close Help Modal', language)}>
+              &times;
+            </button>
 
-      <h2>{t('Recording Instructions', language)}</h2>
-      <p>{t('This is the Record feature. Here’s how to use it:', language)}</p>
+            <h2>{t('Recording Instructions', language)}</h2>
+            <p>{t('This is the Record feature.', language)}</p>
 
-      <h3>{t('Starting the Recording', language)}</h3>
-      <p>
-        {t('Press anywhere on the screen to start. The blur will disappear, and after a 3-second countdown, you can begin signing. Make sure to adjust your position so your face and hands align with the person outline on the screen.', language)}
-      </p>
+            <h3>{t('Starting the Recording', language)}</h3>
+            <p>
+              {t('Press anywhere on the screen to start. The blur will disappear, and after a 3-second countdown, you can begin signing. Make sure to adjust your position so your face and hands align with the person outline on the screen.', language)}
+            </p>
 
-      <h3>{t('Ending the Recording', language)}</h3>
-      <p>
-        {t('To end the recording, simply open your mouth. This will stop the recording automatically.', language)}
-      </p>
+            <h3>{t('Ending the Recording', language)}</h3>
+            <p>
+              {t('To end the recording, simply open your mouth. This will stop the recording automatically.', language)}
+            </p>
 
-      <h3>{t('Saving Your Sign', language)}</h3>
-      <p>
-        {t('Once the recording ends, enter a name for your sign and press "Save" to store it. You can view or delete past recordings in the "Files" section.', language)}
-      </p>
+            <h3>{t('Saving Your Sign', language)}</h3>
+            <p>
+              {t('Once the recording ends, enter a name for your sign and press "Save" to store it. You can view or delete past recordings in the "Files" section.', language)}
+            </p>
 
-      <h3>{t('Recording Tips', language)}</h3>
-      <p>
-        {t('keep_hands_in_frame', language)}<br />
-        {t('one_hand_sign_tip', language)}
-      </p>
-    </div>
-  </div>
-)}
+            <h3>{t('Recording Tips', language)}</h3>
+            <p>
+              {t('keep_hands_in_frame', language)}<br />
+              {t('one_hand_sign_tip', language)}
+            </p>
+          </div>
+        </div>
+      )}
 
-{isEduPopupOpen && (
-  <div className="modal-overlay" onClick={() => setIsEduPopupOpen(false)}>
-    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-      <button className="modal-close-button" onClick={() => setIsEduPopupOpen(false)} aria-label={t('Close Education Popup', language)}>
-        &times;
-      </button>
-      <p>
-        {t('If you don’t know where to start, try learning 100 basic signs on Handspeak. Click the link below to visit the website. Once there, open any word, watch the video, and try recording it here!', language)}{' '}
-        <a href="https://www.handspeak.com/word/most-used/" target="_blank" rel="noopener noreferrer">
-          Handspeak.com
-        </a>
-      </p>
-    </div>
-  </div>
-)}
+      {isEduPopupOpen && (
+        <div className="modal-overlay" onClick={() => setIsEduPopupOpen(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close-button" onClick={() => setIsEduPopupOpen(false)} aria-label={t('Close Education Popup', language)}>
+              &times;
+            </button>
+            <p>
+              {t('new learning', language)}{' '}
+              <a href="https://www.handspeak.com/word/most-used/" target="_blank" rel="noopener noreferrer">
+                Handspeak.com
+              </a>
+            </p>
+          </div>
+        </div>
+      )}
 
       {!isConnected && <LoadingScreen />}
       
@@ -289,6 +298,23 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
         className={`record-video-element ${isVideoVisible ? 'visible' : 'blurred'}`}
       />
 
+      {!isVideoVisible && showTutorial && (
+        <div className="tutorial-overlay">
+          <div className="tutorial-content">
+            <div className="tutorial-message">
+              <span className="pulse-dot"></span>
+              {t('screen_paused', language)}
+            </div>
+            <div className="tutorial-instructions">
+              <span className="arrow">↗️</span> {t('press_help_for_instructions', language)}
+            </div>
+            <div className="tutorial-hint">
+              {t('tap_to_start_recording', language)}
+            </div>
+          </div>
+        </div>
+      )}
+
       {isVideoVisible && isOverlayVisible && (
         <img
           src="/greyperson.png"
@@ -296,7 +322,6 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
           alt="Grey Person Overlay"
         />
       )}
-    
 
       {countdown > 0 && <div className="countdown-overlay">{countdown}</div>}
 
