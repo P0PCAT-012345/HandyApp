@@ -1,6 +1,6 @@
 // src/components/Sidebar.tsx
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   FaBars,
   FaTimes,
@@ -23,8 +23,32 @@ interface SidebarProps {
   onLogout: () => void; 
 }
 
+const DocPopup: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+  const { language } = useLanguage();
+  
+  return (
+    <div className="doc-popup-overlay">
+      <div className="doc-popup">
+        <h2>{t('documentation_popup_title', language)}</h2>
+        <p>{t('documentation_popup_description', language)}</p>
+        <div className="doc-popup-buttons">
+          <button onClick={onClose}>{t('close', language)}</button>
+          <a
+            href="https://github.com/yoyo222/Handy-Website"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {t('visit_anyway', language)}
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, setCurrentComponent, onLogout }) => {
   const { language } = useLanguage();
+  const [showDocPopup, setShowDocPopup] = useState(false);
 
   return (
     <div className={`sidebar ${isOpen ? 'open' : 'closed'}`}>
@@ -68,20 +92,15 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, setCurrentComp
           </Tooltip>
         </li>
 
-        <li>
+        <li onClick={() => setShowDocPopup(true)}>
           <Tooltip title={isOpen ? '' : t('documentation', language)} placement="right">
-            <a
-              href="https://github.com/yoyo222/Handy-Website"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="nav-item external-link"
-              aria-label={t('documentation', language)}
-            >
+            <div className="nav-item" aria-label={t('documentation', language)}>
               <FaBook className="icon" />
               {isOpen && <span className="links_name">{t('documentation', language)}</span>}
-            </a>
+            </div>
           </Tooltip>
         </li>
+
         <li onClick={() => setCurrentComponent("settings")}>
           <Tooltip title={isOpen ? '' : t('settings', language)} placement="right">
             <div className="nav-item" aria-label={t('settings', language)}>
@@ -102,6 +121,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, setCurrentComp
           </Tooltip>
         </li>
       </ul>
+
+      {showDocPopup && <DocPopup onClose={() => setShowDocPopup(false)} />}
     </div>
   );
 };

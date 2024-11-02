@@ -482,3 +482,12 @@
     font-size: 0.8rem;
   }
 }
+
+.tutorial-overlay {
+  opacity: 1;
+  transition: opacity 0.5s ease-out;
+}
+
+.tutorial-overlay.fade-out {
+  opacity: 0;
+}
