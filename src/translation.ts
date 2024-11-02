@@ -327,6 +327,18 @@ interface Translations {
           "tap_to_start_translating": {
             "en": "Tap anywhere to start translation",
             "jp": "翻訳を開始するには、どこでもタップしてください"
+          },
+          "documentation_popup_title": {
+            "en": "Documentation Access",
+            "jp": "ドキュメントアクセス"
+          },
+          "documentation_popup_description": {
+            "en": "This link will redirect you to the Handy website documentation. Please note that access might be restricted until the full public release.",
+            "jp": "このリンクはHandyウェブサイトのドキュメントにリダイレクトします。一般公開されるまでアクセスが制限される可能性がありますのでご注意ください。"
+          },
+          "visit_anyway": {
+            "en": "Visit Anyway",
+            "jp": "一応見てみる"
           }
 
   };

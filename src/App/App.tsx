@@ -120,6 +120,20 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [showTutorial, setShowTutorial] = useState(true);
   const { language } = useLanguage(); 
+  const [isTutorialFading, setIsTutorialFading] = useState(false);
+
+  useEffect(() => {
+    if (showTutorial) {
+      const timer = setTimeout(() => {
+        setIsTutorialFading(true);
+        setTimeout(() => {
+          setShowTutorial(false);
+          setIsTutorialFading(false);
+        }, 500); 
+      }, 8000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   const toggleOverlay = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.stopPropagation();
@@ -198,15 +212,6 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
     }
   }, [isVideoVisible, socketRef]);
   
-  useEffect(() => {
-    if (showTutorial) {
-      const timer = setTimeout(() => {
-        setShowTutorial(false);
-      }, 8000); 
-      return () => clearTimeout(timer);
-    }
-  }, []);
-
   useEffect(() => {
     if (socketMessage && socketMessage.function === 'recieve' && socketMessage.result) {
       if (socketMessage.result === 'No match found') {
@@ -321,7 +326,7 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
       )}
 
       {!isVideoVisible && showTutorial && (
-        <div className="tutorial-overlay">
+        <div className={`tutorial-overlay ${isTutorialFading ? 'fade-out' : ''}`}>
           <div className="tutorial-content">
             <div className="tutorial-message">
               <span className="pulse-dot"></span>

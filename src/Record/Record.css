@@ -530,3 +530,12 @@ html, body {
     opacity: 1;
   }
 }
+
+.tutorial-overlay {
+  opacity: 1;
+  transition: opacity 0.5s ease-out;
+}
+
+.tutorial-overlay.fade-out {
+  opacity: 0;
+}

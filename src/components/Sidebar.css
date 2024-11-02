@@ -57,7 +57,7 @@
 }
 
 .toggle-btn:hover {
-    color: #4b59f7;
+    color: var(--button-primary-bg);
 }
 
 .nav-list {
@@ -83,15 +83,15 @@
     min-width: 50px;
     font-size: 18px;
     border-radius: 12px;
-    transition: background 0.3s ease, color 0.3s ease;
+    transition: all 0.3s ease;
     padding: 0 8px;
     cursor: pointer;
     overflow: hidden;
 }
 
 .nav-item:hover {
-    background: #fff;
-    color: #11101d;
+    background: var(--button-secondary-bg);
+    color: var(--text-color);
 }
 
 .links_name {
@@ -121,8 +121,8 @@
     left: 100%;
     transform: translateY(-50%);
     margin-left: 10px;
-    background: #fff;
-    color: #11101d;
+    background: var(--input-bg);
+    color: var(--text-color);
     padding: 6px 10px;
     border-radius: 4px;
     font-size: 14px;
@@ -132,6 +132,8 @@
     pointer-events: none;
     transition: opacity 0.3s ease;
     z-index: 3;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 4px var(--shadow-color);
 }
 
 .nav-list li:hover .tooltip {
@@ -158,8 +160,148 @@
     min-width: 30px;
 }
 
+/* Popup Styles */
+.doc-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--overlay-bg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.3s ease;
+}
+
+.doc-popup {
+    background-color: var(--input-bg);
+    padding: 25px;
+    border-radius: 12px;
+    max-width: 400px;
+    width: 90%;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 32px var(--shadow-color);
+    animation: slideUp 0.3s ease;
+}
+
+.doc-popup h2 {
+    margin-bottom: 15px;
+    color: var(--text-color);
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.doc-popup p {
+    margin-bottom: 25px;
+    color: var(--text-color);
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+.doc-popup-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.doc-popup-buttons button,
+.doc-popup-buttons a {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.doc-popup-buttons button {
+    background-color: var(--button-secondary-bg);
+    color: var(--button-secondary-text);
+}
+
+.doc-popup-buttons button:hover {
+    background-color: var(--button-secondary-hover);
+    transform: translateY(-1px);
+}
+
+.doc-popup-buttons a {
+    background-color: var(--button-primary-bg);
+    color: var(--button-primary-text);
+}
+
+.doc-popup-buttons a:hover {
+    background-color: var(--button-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px var(--button-shadow);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Focus States */
+.nav-item:focus,
+.doc-popup-buttons button:focus,
+.doc-popup-buttons a:focus {
+    outline: 2px solid var(--button-primary-bg);
+    outline-offset: 2px;
+}
+
+/* Media Queries */
 @media (max-width: 420px) {
     .sidebar li .tooltip {
         display: none;
+    }
+
+    .doc-popup {
+        width: 95%;
+        margin: 10px;
+        padding: 20px;
+    }
+
+    .doc-popup-buttons {
+        flex-direction: column;
+    }
+
+    .doc-popup-buttons button,
+    .doc-popup-buttons a {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .doc-popup-overlay,
+    .doc-popup,
+    .nav-item,
+    .toggle-btn,
+    .doc-popup-buttons button,
+    .doc-popup-buttons a {
+        animation: none;
+        transition: none;
     }
 }

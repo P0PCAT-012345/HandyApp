@@ -35,12 +35,16 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const { language } = useLanguage(); 
+  const [isTutorialFading, setIsTutorialFading] = useState(false);
 
-  // Tutorial timeout effect
   useEffect(() => {
     if (showTutorial) {
       const timer = setTimeout(() => {
-        setShowTutorial(false);
+        setIsTutorialFading(true);
+        setTimeout(() => {
+          setShowTutorial(false);
+          setIsTutorialFading(false);
+        }, 500); 
       }, 8000);
       return () => clearTimeout(timer);
     }
@@ -299,7 +303,7 @@ const Record: React.FC<RecordProps> = ({ socketRef, socketMessage, isConnected }
       />
 
       {!isVideoVisible && showTutorial && (
-        <div className="tutorial-overlay">
+        <div className={`tutorial-overlay ${isTutorialFading ? 'fade-out' : ''}`}>
           <div className="tutorial-content">
             <div className="tutorial-message">
               <span className="pulse-dot"></span>
