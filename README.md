@@ -38,5 +38,5 @@ A newly added sign will be accesible only by the user.
 新しく追加された手話はユーザー個人だけが見られます。
 
 ## License
-
+Favicon- Flaticon Basic License https://www.flaticon.com/free-icons/sign-language
 [MIT](https://choosealicense.com/licenses/mit/)
