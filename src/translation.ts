@@ -132,12 +132,12 @@ interface Translations {
       jp: 'ログイン状態を保持',
     },
     'no_account': {
-      en: "Don't have an account? Sign Up",
-      jp: 'アカウントをお持ちでないですか？サインアップ',
+      en: "Don't have an account?",
+      jp: 'アカウントをお持ちでないですか？',
     },
     'have_account': {
-      en: 'Already have an account? Login',
-      jp: '既にアカウントをお持ちですか？ログイン',
+      en: 'Already have an account?',
+      jp: '既にアカウントをお持ちですか？',
     },
     'login_error': {
       en: 'Login failed. Please check your credentials.',
@@ -343,11 +343,26 @@ interface Translations {
             "en": "Visit Anyway",
             "jp": "一応見てみる"
           },
-            "theme": {
-              "en": "Theme",
-              "jp": "テーマ"
-            },
-
+          "theme": {
+            "en": "Theme",
+            "jp": "テーマ"
+          },
+          "enter_username": {
+            "en": "Enter your username",
+            "jp": "ユーザー名を入力してください"
+          },
+          "enter_password": {
+            "en": "Enter your password",
+            "jp": "パスワードを入力してください"
+          },
+          "confirm_password_placeholder": {
+            "en": "Confirm password",
+            "jp": "パスワードを確認してください"
+          },
+          "confirm_password": {
+            "en": "Confirm Password",
+            "jp": "パスワードの確認"
+          },
   };
   
   export const t = (key: string, language: 'en' | 'jp' = 'jp') => {

@@ -10,7 +10,7 @@ interface LanguageContextType {
 }
 
 const LanguageContext = createContext<LanguageContextType>({
-  language: 'en',
+  language: 'jp',
   setLanguage: () => {},
 });
 
@@ -23,7 +23,7 @@ interface LanguageProviderProps {
 export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
   const [language, setLanguage] = useState<Language>(() => {
     const savedLang = localStorage.getItem('language') as Language;
-    return savedLang || 'en';
+    return savedLang || 'jp';
   });
 
   useEffect(() => {
