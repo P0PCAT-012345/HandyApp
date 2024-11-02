@@ -348,13 +348,13 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
           <p className="subtitle-text">{subtitleText.split(' ').slice(-15).join(' ')}</p>
         </div>
       )}
-
       <button 
         className="toggle-overlay-button" 
         onClick={toggleOverlay}
+        aria-checked={isOverlayVisible}
+        role="switch"
         aria-label={isOverlayVisible ? t('hide_overlay', language) : t('show_overlay', language)}
       >
-        {isOverlayVisible ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
       </button>
     </div>
   );

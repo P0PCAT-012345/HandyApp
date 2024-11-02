@@ -147,32 +147,45 @@ html, body {
   position: absolute;
   bottom: 20px;
   right: 20px;
-  padding: 12px 18px;
-  background-color: #4b59f7;
-  color: white;
+  width: 60px;
+  height: 34px;
+  background-color: #ccc;
+  border-radius: 34px;
   border: none;
-  border-radius: 30px;
   cursor: pointer;
   z-index: 8;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  padding: 0;
+  transition: background-color 0.3s ease;
+  overflow: hidden;
+}
+
+.toggle-overlay-button::before {
+  content: '';
+  position: absolute;
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+}
+
+.toggle-overlay-button[aria-checked="true"] {
+  background-color: #4b59f7;
+}
+
+.toggle-overlay-button[aria-checked="true"]::before {
+  transform: translateX(26px);
 }
 
 .toggle-overlay-button:hover {
-  background-color: #3e47d0;
-  transform: translateY(-2px);
+  opacity: 0.9;
 }
 
-.toggle-overlay-button:active {
-  background-color: #2e36a0;
-  transform: translateY(0);
-}
-
-.toggle-overlay-button svg {
-  margin-right: 8px;
+.toggle-overlay-button:focus {
+  outline: 2px solid #4b59f7;
+  outline-offset: 2px;
 }
 
 .modal-overlay {

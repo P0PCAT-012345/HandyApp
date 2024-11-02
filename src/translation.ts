@@ -6,6 +6,9 @@ interface Translations {
       jp: string;
     };
   }
+  const initialState = {
+    language: 'jp'
+  };
   
   export const translations: Translations = {
     'click_to_start_translation': {
@@ -58,10 +61,10 @@ interface Translations {
     },
     'english': {
       en: 'English',
-      jp: '英語',
+      jp: 'English',
     },
     'japanese': {
-      en: 'Japanese',
+      en: '日本語',
       jp: '日本語',
     },
     'translate': {
@@ -339,11 +342,15 @@ interface Translations {
           "visit_anyway": {
             "en": "Visit Anyway",
             "jp": "一応見てみる"
-          }
+          },
+            "theme": {
+              "en": "Theme",
+              "jp": "テーマ"
+            },
 
   };
   
-  export const t = (key: string, language: 'en' | 'jp') => {
+  export const t = (key: string, language: 'en' | 'jp' = 'jp') => {
     return translations[key]?.[language] || key;
-  };
+};
   
