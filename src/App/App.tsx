@@ -103,6 +103,13 @@ class VideoChunkProcessor {
   }
 }
 
+
+
+
+
+
+
+
 const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) => {
   const [subtitleText, setSubtitleText] = useState<string>('');
   const [isVideoVisible, setIsVideoVisible] = useState(false);
@@ -111,6 +118,7 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
   const [isCopyPopupOpen, setIsCopyPopupOpen] = useState(false); 
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [showTutorial, setShowTutorial] = useState(true);
   const { language } = useLanguage(); 
 
   const toggleOverlay = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -189,6 +197,15 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
       return () => clearInterval(intervalId);
     }
   }, [isVideoVisible, socketRef]);
+  
+  useEffect(() => {
+    if (showTutorial) {
+      const timer = setTimeout(() => {
+        setShowTutorial(false);
+      }, 8000); 
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   useEffect(() => {
     if (socketMessage && socketMessage.function === 'recieve' && socketMessage.result) {
@@ -303,6 +320,24 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
         />
       )}
 
+      {!isVideoVisible && showTutorial && (
+        <div className="tutorial-overlay">
+          <div className="tutorial-content">
+            <div className="tutorial-message">
+              <span className="pulse-dot"></span>
+              {t('screen_paused', language)}
+            </div>
+            <div className="tutorial-instructions">
+              <span className="arrow">↗️</span> {t('press_help_for_instructions', language)}
+            </div>
+            <div className="tutorial-hint">
+              {t('tap_to_start_translating', language)}
+            </div>
+          </div>
+        </div>
+      )}
+
+      
       {subtitleText && (
         <div className="subtitle-container">
           <p className="subtitle-text">{subtitleText.split(' ').slice(-15).join(' ')}</p>
@@ -319,6 +354,14 @@ const Home: React.FC<HomeProps> = ({ socketRef, socketMessage, isConnected }) =>
     </div>
   );
 };
+
+
+
+
+
+
+
+
 
 const App: React.FC = () => {
   const socketRef = useRef<WebSocket | null>(null);
